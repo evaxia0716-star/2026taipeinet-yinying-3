@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台北有影 3｜專案進度追蹤</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f14;
+    --surface: #16181f;
+    --surface2: #1e2029;
+    --border: #2a2d38;
+    --accent: #f5c842;
+    --accent2: #e05b3a;
+    --text: #e8e9ef;
+    --text-muted: #6b6f82;
+    --text-dim: #9196aa;
+
+    --tag-admin: #3a7bd5;
+    --tag-film: #9b59b6;
+    --tag-award: #e67e22;
+    --tag-citizen: #27ae60;
+    --tag-talent: #e91e63;
+
+    --status-pending: #6b6f82;
+    --status-ongoing: #3a7bd5;
+    --status-done: #27ae60;
+    --status-confirm: #e67e22;
+    --status-late: #e05b3a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .logo {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .project-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .project-title span {
+    color: var(--accent);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+
+  .btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-accent {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0e0f14;
+    font-weight: 700;
+  }
+
+  .btn-accent:hover {
+    background: #ffd55a;
+    border-color: #ffd55a;
+    color: #0e0f14;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    overflow-x: auto;
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .stat-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .stat-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* TOOLBAR */
+  .toolbar {
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .filter-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .filter-btn {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--surface2);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .filter-btn[data-cat="行政準備"].active { border-color: var(--tag-admin); color: var(--tag-admin); }
+  .filter-btn[data-cat="影片徵選"].active { border-color: var(--tag-film); color: var(--tag-film); }
+  .filter-btn[data-cat="頒獎典禮"].active { border-color: var(--tag-award); color: var(--tag-award); }
+  .filter-btn[data-cat="市民大聲說"].active { border-color: var(--tag-citizen); color: var(--tag-citizen); }
+  .filter-btn[data-cat="人才培訓"].active { border-color: var(--tag-talent); color: var(--tag-talent); }
+
+  .search-wrap {
+    margin-left: auto;
+    position: relative;
+  }
+
+  .search-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.35rem 0.75rem 0.35rem 2rem;
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.8rem;
+    width: 200px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text-muted); }
+
+  .search-icon {
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    pointer-events: none;
+  }
+
+  /* TABLE */
+  .table-wrap {
+    overflow-x: auto;
+    padding: 0 2rem 4rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+  }
+
+  thead th {
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 61px;
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  thead th:first-child { padding-left: 0; }
+
+  .col-group { width: 90px; }
+  .col-date { width: 110px; }
+  .col-task { min-width: 280px; }
+  .col-unit { width: 160px; }
+  .col-status { width: 110px; }
+  .col-note { min-width: 200px; }
+  .col-actions { width: 80px; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+
+  tbody tr:hover { background: var(--surface); }
+  tbody tr.hidden { display: none; }
+
+  tbody td {
+    padding: 0.75rem 0.75rem;
+    vertical-align: top;
+  }
+
+  tbody td:first-child { padding-left: 0; }
+
+  /* GROUP TAG */
+  .group-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border-radius: 3px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .tag-行政準備 { background: rgba(58,123,213,0.15); color: #6da0f5; border: 1px solid rgba(58,123,213,0.3); }
+  .tag-影片徵選 { background: rgba(155,89,182,0.15); color: #c78fff; border: 1px solid rgba(155,89,182,0.3); }
+  .tag-頒獎典禮 { background: rgba(230,126,34,0.15); color: #f5a05a; border: 1px solid rgba(230,126,34,0.3); }
+  .tag-市民大聲說 { background: rgba(39,174,96,0.15); color: #5ed68a; border: 1px solid rgba(39,174,96,0.3); }
+  .tag-人才培訓 { background: rgba(233,30,99,0.15); color: #ff6b9d; border: 1px solid rgba(233,30,99,0.3); }
+
+  /* DATE */
+  .date-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+
+  .date-range {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+  }
+
+  /* TASK */
+  .task-content {
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .task-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 2px;
+    margin-bottom: 0.3rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-new { background: rgba(245,200,66,0.15); color: var(--accent); border: 1px solid rgba(245,200,66,0.3); }
+  .badge-warn { background: rgba(224,91,58,0.15); color: #f5845a; border: 1px solid rgba(224,91,58,0.3); }
+  .badge-tip { background: rgba(58,123,213,0.15); color: #6da0f5; border: 1px solid rgba(58,123,213,0.3); }
+
+  .task-editable {
+    cursor: text;
+    outline: none;
+    min-height: 1.2em;
+  }
+
+  .task-editable:focus {
+    background: rgba(255,255,255,0.03);
+    border-radius: 3px;
+    outline: 1px solid var(--border);
+    padding: 0.15rem 0.3rem;
+    margin: -0.15rem -0.3rem;
+  }
+
+  /* STATUS */
+  .status-select {
+    appearance: none;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 20px;
+    padding: 0.25rem 0.6rem;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.75rem;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .status-待開始 { color: var(--status-pending); border-color: rgba(107,111,130,0.4); }
+  .status-進行中 { color: var(--status-ongoing); border-color: rgba(58,123,213,0.4); background: rgba(58,123,213,0.08); }
+  .status-已完成 { color: var(--status-done); border-color: rgba(39,174,96,0.4); background: rgba(39,174,96,0.08); }
+  .status-待確認 { color: var(--status-confirm); border-color: rgba(230,126,34,0.4); background: rgba(230,126,34,0.08); }
+  .status-延遲 { color: var(--status-late); border-color: rgba(224,91,58,0.4); background: rgba(224,91,58,0.08); }
+
+  /* NOTE */
+  .note-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .note-original {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .note-comment {
+    background: rgba(245,200,66,0.06);
+    border-left: 2px solid rgba(245,200,66,0.4);
+    padding: 0.3rem 0.5rem;
+    border-radius: 0 3px 3px 0;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+    min-height: 1.2em;
+    outline: none;
+  }
+
+  .note-comment:focus {
+    background: rgba(245,200,66,0.1);
+    border-left-color: var(--accent);
+    color: var(--text);
+  }
+
+  .note-comment:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-muted);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  /* ACTION BTNS */
+  .row-actions {
+    display: flex;
+    gap: 0.35rem;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+  }
+
+  tr:hover .row-actions { opacity: 1; }
+
+  .action-btn {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.15s;
+  }
+
+  .action-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .action-btn.delete:hover { border-color: #e05b3a; color: #e05b3a; }
+
+  /* MONTH DIVIDER */
+  .month-divider td {
+    padding: 1.5rem 0.75rem 0.4rem;
+    background: var(--bg) !important;
+  }
+
+  .month-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  /* PROGRESS BAR */
+  .progress-section {
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .progress-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    min-width: 200px;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #e05b3a);
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  .progress-pct {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* ADD ROW */
+  .add-row-btn {
+    margin: 1rem 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .add-row-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    width: 500px;
+    max-width: 90vw;
+  }
+
+  .modal h3 {
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+    color: var(--accent);
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+    letter-spacing: 0.05em;
+  }
+
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-select { cursor: pointer; }
+  .form-textarea { resize: vertical; min-height: 80px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.82rem;
+    color: var(--text);
+    z-index: 2000;
+    transform: translateX(120%);
+    transition: transform 0.25s;
+  }
+
+  .toast.show { transform: translateX(0); }
+
+  /* PRINT */
+  @media print {
+    header, .toolbar, .stats-bar, .progress-section, .add-row-btn, .row-actions, .modal-overlay, .toast { display: none !important; }
+    body { background: white; color: black; }
+    .table-wrap { padding: 0; }
+    table { font-size: 11px; }
+    tbody tr:hover { background: transparent; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <div class="logo">TBFF · 2025</div>
+    <div class="project-title">台北有影 <span>3</span>｜專案進度追蹤</div>
+  </div>
+  <div class="header-right">
+    <button class="btn" onclick="exportCSV()">⬇ 匯出 CSV</button>
+    <button class="btn" onclick="window.print()">⎙ 列印</button>
+    <button class="btn btn-accent" onclick="saveAll()">✓ 儲存</button>
+  </div>
+</header>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-dot" style="background:var(--text-muted)"></div>
+    <span class="stat-label">待開始</span>
+    <span class="stat-val" id="stat-pending">—</span>
+  </div>
+  <div class="stat-item">
+    <div class="stat-dot" style="background:var(--status-ongoing)"></div>
+    <span class="stat-label">進行中</span>
+    <span class="stat-val" id="stat-ongoing">—</span>
+  </div>
+  <div class="stat-item">
+    <div class="stat-dot" style="background:var(--status-done)"></div>
+    <span class="stat-label">已完成</span>
+    <span class="stat-val" id="stat-done">—</span>
+  </div>
+  <div class="stat-item">
+    <div class="stat-dot" style="background:var(--status-confirm)"></div>
+    <span class="stat-label">待確認</span>
+    <span class="stat-val" id="stat-confirm">—</span>
+  </div>
+  <div class="stat-item">
+    <div class="stat-dot" style="background:var(--status-late)"></div>
+    <span class="stat-label">延遲</span>
+    <span class="stat-val" id="stat-late">—</span>
+  </div>
+  <div class="stat-item" style="margin-left: auto;">
+    <span class="stat-label">最後儲存：</span>
+    <span class="stat-val" id="last-saved" style="font-size:0.75rem; color:var(--text-muted)">尚未儲存</span>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-section">
+  <span class="progress-label">整體完成度</span>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <span class="progress-pct" id="progress-pct">0%</span>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <span class="filter-label">篩選：</span>
+  <button class="filter-btn active" data-cat="全部" onclick="filterCat(this)">全部</button>
+  <button class="filter-btn" data-cat="行政準備" onclick="filterCat(this)">行政準備</button>
+  <button class="filter-btn" data-cat="影片徵選" onclick="filterCat(this)">影片徵選</button>
+  <button class="filter-btn" data-cat="頒獎典禮" onclick="filterCat(this)">頒獎典禮</button>
+  <button class="filter-btn" data-cat="市民大聲說" onclick="filterCat(this)">市民大聲說</button>
+  <button class="filter-btn" data-cat="人才培訓" onclick="filterCat(this)">人才培訓</button>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="text" placeholder="搜尋工作內容…" oninput="searchTable(this.value)">
+  </div>
+</div>
+
+<!-- TABLE -->
+<div class="table-wrap">
+  <table id="main-table">
+    <thead>
+      <tr>
+        <th class="col-group">分類</th>
+        <th class="col-date">日期</th>
+        <th class="col-task">工作內容</th>
+        <th class="col-unit">執行單位</th>
+        <th class="col-status">進度狀態</th>
+        <th class="col-note">備註 ／ 新增說明</th>
+        <th class="col-actions"></th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+</div>
+
+<button class="add-row-btn" onclick="openAddModal()">＋ 新增任務</button>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">新增任務</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">分類</label>
+        <select class="form-select" id="m-cat">
+          <option>行政準備</option>
+          <option>影片徵選</option>
+          <option>頒獎典禮</option>
+          <option>市民大聲說</option>
+          <option>人才培訓</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">日期</label>
+        <input class="form-input" type="text" id="m-date" placeholder="e.g. 7/1">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">工作內容</label>
+      <textarea class="form-textarea" id="m-task" placeholder="任務描述…"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">執行單位</label>
+        <input class="form-input" type="text" id="m-unit" placeholder="北都行銷部">
+      </div>
+      <div class="form-group">
+        <label class="form-label">進度狀態</label>
+        <select class="form-select" id="m-status">
+          <option>待開始</option>
+          <option>進行中</option>
+          <option>已完成</option>
+          <option>待確認</option>
+          <option>延遲</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">備註說明</label>
+      <input class="form-input" type="text" id="m-note" placeholder="補充資訊…">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-accent" onclick="submitModal()">確認新增</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================
+// DATA
+// =====================
+const INITIAL_DATA = [
+  // 5月
+  { id: 1, cat: '行政準備', date: '5/20', task: '公用頻道會議報告企劃案給特助確認最後版本', unit: '北都行銷部（阿皓）', status: '待開始', note: '5/20 跟特助確認', badge: '', comment: '' },
+  { id: 2, cat: '行政準備', date: '5/22', task: '提交公用頻道會議報告企劃案、徵選辦法、問燈箱費用、電子邀請卡', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 3, cat: '頒獎典禮', date: '5/25–5/27', task: '頒獎典禮硬體廠商會議（三天）', unit: '北都行銷部', status: '待開始', note: '5/25~5/27 三天會議', badge: '', comment: '' },
+  { id: 4, cat: '行政準備', date: '5/29', task: '衛星頻道執照企劃書', unit: '北都行銷部', status: '待確認', note: '', badge: '', comment: '' },
+  // 6月
+  { id: 5, cat: '影片徵選', date: '6/1', task: '【新增】徵件辦法 ／ 簡章定稿', unit: '北都行銷部', status: '待開始', note: '公告徵件的正式文件', badge: 'new', comment: '' },
+  { id: 6, cat: '人才培訓', date: '6/1', task: '【新增】人才培訓課程報名開放', unit: '北都行銷部', status: '待開始', note: '社群暖身宣傳，課程開始前開放報名', badge: 'new', comment: '' },
+  { id: 7, cat: '影片徵選', date: '6/1–6/30', task: '製作年度活動影片、影片徵選活動影片（預計 7/1 完成）', unit: '北都行銷部 ／ 運豐多媒體', status: '待開始', note: '⚠ 6月底前拍攝完畢', badge: 'warn', comment: '' },
+  { id: 8, cat: '影片徵選', date: '6/1–6/20', task: '製作及印製影片徵選活動海報 ／ 燈箱廣告（費用問題）、相關宣傳素材', unit: '北都行銷部', status: '待開始', note: '⚠ 6/20 前須完成', badge: 'warn', comment: '' },
+  { id: 9, cat: '影片徵選', date: '6/1–6/30', task: '【新增】影片徵選收件平台 ／ 系統建置', unit: '北都行銷部', status: '待開始', note: '7/1 徵件前需準備完成', badge: 'new', comment: '' },
+  { id: 10, cat: '人才培訓', date: '6/15', task: '社群暖身徵選宣傳，公告人才培訓課程內容，提供雲端表單', unit: '北都行銷部', status: '待開始', note: '', badge: 'tip', comment: '' },
+  { id: 11, cat: '影片徵選', date: '6/24', task: '【新增】徵件事宜線上公告（至少前一週）', unit: '北都行銷部', status: '待開始', note: '線上公告與海報張貼分開規劃', badge: 'new', comment: '' },
+  { id: 12, cat: '影片徵選', date: '6/29', task: '影片徵選活動海報寄送及張貼（高中、大學）', unit: '北都行銷部', status: '待開始', note: '⚠ 須提前 6/20 完成印製，確認張貼地點（地點待確認）', badge: 'warn', comment: '' },
+  // 7月
+  { id: 13, cat: '影片徵選', date: '7/1', task: '年度活動影片 ／ 影片徵選活動影片開跑，宣傳培訓 ＋ 徵件啟動', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 14, cat: '影片徵選', date: '7/1', task: '影片徵選活動燈箱上架', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 15, cat: '影片徵選', date: '7/1–9/30', task: '影片徵選收件期間（建議 7/1~9/30；件數不足可延長至 10/10）', unit: '北都行銷部', status: '待開始', note: '建議提早評審', badge: 'tip', comment: '' },
+  { id: 16, cat: '市民大聲說', date: '7/3', task: '市民大聲說 1、2 外景（西門）', unit: '北都行銷部 ／ 運豐多媒體', status: '待開始', note: '外景期間建議安排側拍人員，以照片記錄作為宣傳素材', badge: 'tip', comment: '' },
+  { id: 17, cat: '人才培訓', date: '7/11', task: '影像人才培訓課程（第 1 場）', unit: '北都行銷部 ／ 運豐多媒體', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 18, cat: '市民大聲說', date: '7/18', task: '市民大聲說 1 播出', unit: '北都行銷部', status: '待開始', note: '對應 7/3 外景', badge: '', comment: '' },
+  { id: 19, cat: '人才培訓', date: '7/25', task: '影像人才培訓課程（第 2 場）', unit: '北都行銷部 ／ 運豐多媒體', status: '待開始', note: '', badge: '', comment: '' },
+  // 8月
+  { id: 20, cat: '頒獎典禮', date: '8/1–8/31', task: '頒獎典禮主視覺定稿、製作典禮宣傳物（社群、海報）', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 21, cat: '影片徵選', date: '8/1–8/31', task: '注意徵件數量是否足夠；不足需啟動加強宣傳', unit: '北都行銷部', status: '待開始', note: '', badge: 'warn', comment: '' },
+  { id: 22, cat: '市民大聲說', date: '8/7', task: '市民大聲說 3、4 外景（信義）', unit: '北都行銷部 ／ 運豐多媒體', status: '待開始', note: '外景期間建議安排側拍人員', badge: 'tip', comment: '' },
+  { id: 23, cat: '人才培訓', date: '8/15', task: '影像人才培訓課程（第 3 場）', unit: '北都行銷部 ／ 運豐多媒體', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 24, cat: '市民大聲說', date: '8/22', task: '市民大聲說 2 播出', unit: '北都行銷部', status: '待開始', note: '對應 7/3 外景', badge: '', comment: '' },
+  { id: 25, cat: '人才培訓', date: '8/22', task: '影像人才培訓課程（第 4 場）', unit: '北都行銷部 ／ 運豐多媒體', status: '待開始', note: '', badge: '', comment: '' },
+  // 9月
+  { id: 26, cat: '影片徵選', date: '9/1', task: '【新增】評審委員邀請與確認', unit: '北都行銷部', status: '待開始', note: '10/15 評審若臨時找會很趕', badge: 'new', comment: '' },
+  { id: 27, cat: '頒獎典禮', date: '9/1–9/30', task: '【新增】頒獎典禮籌備啟動（流程 ／ 貴賓 ／ 影片放映）', unit: '北都行銷部', status: '待開始', note: '5月硬體會議後到 12月典禮的籌備期', badge: 'new', comment: '' },
+  { id: 28, cat: '頒獎典禮', date: '9/1–9/30', task: '典禮現場製作物（電子邀請卡、背板、頒獎人名牌、舞台設計、拍照牆、獎金手版…）、新聞稿模板', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 29, cat: '市民大聲說', date: '9/19', task: '市民大聲說 3 播出', unit: '北都行銷部', status: '待開始', note: '對應 8/7 外景', badge: '', comment: '' },
+  // 10月
+  { id: 30, cat: '影片徵選', date: '10/1', task: '【新增】評審會議場地與設備預訂', unit: '北都行銷部', status: '待開始', note: '評審期間需要場地與設備', badge: 'new', comment: '' },
+  { id: 31, cat: '影片徵選', date: '10/1–10/10', task: '影片徵選初審', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 32, cat: '頒獎典禮', date: '10/5', task: '主持人確認、表演團體（音樂版權確認）', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 33, cat: '頒獎典禮', date: '10/10', task: '頒獎人確認、邀請', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 34, cat: '市民大聲說', date: '10/10', task: '市民大聲說 4 播出', unit: '北都行銷部', status: '待開始', note: '對應 8/7 外景', badge: '', comment: '' },
+  { id: 35, cat: '影片徵選', date: '10/15', task: '入圍名單確認', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 36, cat: '頒獎典禮', date: '10/15', task: '典禮流程初版、舞台設計；獎狀、獎盃、入圍名單主視覺動畫（典禮當天用）', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 37, cat: '影片徵選', date: '10/20', task: '入圍通知 ＋ 詢問是否參加頒獎典禮', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 38, cat: '頒獎典禮', date: '10/20', task: '所有影片初版（入圍影片 ／ 得獎影片 ／ 開場影片）', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 39, cat: '頒獎典禮', date: '10/25', task: '典禮流程會議、技術設備會議（硬體規格確認）', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 40, cat: '影片徵選', date: '10/31', task: '決審完成', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  // 11月
+  { id: 41, cat: '影片徵選', date: '11/1', task: '【新增】得獎名單公告與得獎者通知', unit: '北都行銷部', status: '待開始', note: '評審結束到頒獎中間的空白期', badge: 'new', comment: '' },
+  { id: 42, cat: '頒獎典禮', date: '11/1', task: '入圍名單公布、新聞稿、社群宣傳素材；頒獎典禮宣傳、全部工作人員會議（初步）', unit: '北都行銷部', status: '待開始', note: '入圍名單曝光期', badge: '', comment: '' },
+  { id: 43, cat: '頒獎典禮', date: '11/1', task: '【新增】貴賓邀請函發送與回覆統計', unit: '北都行銷部', status: '待開始', note: '典禮前一個月需完成貴賓確認', badge: 'new', comment: '' },
+  { id: 44, cat: '頒獎典禮', date: '11/15', task: '頒獎典禮流程定稿、主持稿定稿、流程表定稿、頒獎順序定稿', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 45, cat: '頒獎典禮', date: '11/20', task: '所有影片定稿', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 46, cat: '頒獎典禮', date: '11/23', task: '全部工作人員會議、最後分工確認', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 47, cat: '頒獎典禮', date: '11/30', task: '主持人彩排', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  // 12月
+  { id: 48, cat: '頒獎典禮', date: '12/3–12/4', task: '全流程總彩排、技術設備彩排', unit: '北都行銷部', status: '待開始', note: '', badge: '', comment: '' },
+  { id: 49, cat: '頒獎典禮', date: '12/5', task: '台北有影 3 頒獎典禮（候選場地：1. 威秀  2. 紅樓）', unit: '北都有線電視 ／ 運豐多媒體', status: '待開始', note: '場地候選：1. 威秀  2. 紅樓', badge: '', comment: '' },
+];
+
+// =====================
+// STATE
+// =====================
+let data = [];
+let nextId = 100;
+let editingId = null;
+
+const MONTHS = [
+  { label: '五月', prefix: '5/' },
+  { label: '六月', prefix: '6/' },
+  { label: '七月', prefix: '7/' },
+  { label: '八月', prefix: '8/' },
+  { label: '九月', prefix: '9/' },
+  { label: '十月', prefix: '10/' },
+  { label: '十一月', prefix: '11/' },
+  { label: '十二月', prefix: '12/' },
+];
+
+function getMonth(date) {
+  const m = date.split('/')[0].trim();
+  return m;
+}
+
+// =====================
+// RENDER
+// =====================
+function renderTable() {
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+
+  let lastMonth = null;
+
+  data.forEach(row => {
+    const m = getMonth(row.date);
+
+    if (m !== lastMonth) {
+      const mo = MONTHS.find(x => x.prefix.replace('/', '') === m);
+      const divRow = document.createElement('tr');
+      divRow.className = 'month-divider';
+      divRow.innerHTML = `<td colspan="7"><span class="month-label">${mo ? mo.label : m + '月'}</span></td>`;
+      tbody.appendChild(divRow);
+      lastMonth = m;
+    }
+
+    const badgeHTML = row.badge === 'new' ? '<span class="task-badge badge-new">NEW</span><br>'
+      : row.badge === 'warn' ? '<span class="task-badge badge-warn">⚠ 注意</span><br>'
+      : row.badge === 'tip' ? '<span class="task-badge badge-tip">💡 建議</span><br>'
+      : '';
+
+    const tr = document.createElement('tr');
+    tr.dataset.id = row.id;
+    tr.dataset.cat = row.cat;
+    tr.innerHTML = `
+      <td><span class="group-tag tag-${row.cat}">${row.cat}</span></td>
+      <td><div class="date-text">${row.date}</div></td>
+      <td>
+        <div class="task-content">
+          ${badgeHTML}
+          <span class="task-editable" contenteditable="true" data-field="task" data-id="${row.id}">${row.task}</span>
+        </div>
+      </td>
+      <td><span class="task-editable" contenteditable="true" data-field="unit" data-id="${row.id}" style="font-size:0.78rem; color:var(--text-muted)">${row.unit}</span></td>
+      <td>
+        <select class="status-select status-${row.status}" data-id="${row.id}" onchange="changeStatus(this, ${row.id})">
+          <option ${row.status==='待開始'?'selected':''}>待開始</option>
+          <option ${row.status==='進行中'?'selected':''}>進行中</option>
+          <option ${row.status==='已完成'?'selected':''}>已完成</option>
+          <option ${row.status==='待確認'?'selected':''}>待確認</option>
+          <option ${row.status==='延遲'?'selected':''}>延遲</option>
+        </select>
+      </td>
+      <td>
+        <div class="note-cell">
+          ${row.note ? `<div class="note-original">${row.note}</div>` : ''}
+          <div class="note-comment" contenteditable="true" data-field="comment" data-id="${row.id}" data-placeholder="新增說明…">${row.comment || ''}</div>
+        </div>
+      </td>
+      <td>
+        <div class="row-actions">
+          <div class="action-btn delete" onclick="deleteRow(${row.id})" title="刪除">✕</div>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Bind inline edit
+  tbody.querySelectorAll('[contenteditable]').forEach(el => {
+    el.addEventListener('blur', () => {
+      const id = parseInt(el.dataset.id);
+      const field = el.dataset.field;
+      const row = data.find(r => r.id === id);
+      if (row) {
+        row[field] = el.innerText.trim();
+      }
+    });
+  });
+
+  updateStats();
+}
+
+// =====================
+// STATUS CHANGE
+// =====================
+function changeStatus(sel, id) {
+  const row = data.find(r => r.id === id);
+  if (row) {
+    row.status = sel.value;
+    sel.className = `status-select status-${sel.value}`;
+    updateStats();
+  }
+}
+
+// =====================
+// STATS
+// =====================
+function updateStats() {
+  const counts = { '待開始': 0, '進行中': 0, '已完成': 0, '待確認': 0, '延遲': 0 };
+  data.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
+
+  document.getElementById('stat-pending').textContent = counts['待開始'];
+  document.getElementById('stat-ongoing').textContent = counts['進行中'];
+  document.getElementById('stat-done').textContent = counts['已完成'];
+  document.getElementById('stat-confirm').textContent = counts['待確認'];
+  document.getElementById('stat-late').textContent = counts['延遲'];
+
+  const pct = data.length ? Math.round(counts['已完成'] / data.length * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+}
+
+// =====================
+// FILTER & SEARCH
+// =====================
+function filterCat(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cat = btn.dataset.cat;
+  document.querySelectorAll('#table-body tr:not(.month-divider)').forEach(tr => {
+    tr.classList.toggle('hidden', cat !== '全部' && tr.dataset.cat !== cat);
+  });
+  // Hide empty month dividers
+  hideEmptyDividers();
+}
+
+function searchTable(val) {
+  const q = val.toLowerCase();
+  document.querySelectorAll('#table-body tr:not(.month-divider)').forEach(tr => {
+    const text = tr.textContent.toLowerCase();
+    tr.classList.toggle('hidden', !!q && !text.includes(q));
+  });
+  hideEmptyDividers();
+}
+
+function hideEmptyDividers() {
+  const rows = document.querySelectorAll('#table-body tr');
+  rows.forEach((tr, i) => {
+    if (tr.classList.contains('month-divider')) {
+      let hasVisible = false;
+      let j = i + 1;
+      while (j < rows.length && !rows[j].classList.contains('month-divider')) {
+        if (!rows[j].classList.contains('hidden')) { hasVisible = true; break; }
+        j++;
+      }
+      tr.classList.toggle('hidden', !hasVisible);
+    }
+  });
+}
+
+// =====================
+// DELETE
+// =====================
+function deleteRow(id) {
+  if (!confirm('確定刪除此任務？')) return;
+  data = data.filter(r => r.id !== id);
+  renderTable();
+  showToast('已刪除任務');
+}
+
+// =====================
+// ADD MODAL
+// =====================
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = '新增任務';
+  document.getElementById('m-cat').value = '影片徵選';
+  document.getElementById('m-date').value = '';
+  document.getElementById('m-task').value = '';
+  document.getElementById('m-unit').value = '北都行銷部';
+  document.getElementById('m-status').value = '待開始';
+  document.getElementById('m-note').value = '';
+  document.getElementById('modal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+function submitModal() {
+  const cat = document.getElementById('m-cat').value;
+  const date = document.getElementById('m-date').value.trim();
+  const task = document.getElementById('m-task').value.trim();
+  const unit = document.getElementById('m-unit').value.trim();
+  const status = document.getElementById('m-status').value;
+  const note = document.getElementById('m-note').value.trim();
+
+  if (!date || !task) { alert('請填寫日期與工作內容'); return; }
+
+  // Insert in date order
+  const newRow = { id: nextId++, cat, date, task, unit, status, note, badge: '', comment: '' };
+  data.push(newRow);
+  data.sort((a, b) => sortByDate(a.date) - sortByDate(b.date));
+
+  closeModal();
+  renderTable();
+  showToast('已新增任務 ✓');
+}
+
+function sortByDate(d) {
+  const parts = d.split(/[\/\-–]/);
+  const m = parseInt(parts[0]) || 0;
+  const day = parseInt(parts[1]) || 0;
+  return m * 100 + day;
+}
+
+// =====================
+// GOOGLE SHEETS SYNC
+// =====================
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
+
+function syncFields() {
+  document.querySelectorAll('[contenteditable]').forEach(el => {
+    const id = parseInt(el.dataset.id);
+    const field = el.dataset.field;
+    const row = data.find(r => r.id === id);
+    if (row) row[field] = el.innerText.trim();
+  });
+}
+
+async function saveAll() {
+  syncFields();
+  const saveBtn = document.querySelector('.btn-accent');
+  const orig = saveBtn.textContent;
+  saveBtn.textContent = '同步中…';
+  saveBtn.disabled = true;
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'write', data }),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      const now = new Date();
+      document.getElementById('last-saved').textContent =
+        now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+      // 同步備份到 localStorage
+      localStorage.setItem('tbff3_data', JSON.stringify(data));
+      showToast('已同步至 Google Sheets ✓');
+    } else {
+      throw new Error('write failed');
+    }
+  } catch(e) {
+    showToast('⚠ 同步失敗，已儲存至本機備份');
+    localStorage.setItem('tbff3_data', JSON.stringify(data));
+  } finally {
+    saveBtn.textContent = orig;
+    saveBtn.disabled = false;
+  }
+}
+
+async function loadSaved() {
+  setLoading(true);
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=read');
+    const remote = await res.json();
+    if (Array.isArray(remote) && remote.length > 0) {
+      // 轉型：從 Sheet 回來的欄位都是字串
+      data = remote.map(r => ({
+        id: parseInt(r.id) || Math.random(),
+        cat: r.cat || '',
+        date: r.date || '',
+        task: r.task || '',
+        unit: r.unit || '',
+        status: r.status || '待開始',
+        note: r.note || '',
+        badge: r.badge || '',
+        comment: r.comment || '',
+      }));
+      nextId = Math.max(...data.map(r => typeof r.id === 'number' ? r.id : 0)) + 1;
+      document.getElementById('last-saved').textContent = '已從雲端載入';
+    } else {
+      // Sheet 空白 → 用初始資料並立刻寫入
+      data = JSON.parse(JSON.stringify(INITIAL_DATA));
+      await saveAll();
+    }
+  } catch(e) {
+    // 網路失敗 → 讀本機備份
+    const local = localStorage.getItem('tbff3_data');
+    if (local) {
+      data = JSON.parse(local);
+      nextId = Math.max(...data.map(r => r.id)) + 1;
+      document.getElementById('last-saved').textContent = '（離線，顯示本機備份）';
+    } else {
+      data = JSON.parse(JSON.stringify(INITIAL_DATA));
+    }
+    showToast('⚠ 無法連線，顯示本機備份');
+  } finally {
+    setLoading(false);
+  }
+}
+
+function setLoading(on) {
+  const wrap = document.getElementById('table-body');
+  if (on) {
+    wrap.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:3rem; color:var(--text-muted); font-size:0.85rem; letter-spacing:0.1em;">從 Google Sheets 載入中…</td></tr>`;
+  }
+}
+
+// =====================
+// EXPORT CSV
+// =====================
+function exportCSV() {
+  // Sync fields first
+  document.querySelectorAll('[contenteditable]').forEach(el => {
+    const id = parseInt(el.dataset.id);
+    const field = el.dataset.field;
+    const row = data.find(r => r.id === id);
+    if (row) row[field] = el.innerText.trim();
+  });
+
+  const headers = ['分類', '日期', '工作內容', '執行單位', '進度狀態', '備註', '補充說明'];
+  const rows = data.map(r => [r.cat, r.date, r.task, r.unit, r.status, r.note, r.comment]);
+  const csv = '\uFEFF' + [headers, ...rows].map(r => r.map(c => `"${(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  a.download = '台北有影3_進度表.csv';
+  a.click();
+  showToast('CSV 匯出成功');
+}
+
+// =====================
+// TOAST
+// =====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// =====================
+// KEYBOARD SAVE
+// =====================
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    saveAll();
+  }
+});
+
+// Close modal on overlay click
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// =====================
+// INIT
+// =====================
+(async () => {
+  await loadSaved();
+  renderTable();
+})();
+</script>
+</body>
+</html>
