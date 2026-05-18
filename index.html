@@ -648,7 +648,24 @@ async function loadSaved(){
     const res=await fetch(SCRIPT_URL+'?action=read');
     const remote=await res.json();
     if(Array.isArray(remote)&&remote.length>0){
-      data=remote.map(r=>({id:parseInt(r.id)||Math.random(),cat:r.cat||'',date:r.date||'',task:r.task||'',unit:r.unit||'',status:r.status||'待開始',note:r.note||'',badge:r.badge||'',comment:r.comment||''}));
+      data=remote.map(r=>{
+        // Google Sheets 會把日期自動轉成時間戳記，這裡轉回 M/D 格式
+        let date = r.date||'';
+        if(date instanceof Date || (typeof date==='string' && date.includes('T'))){
+          const d = new Date(date);
+          date = (d.getMonth()+1)+'/'+(d.getDate());
+        } else if(typeof date==='number'){
+          // Sheets 有時回傳數字序列號
+          const d = new Date((date-25569)*86400*1000);
+          date = (d.getUTCMonth()+1)+'/'+(d.getUTCDate());
+        }
+        return {
+          id:parseInt(r.id)||Math.random(),
+          cat:r.cat||'', date, task:r.task||'',
+          unit:r.unit||'', status:r.status||'待開始',
+          note:r.note||'', badge:r.badge||'', comment:r.comment||''
+        };
+      });
       nextId=Math.max(...data.map(r=>typeof r.id==='number'?r.id:0))+1;
       document.getElementById('last-saved').textContent='已從雲端載入';
     }else{data=JSON.parse(JSON.stringify(INITIAL_DATA));await saveAll();}
