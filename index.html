@@ -463,8 +463,13 @@ function filterCat(btn){
   btn.classList.add('active');
   currentFilter=btn.dataset.cat;
   applyFilter();
+  if(currentView==='calendar') renderCalendar();
 }
-function searchTable(val){ currentSearch=val.toLowerCase(); applyFilter(); }
+function searchTable(val){
+  currentSearch=val.toLowerCase();
+  applyFilter();
+  if(currentView==='calendar') renderCalendar();
+}
 function applyFilter(){
   document.querySelectorAll('#table-body tr:not(.month-divider)').forEach(tr=>{
     const ok=(currentFilter==='全部'||tr.dataset.cat===currentFilter)&&
@@ -571,7 +576,13 @@ function renderCalendar(){
   const days=new Date(calYear,calMonth+1,0).getDate();
   const today=new Date();
   const byDay={};
-  data.forEach(r=>{const d=parseDateFirst(r.date);if(d&&d.month===calMonth+1){if(!byDay[d.day])byDay[d.day]=[];byDay[d.day].push(r);}});
+  data.forEach(r=>{
+    // 套用篩選器
+    if(currentFilter!=='全部' && r.cat!==currentFilter) return;
+    if(currentSearch && !r.task.toLowerCase().includes(currentSearch) && !r.cat.toLowerCase().includes(currentSearch)) return;
+    const d=parseDateFirst(r.date);
+    if(d&&d.month===calMonth+1){if(!byDay[d.day])byDay[d.day]=[];byDay[d.day].push(r);}
+  });
   let h=CAL_DAY.map(d=>`<div class="cal-day-header">${d}</div>`).join('');
   for(let i=0;i<first;i++)h+=`<div class="cal-day empty"></div>`;
   for(let d=1;d<=days;d++){
@@ -695,7 +706,44 @@ function showToast(msg){
 
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveAll();}});
 
-(async()=>{await loadSaved();renderTable();})();
+// ── 自動輪詢（每 30 秒從 Sheets 讀最新，有人更新自動同步）──
+let isEditing = false;
+
+document.addEventListener('focusin', e => {
+  if(e.target.isContentEditable || ['SELECT','TEXTAREA','INPUT'].includes(e.target.tagName))
+    isEditing = true;
+});
+document.addEventListener('focusout', () => {
+  setTimeout(() => { isEditing = false; }, 3000);
+});
+
+async function pollUpdate() {
+  if(isEditing) return;
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=read');
+    const remote = await res.json();
+    if(!Array.isArray(remote) || remote.length === 0) return;
+    const newData = remote.map(r => {
+      let date = r.date||'';
+      if(typeof date==='string' && date.includes('T')){ const d=new Date(date); date=(d.getMonth()+1)+'/'+(d.getDate()); }
+      else if(typeof date==='number'){ const d=new Date((date-25569)*86400*1000); date=(d.getUTCMonth()+1)+'/'+(d.getUTCDate()); }
+      return {id:parseInt(r.id)||Math.random(),cat:r.cat||'',date,task:r.task||'',unit:r.unit||'',status:r.status||'待開始',note:r.note||'',badge:r.badge||'',comment:r.comment||''};
+    });
+    if(JSON.stringify(newData) !== JSON.stringify(data)) {
+      data = newData;
+      renderTable();
+      if(currentView==='calendar') renderCalendar();
+      document.getElementById('last-saved').textContent = '剛剛已同步';
+      showToast('🔄 偵測到更新，已自動同步');
+    }
+  } catch { /* 網路失敗靜默跳過 */ }
+}
+
+(async()=>{
+  await loadSaved();
+  renderTable();
+  setInterval(pollUpdate, 30000); // 每 30 秒自動讀取
+})();
 </script>
 </body>
 </html>
