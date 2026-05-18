@@ -156,6 +156,7 @@ tbody td:first-child { padding-left:0; }
 tr:hover .row-actions { opacity:1; }
 .action-btn { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:5px; border:1px solid var(--border); background:#fff; color:var(--text-muted); cursor:pointer; font-size:0.82rem; transition:all 0.15s; }
 .action-btn:hover { border-color:#fca5a5; color:#dc2626; background:#fef2f2; }
+.action-btn.edit-btn:hover { border-color:#6ee7b7; color:#059669; background:#f0fdf8; }
 
 .month-divider td { padding:1.75rem 0.9rem 0.55rem; background:var(--bg)!important; }
 .month-label { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-dim); font-weight:700; padding:0.3rem 0.75rem; border:1.5px solid var(--border2); border-radius:5px; background:#fff; display:inline-block; }
@@ -312,7 +313,7 @@ tr:hover .row-actions { opacity:1; }
 <!-- 新增任務 -->
 <div class="modal-overlay" id="add-modal">
   <div class="modal">
-    <h3>新增任務</h3>
+    <h3 id="modal-title">新增任務</h3>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">分類</label>
@@ -345,9 +346,13 @@ tr:hover .row-actions { opacity:1; }
       <label class="form-label">備註說明</label>
       <input class="form-input" type="text" id="m-note" placeholder="補充資訊…">
     </div>
+    <div class="form-group">
+      <label class="form-label">補充說明（黃色備忘欄）</label>
+      <textarea class="form-textarea" id="m-comment" placeholder="備忘、聯絡事項…" rows="2"></textarea>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-cancel" onclick="closeModal()">取消</button>
-      <button class="btn btn-accent" onclick="submitModal()">確認新增</button>
+      <button class="btn btn-accent" id="modal-submit-btn" onclick="submitModal()">確認新增</button>
     </div>
   </div>
 </div>
@@ -444,7 +449,10 @@ function renderTable(){
         ${row.note?`<div class="note-original">${row.note}</div>`:''}
         <div class="note-comment" contenteditable="true" data-field="comment" data-id="${row.id}" data-placeholder="點此新增說明、備忘…">${row.comment||''}</div>
       </div></td>
-      <td><div class="row-actions"><div class="action-btn" onclick="deleteRow(${row.id})">✕</div></div></td>`;
+      <td><div class="row-actions">
+        <div class="action-btn edit-btn" onclick="openEditModal(${row.id})" title="編輯">✎</div>
+        <div class="action-btn" onclick="deleteRow(${row.id})" title="刪除">✕</div>
+      </div></td>`;
     tbody.appendChild(tr);
   });
   tbody.querySelectorAll('[contenteditable]').forEach(el=>{
@@ -505,8 +513,51 @@ function deleteRow(id){
   data=data.filter(r=>r.id!==id); renderTable(); showToast('已刪除任務');
 }
 
+// ── EDIT MODAL（編輯現有任務）──
+function openEditModal(id){
+  const row=data.find(r=>r.id===id); if(!row)return;
+  // 重用新增 Modal，但改成編輯模式
+  document.getElementById('modal-title').textContent='編輯任務';
+  document.getElementById('m-cat').value=row.cat;
+  document.getElementById('m-date').value=row.date;
+  document.getElementById('m-task').value=row.task;
+  document.getElementById('m-unit').value=row.unit;
+  document.getElementById('m-status').value=row.status;
+  document.getElementById('m-note').value=row.note;
+  document.getElementById('m-comment').value=row.comment||'';
+  document.getElementById('modal-submit-btn').onclick=()=>submitEditModal(id);
+  document.getElementById('add-modal').classList.add('active');
+}
+function submitEditModal(id){
+  const row=data.find(r=>r.id===id); if(!row)return;
+  row.cat=document.getElementById('m-cat').value;
+  row.date=document.getElementById('m-date').value.trim();
+  row.task=document.getElementById('m-task').value.trim();
+  row.unit=document.getElementById('m-unit').value.trim();
+  row.status=document.getElementById('m-status').value;
+  row.note=document.getElementById('m-note').value.trim();
+  row.comment=document.getElementById('m-comment').value.trim();
+  if(!row.date||!row.task){alert('請填寫日期與工作內容');return;}
+  data.sort((a,b)=>{const p=s=>parseInt(s.split(/[\/\-–]/)[0]||0)*100+parseInt((s.split(/[\/\-–]/)[1]||0));return p(a.date)-p(b.date);});
+  closeModal();
+  renderTable();
+  if(currentView==='calendar')renderCalendar();
+  showToast('已更新，記得按「儲存」同步');
+}
+
 // ── ADD MODAL ──
-function openAddModal(){ document.getElementById('add-modal').classList.add('active'); }
+function openAddModal(){
+  document.getElementById('modal-title').textContent='新增任務';
+  document.getElementById('m-cat').value='影片徵選';
+  document.getElementById('m-date').value='';
+  document.getElementById('m-task').value='';
+  document.getElementById('m-unit').value='北都行銷部';
+  document.getElementById('m-status').value='待開始';
+  document.getElementById('m-note').value='';
+  document.getElementById('m-comment').value='';
+  document.getElementById('modal-submit-btn').onclick=submitModal;
+  document.getElementById('add-modal').classList.add('active');
+}
 function closeModal(){ document.getElementById('add-modal').classList.remove('active'); }
 function submitModal(){
   const date=document.getElementById('m-date').value.trim();
@@ -612,22 +663,29 @@ async function saveAll(){
   const btn=document.querySelector('.btn-accent'), orig=btn.textContent;
   btn.textContent='同步中…'; btn.disabled=true;
   try{
-    // 第一步：清空 Sheet
     await fetch(`${SCRIPT_URL}?action=clear`);
-    // 第二步：一筆一筆寫入（每筆 URL 很短，完全沒有 CORS 問題）
     for(const row of data){
       const encoded = encodeURIComponent(JSON.stringify(row));
       await fetch(`${SCRIPT_URL}?action=appendrow&row=${encoded}`);
     }
     const n=new Date();
-    document.getElementById('last-saved').textContent=
-      n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
+    const t=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
+    document.getElementById('last-saved').textContent=t;
     localStorage.setItem('tbff3_data',JSON.stringify(data));
+    // 按鈕短暫顯示成功
+    btn.textContent='✓ 已同步';
+    btn.style.background='#059669';
+    setTimeout(()=>{ btn.textContent=orig; btn.style.background=''; },2500);
     showToast('已同步至 Google Sheets ✓');
   }catch(e){
     localStorage.setItem('tbff3_data',JSON.stringify(data));
+    btn.textContent='⚠ 失敗';
+    btn.style.background='#dc2626';
+    setTimeout(()=>{ btn.textContent=orig; btn.style.background=''; },2500);
     showToast('⚠ 同步失敗，已儲存至本機');
-  }finally{btn.textContent=orig;btn.disabled=false;}
+  }finally{
+    btn.disabled=false;
+  }
 }
 
 async function loadSaved(){
