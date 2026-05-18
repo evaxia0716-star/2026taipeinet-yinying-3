@@ -600,19 +600,46 @@ async function saveAll(){
   syncFields();
   const btn=document.querySelector('.btn-accent'), orig=btn.textContent;
   btn.textContent='同步中…'; btn.disabled=true;
+
   try{
-    const res=await fetch(`${SCRIPT_URL}?action=write&data=${encodeURIComponent(JSON.stringify(data))}`);
-    const json=await res.json();
-    if(json.ok){
-      const n=new Date();
-      document.getElementById('last-saved').textContent=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
-      localStorage.setItem('tbff3_data',JSON.stringify(data));
-      showToast('已同步至 Google Sheets ✓');
-    }else throw new Error();
-  }catch{
-    localStorage.setItem('tbff3_data',JSON.stringify(data));
+    // 用隱藏 form 送出，完全繞過 CORS 限制
+    const iframe = document.createElement('iframe');
+    iframe.name = 'hidden_frame';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = SCRIPT_URL;
+    form.target = 'hidden_frame';
+    form.style.display = 'none';
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'payload';
+    input.value = JSON.stringify({action:'write', data});
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+
+    // 等待寫入完成
+    await new Promise(r => setTimeout(r, 2000));
+
+    document.body.removeChild(form);
+    document.body.removeChild(iframe);
+
+    const n = new Date();
+    document.getElementById('last-saved').textContent =
+      n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
+    localStorage.setItem('tbff3_data', JSON.stringify(data));
+    showToast('已同步至 Google Sheets ✓');
+  } catch(e) {
+    localStorage.setItem('tbff3_data', JSON.stringify(data));
     showToast('⚠ 同步失敗，已儲存至本機');
-  }finally{btn.textContent=orig;btn.disabled=false;}
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
 }
 
 async function loadSaved(){
