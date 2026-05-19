@@ -480,17 +480,14 @@ function renderTable(){
     tbody.appendChild(tr);
   });
   tbody.querySelectorAll('[contenteditable]').forEach(el=>{
-    el.addEventListener('blur',()=>{
-      const row=data.find(r=>r.id===parseInt(el.dataset.id));
-      if(row){
-        row[el.dataset.field]=el.innerText.trim();
-        if(el.dataset.field==='date' && currentView==='calendar') renderCalendar();
-      }
-    });
-  });
-  applyFilter();
-  updateStats();
-}
+el.addEventListener('blur',()=>{
+  const row=data.find(r=>r.id===parseInt(el.dataset.id));
+  if(row){
+    row[el.dataset.field]=el.innerText.trim();
+    isDirty = true; // ← 新增
+    if(el.dataset.field==='date' && currentView==='calendar') renderCalendar();
+  }
+});
 
 // ── FILTER（修正：狀態持久化，每次 render 後重套）──
 function filterCat(btn){
@@ -693,31 +690,32 @@ applyFont();
 
 // ── SYNC ──
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-function syncFields(){document.querySelectorAll('[contenteditable]').forEach(el=>{const row=data.find(r=>r.id===parseInt(el.dataset.id));if(row)row[el.dataset.field]=el.innerText.trim();});}
+let isDirty = false;
+  function syncFields(){document.querySelectorAll('[contenteditable]').forEach(el=>{const row=data.find(r=>r.id===parseInt(el.dataset.id));if(row)row[el.dataset.field]=el.innerText.trim();});}
 
 async function saveAll(){
   syncFields();
   const btn=document.querySelector('.btn-accent'), orig=btn.textContent;
   btn.textContent='同步中…'; btn.disabled=true;
   try{
-    await fetch(`${SCRIPT_URL}?action=clear`);
-    for(const row of data){
-      const encoded = encodeURIComponent(JSON.stringify(row));
-      await fetch(`${SCRIPT_URL}?action=appendrow&row=${encoded}`);
-    }
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify({action:'writeAll', data})
+    });
+    const result = await res.json();
+    if(result.status !== 'ok') throw new Error(result.msg||'failed');
+    isDirty = false; // ← 存成功才清旗標
     const n=new Date();
     const t=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
     document.getElementById('last-saved').textContent=t;
     localStorage.setItem('tbff3_data',JSON.stringify(data));
-    // 按鈕短暫顯示成功
-    btn.textContent='✓ 已同步';
-    btn.style.background='#059669';
+    btn.textContent='✓ 已同步'; btn.style.background='#059669';
     setTimeout(()=>{ btn.textContent=orig; btn.style.background=''; },2500);
     showToast('已同步至 Google Sheets ✓');
   }catch(e){
     localStorage.setItem('tbff3_data',JSON.stringify(data));
-    btn.textContent='⚠ 失敗';
-    btn.style.background='#dc2626';
+    btn.textContent='⚠ 失敗'; btn.style.background='#dc2626';
     setTimeout(()=>{ btn.textContent=orig; btn.style.background=''; },2500);
     showToast('⚠ 同步失敗，已儲存至本機');
   }finally{
@@ -806,7 +804,7 @@ document.addEventListener('focusin', e => {
 document.addEventListener('focusout', () => { setTimeout(()=>{ isEditing=false; },3000); });
 
 async function pollUpdate() {
-  if(isEditing) return;
+  if(isEditing || isDirty) return;
   try {
     const res = await fetch(SCRIPT_URL + '?action=read');
     const remote = await res.json();
