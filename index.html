@@ -771,7 +771,15 @@ async function loadSaved(){
   } catch {
     const local = localStorage.getItem('tbff3_data');
     if(local){
-      try { data = JSON.parse(local); } catch { data = JSON.parse(JSON.stringify(INITIAL_DATA)); }
+try { data = JSON.parse(local); } catch { data = JSON.parse(JSON.stringify(INITIAL_DATA)); }
+    } else {
+      data = JSON.parse(JSON.stringify(INITIAL_DATA));
+    }
+    nextId = Math.max(...data.map(r=>typeof r.id==='number'?r.id:0))+1;
+    document.getElementById('last-saved').textContent='離線模式（本機資料）';
+  }
+}
+
 function exportCSV(){
   syncFields();
   const h=['分類','日期','工作內容','執行單位','進度狀態','備註','補充說明'];
