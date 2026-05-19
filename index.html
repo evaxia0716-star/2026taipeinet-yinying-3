@@ -118,7 +118,19 @@ tbody tr.hidden { display:none; }
 tbody td { padding:0.95rem 0.9rem; vertical-align:top; }
 tbody td:first-child { padding-left:0; }
 
-.group-tag { display:inline-flex; align-items:center; padding:0.28rem 0.7rem; border-radius:5px; font-size:0.82rem; font-weight:700; white-space:nowrap; }
+.group-tag-select {
+  appearance: none;
+  padding: 0.28rem 0.7rem; border-radius: 5px;
+  font-size: 0.82rem; font-weight: 700; white-space: nowrap;
+  cursor: pointer; outline: none; border: 1.5px solid;
+  font-family: 'Noto Sans TC', sans-serif;
+  transition: all 0.15s;
+}
+.group-tag-select.tag-行政準備 { background:#dbeafe; color:#1e40af; border-color:#93c5fd; }
+.group-tag-select.tag-影片徵選 { background:#ede9fe; color:#5b21b6; border-color:#c4b5fd; }
+.group-tag-select.tag-頒獎典禮 { background:#fef3c7; color:#92400e; border-color:#fcd34d; }
+.group-tag-select.tag-市民大聲說 { background:#d1fae5; color:#065f46; border-color:#6ee7b7; }
+.group-tag-select.tag-人才培訓 { background:#fce7f3; color:#9d174d; border-color:#f9a8d4; }
 .tag-行政準備 { background:#dbeafe; color:#1e40af; border:1.5px solid #93c5fd; }
 .tag-影片徵選 { background:#ede9fe; color:#5b21b6; border:1.5px solid #c4b5fd; }
 .tag-頒獎典禮 { background:#fef3c7; color:#92400e; border:1.5px solid #fcd34d; }
@@ -143,14 +155,18 @@ tbody td:first-child { padding-left:0; }
 .status-延遲 { color:#b71c1c; border-color:#ef9a9a; background:#ffebee; }
 
 .note-cell { display:flex; flex-direction:column; gap:0.5rem; }
-.note-original { font-size:0.9rem; color:var(--text-dim); line-height:1.55; }
+.note-original {
+  font-size:0.9rem; color:var(--text-dim); line-height:1.55;
+  word-break:break-word; white-space:pre-wrap;
+}
 .note-comment {
   background:#fffde7; border-left:3px solid #f59e0b; border-radius:0 6px 6px 0;
   padding:0.6rem 0.75rem; font-size:0.9rem; color:var(--text); line-height:1.6;
   min-height:3.5rem; outline:none; transition:all 0.15s; font-family:'Noto Sans TC',sans-serif;
+  word-break:break-word; white-space:pre-wrap; overflow-wrap:break-word;
 }
 .note-comment:focus { background:#fff9c4; border-left-color:#d97706; }
-.note-comment:empty::before { content:attr(data-placeholder); color:var(--text-muted); }
+.note-comment:empty::before { content:attr(data-placeholder); color:var(--text-muted); white-space:normal; }
 
 .row-actions { display:flex; opacity:0; transition:opacity 0.15s; }
 tr:hover .row-actions { opacity:1; }
@@ -434,8 +450,16 @@ function renderTable(){
     const tr=document.createElement('tr');
     tr.dataset.id=row.id; tr.dataset.cat=row.cat;
     tr.innerHTML=`
-      <td><span class="group-tag tag-${row.cat}">${row.cat}</span></td>
-      <td><div class="date-text">${row.date}</div></td>
+      <td>
+        <select class="group-tag-select tag-${row.cat}" data-id="${row.id}" onchange="changeCat(this,${row.id})">
+          <option value="行政準備" ${row.cat==='行政準備'?'selected':''}>行政準備</option>
+          <option value="影片徵選" ${row.cat==='影片徵選'?'selected':''}>影片徵選</option>
+          <option value="頒獎典禮" ${row.cat==='頒獎典禮'?'selected':''}>頒獎典禮</option>
+          <option value="市民大聲說" ${row.cat==='市民大聲說'?'selected':''}>市民大聲說</option>
+          <option value="人才培訓" ${row.cat==='人才培訓'?'selected':''}>人才培訓</option>
+        </select>
+      </td>
+      <td><div class="date-text task-editable" contenteditable="true" data-field="date" data-id="${row.id}">${row.date}</div></td>
       <td><div class="task-content">${badge}<span class="task-editable" contenteditable="true" data-field="task" data-id="${row.id}">${row.task}</span></div></td>
       <td><span class="task-editable unit-text" contenteditable="true" data-field="unit" data-id="${row.id}">${row.unit}</span></td>
       <td><select class="status-select status-${row.status}" data-id="${row.id}" onchange="changeStatus(this,${row.id})">
@@ -458,7 +482,10 @@ function renderTable(){
   tbody.querySelectorAll('[contenteditable]').forEach(el=>{
     el.addEventListener('blur',()=>{
       const row=data.find(r=>r.id===parseInt(el.dataset.id));
-      if(row) row[el.dataset.field]=el.innerText.trim();
+      if(row){
+        row[el.dataset.field]=el.innerText.trim();
+        if(el.dataset.field==='date' && currentView==='calendar') renderCalendar();
+      }
     });
   });
   applyFilter();
@@ -494,6 +521,16 @@ function applyFilter(){
   });
 }
 
+function changeCat(sel, id){
+  const row = data.find(r => r.id === id);
+  if(row){
+    row.cat = sel.value;
+    sel.className = `group-tag-select tag-${sel.value}`;
+    sel.closest('tr').dataset.cat = sel.value;
+    applyFilter();
+    if(currentView==='calendar') renderCalendar();
+  }
+}
 function changeStatus(sel,id){
   const row=data.find(r=>r.id===id);
   if(row){row.status=sel.value; sel.className=`status-select status-${sel.value}`; updateStats();}
@@ -688,39 +725,57 @@ async function saveAll(){
   }
 }
 
+// 解析從 Sheets 讀回的單筆資料（處理日期時間戳 + 單引號前綴）
+function parseSheetRow(r) {
+  // 清除 Apps Script 加的單引號前綴
+  const clean = v => (typeof v === 'string' && v.startsWith("'")) ? v.slice(1) : String(v||'');
+  let date = clean(r.date);
+  if(date.includes('T') || date.includes('-')){
+    const d = new Date(date);
+    if(!isNaN(d)) date = (d.getMonth()+1)+'/'+(d.getDate());
+  } else if(!isNaN(Number(r.date)) && Number(r.date) > 1000){
+    const d = new Date((Number(r.date)-25569)*86400*1000);
+    date = (d.getUTCMonth()+1)+'/'+(d.getUTCDate());
+  }
+  return {
+    id: parseInt(clean(r.id)) || Math.floor(Math.random()*9000+1000),
+    cat: clean(r.cat)||'行政準備',
+    date,
+    task: clean(r.task)||'',
+    unit: clean(r.unit)||'',
+    status: clean(r.status)||'待開始',
+    note: clean(r.note)||'',
+    badge: clean(r.badge)||'',
+    comment: clean(r.comment)||'',
+  };
+}
+
 async function loadSaved(){
-  document.getElementById('table-body').innerHTML='<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text-muted)">從 Google Sheets 載入中…</td></tr>';
+  document.getElementById('table-body').innerHTML=
+    '<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text-muted)">載入中…</td></tr>';
   try{
-    const res=await fetch(SCRIPT_URL+'?action=read');
-    const remote=await res.json();
-    if(Array.isArray(remote)&&remote.length>0){
-      data=remote.map(r=>{
-        // Google Sheets 會把日期自動轉成時間戳記，這裡轉回 M/D 格式
-        let date = r.date||'';
-        if(date instanceof Date || (typeof date==='string' && date.includes('T'))){
-          const d = new Date(date);
-          date = (d.getMonth()+1)+'/'+(d.getDate());
-        } else if(typeof date==='number'){
-          // Sheets 有時回傳數字序列號
-          const d = new Date((date-25569)*86400*1000);
-          date = (d.getUTCMonth()+1)+'/'+(d.getUTCDate());
-        }
-        return {
-          id:parseInt(r.id)||Math.random(),
-          cat:r.cat||'', date, task:r.task||'',
-          unit:r.unit||'', status:r.status||'待開始',
-          note:r.note||'', badge:r.badge||'', comment:r.comment||''
-        };
-      });
-      nextId=Math.max(...data.map(r=>typeof r.id==='number'?r.id:0))+1;
+    const res = await fetch(SCRIPT_URL+'?action=read');
+    const remote = await res.json();
+    if(Array.isArray(remote) && remote.length > 0){
+      data = remote.map(parseSheetRow);
+      nextId = Math.max(...data.map(r=>typeof r.id==='number'?r.id:0))+1;
       document.getElementById('last-saved').textContent='已從雲端載入';
-    }else{data=JSON.parse(JSON.stringify(INITIAL_DATA));await saveAll();}
-  }catch{
-    const local=localStorage.getItem('tbff3_data');
-    data=local?JSON.parse(local):JSON.parse(JSON.stringify(INITIAL_DATA));
-    if(data.length)nextId=Math.max(...data.map(r=>r.id||0))+1;
+    } else {
+      // Sheets 是空的，用初始資料
+      data = JSON.parse(JSON.stringify(INITIAL_DATA));
+      nextId = 100;
+      document.getElementById('last-saved').textContent='（初始資料）';
+    }
+  } catch {
+    // 網路失敗，讀本機備份
+    const local = localStorage.getItem('tbff3_data');
+    if(local){
+      try { data = JSON.parse(local); } catch { data = JSON.parse(JSON.stringify(INITIAL_DATA)); }
+    } else {
+      data = JSON.parse(JSON.stringify(INITIAL_DATA));
+    }
+    if(data.length) nextId = Math.max(...data.map(r=>r.id||0))+1;
     document.getElementById('last-saved').textContent='（離線備份）';
-    showToast('⚠ 無法連線，顯示本機備份');
   }
 }
 
@@ -736,21 +791,18 @@ function exportCSV(){
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
+  setTimeout(()=>t.classList.remove('show'),2800);
 }
 
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveAll();}});
 
-// ── 自動輪詢（每 30 秒從 Sheets 讀最新，有人更新自動同步）──
+// ── 靜默輪詢（每 60 秒背景讀取，無彈跳通知，僅更新狀態列）──
 let isEditing = false;
-
 document.addEventListener('focusin', e => {
   if(e.target.isContentEditable || ['SELECT','TEXTAREA','INPUT'].includes(e.target.tagName))
     isEditing = true;
 });
-document.addEventListener('focusout', () => {
-  setTimeout(() => { isEditing = false; }, 3000);
-});
+document.addEventListener('focusout', () => { setTimeout(()=>{ isEditing=false; },3000); });
 
 async function pollUpdate() {
   if(isEditing) return;
@@ -758,26 +810,23 @@ async function pollUpdate() {
     const res = await fetch(SCRIPT_URL + '?action=read');
     const remote = await res.json();
     if(!Array.isArray(remote) || remote.length === 0) return;
-    const newData = remote.map(r => {
-      let date = r.date||'';
-      if(typeof date==='string' && date.includes('T')){ const d=new Date(date); date=(d.getMonth()+1)+'/'+(d.getDate()); }
-      else if(typeof date==='number'){ const d=new Date((date-25569)*86400*1000); date=(d.getUTCMonth()+1)+'/'+(d.getUTCDate()); }
-      return {id:parseInt(r.id)||Math.random(),cat:r.cat||'',date,task:r.task||'',unit:r.unit||'',status:r.status||'待開始',note:r.note||'',badge:r.badge||'',comment:r.comment||''};
-    });
-    if(JSON.stringify(newData) !== JSON.stringify(data)) {
+    const newData = remote.map(parseSheetRow);
+    // 有變化才更新，且不彈 Toast，只更新狀態列文字
+    if(JSON.stringify(newData) !== JSON.stringify(data)){
       data = newData;
       renderTable();
       if(currentView==='calendar') renderCalendar();
-      document.getElementById('last-saved').textContent = '剛剛已同步';
-      showToast('🔄 偵測到更新，已自動同步');
+      const n = new Date();
+      document.getElementById('last-saved').textContent =
+        '自動同步 '+n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
     }
-  } catch { /* 網路失敗靜默跳過 */ }
+  } catch { /* 靜默跳過 */ }
 }
 
 (async()=>{
   await loadSaved();
   renderTable();
-  setInterval(pollUpdate, 30000); // 每 30 秒自動讀取
+  setInterval(pollUpdate, 30000); // 每 30 秒靜默讀取
 })();
 </script>
 </body>
