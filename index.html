@@ -756,29 +756,22 @@ async function loadSaved(){
   try{
     const res = await fetch(SCRIPT_URL+'?action=read');
     const remote = await res.json();
-    if(Array.isArray(remote) && remote.length > 0){
+    if(Array.isArray(remote) && remote.length >= 10){
+      // Sheets 有足夠資料，正常載入
       data = remote.map(parseSheetRow);
       nextId = Math.max(...data.map(r=>typeof r.id==='number'?r.id:0))+1;
       document.getElementById('last-saved').textContent='已從雲端載入';
     } else {
-      // Sheets 是空的，用初始資料
+      // Sheets 空的或資料不完整（少於10筆），載入初始資料
       data = JSON.parse(JSON.stringify(INITIAL_DATA));
       nextId = 100;
-      document.getElementById('last-saved').textContent='（初始資料）';
+      document.getElementById('last-saved').textContent='請按「儲存」寫入雲端';
+      showToast('⚠ 雲端資料不完整，請按「儲存」');
     }
   } catch {
-    // 網路失敗，讀本機備份
     const local = localStorage.getItem('tbff3_data');
     if(local){
       try { data = JSON.parse(local); } catch { data = JSON.parse(JSON.stringify(INITIAL_DATA)); }
-    } else {
-      data = JSON.parse(JSON.stringify(INITIAL_DATA));
-    }
-    if(data.length) nextId = Math.max(...data.map(r=>r.id||0))+1;
-    document.getElementById('last-saved').textContent='（離線備份）';
-  }
-}
-
 function exportCSV(){
   syncFields();
   const h=['分類','日期','工作內容','執行單位','進度狀態','備註','補充說明'];
