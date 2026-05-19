@@ -480,16 +480,20 @@ function renderTable(){
     tbody.appendChild(tr);
   });
   tbody.querySelectorAll('[contenteditable]').forEach(el=>{
-el.addEventListener('blur',()=>{
-  const row=data.find(r=>r.id===parseInt(el.dataset.id));
-  if(row){
-    row[el.dataset.field]=el.innerText.trim();
-    isDirty = true; // ← 新增
-    if(el.dataset.field==='date' && currentView==='calendar') renderCalendar();
-  }
-});
+    el.addEventListener('blur',()=>{
+      const row=data.find(r=>r.id===parseInt(el.dataset.id));
+      if(row){
+        row[el.dataset.field]=el.innerText.trim();
+        isDirty=true;
+        if(el.dataset.field==='date' && currentView==='calendar') renderCalendar();
+      }
+    });
+  });
+  applyFilter();
+  updateStats();
+}
 
-// ── FILTER（修正：狀態持久化，每次 render 後重套）──
+// ── FILTER ──
 function filterCat(btn){
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
@@ -519,18 +523,24 @@ function applyFilter(){
 }
 
 function changeCat(sel, id){
-  const row = data.find(r => r.id === id);
+  const row=data.find(r=>r.id===id);
   if(row){
-    row.cat = sel.value;
-    sel.className = `group-tag-select tag-${sel.value}`;
-    sel.closest('tr').dataset.cat = sel.value;
+    row.cat=sel.value;
+    isDirty=true;
+    sel.className=`group-tag-select tag-${sel.value}`;
+    sel.closest('tr').dataset.cat=sel.value;
     applyFilter();
     if(currentView==='calendar') renderCalendar();
   }
 }
 function changeStatus(sel,id){
   const row=data.find(r=>r.id===id);
-  if(row){row.status=sel.value; sel.className=`status-select status-${sel.value}`; updateStats();}
+  if(row){
+    row.status=sel.value;
+    isDirty=true;
+    sel.className=`status-select status-${sel.value}`;
+    updateStats();
+  }
 }
 function updateStats(){
   const c={'待開始':0,'進行中':0,'已完成':0,'待確認':0,'延遲':0};
@@ -544,13 +554,15 @@ function updateStats(){
 }
 function deleteRow(id){
   if(!confirm('確定刪除此任務？'))return;
-  data=data.filter(r=>r.id!==id); renderTable(); showToast('已刪除任務');
+  data=data.filter(r=>r.id!==id);
+  isDirty=true;
+  renderTable();
+  showToast('已刪除任務');
 }
 
-// ── EDIT MODAL（編輯現有任務）──
+// ── EDIT MODAL ──
 function openEditModal(id){
   const row=data.find(r=>r.id===id); if(!row)return;
-  // 重用新增 Modal，但改成編輯模式
   document.getElementById('modal-title').textContent='編輯任務';
   document.getElementById('m-cat').value=row.cat;
   document.getElementById('m-date').value=row.date;
@@ -572,6 +584,7 @@ function submitEditModal(id){
   row.note=document.getElementById('m-note').value.trim();
   row.comment=document.getElementById('m-comment').value.trim();
   if(!row.date||!row.task){alert('請填寫日期與工作內容');return;}
+  isDirty=true;
   data.sort((a,b)=>{const p=s=>parseInt(s.split(/[\/\-–]/)[0]||0)*100+parseInt((s.split(/[\/\-–]/)[1]||0));return p(a.date)-p(b.date);});
   closeModal();
   renderTable();
@@ -601,6 +614,7 @@ function submitModal(){
     unit:document.getElementById('m-unit').value.trim(),
     status:document.getElementById('m-status').value,
     note:document.getElementById('m-note').value.trim(),badge:'',comment:''});
+  isDirty=true;
   data.sort((a,b)=>{const p=s=>parseInt(s.split(/[\/\-–]/)[0]||0)*100+parseInt((s.split(/[\/\-–]/)[1]||0));return p(a.date)-p(b.date);});
   closeModal(); renderTable();
   if(currentView==='calendar')renderCalendar();
@@ -625,6 +639,7 @@ function saveTaskModal(){
   const row=data.find(r=>r.id===taskModalId); if(!row)return;
   row.status=document.getElementById('tm-status').value;
   row.comment=document.getElementById('tm-comment').value.trim();
+  isDirty=true;
   closeTaskModal(); renderTable();
   if(currentView==='calendar')renderCalendar();
   showToast('已更新，記得按「儲存」同步');
@@ -662,7 +677,6 @@ function renderCalendar(){
   const today=new Date();
   const byDay={};
   data.forEach(r=>{
-    // 套用篩選器
     if(currentFilter!=='全部' && r.cat!==currentFilter) return;
     if(currentSearch && !r.task.toLowerCase().includes(currentSearch) && !r.cat.toLowerCase().includes(currentSearch)) return;
     const d=parseDateFirst(r.date);
@@ -690,22 +704,28 @@ applyFont();
 
 // ── SYNC ──
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-let isDirty = false;
-  function syncFields(){document.querySelectorAll('[contenteditable]').forEach(el=>{const row=data.find(r=>r.id===parseInt(el.dataset.id));if(row)row[el.dataset.field]=el.innerText.trim();});}
+let isDirty=false;
+
+function syncFields(){
+  document.querySelectorAll('[contenteditable]').forEach(el=>{
+    const row=data.find(r=>r.id===parseInt(el.dataset.id));
+    if(row) row[el.dataset.field]=el.innerText.trim();
+  });
+}
 
 async function saveAll(){
   syncFields();
   const btn=document.querySelector('.btn-accent'), orig=btn.textContent;
   btn.textContent='同步中…'; btn.disabled=true;
   try{
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'text/plain'},
-      body: JSON.stringify({action:'writeAll', data})
+    const res=await fetch(SCRIPT_URL,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'writeAll',data})
     });
-    const result = await res.json();
-    if(result.status !== 'ok') throw new Error(result.msg||'failed');
-    isDirty = false; // ← 存成功才清旗標
+    const result=await res.json();
+    if(result.status!=='ok') throw new Error(result.msg||'failed');
+    isDirty=false;
     const n=new Date();
     const t=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
     document.getElementById('last-saved').textContent=t;
@@ -723,28 +743,27 @@ async function saveAll(){
   }
 }
 
-// 解析從 Sheets 讀回的單筆資料（處理日期時間戳 + 單引號前綴）
-function parseSheetRow(r) {
-  // 清除 Apps Script 加的單引號前綴
-  const clean = v => (typeof v === 'string' && v.startsWith("'")) ? v.slice(1) : String(v||'');
-  let date = clean(r.date);
-  if(date.includes('T') || date.includes('-')){
-    const d = new Date(date);
-    if(!isNaN(d)) date = (d.getMonth()+1)+'/'+(d.getDate());
-  } else if(!isNaN(Number(r.date)) && Number(r.date) > 1000){
-    const d = new Date((Number(r.date)-25569)*86400*1000);
-    date = (d.getUTCMonth()+1)+'/'+(d.getUTCDate());
+// ── 解析 Sheets 回傳資料 ──
+function parseSheetRow(r){
+  const clean=v=>(typeof v==='string'&&v.startsWith("'"))?v.slice(1):String(v||'');
+  let date=clean(r.date);
+  if(date.includes('T')||date.includes('-')){
+    const d=new Date(date);
+    if(!isNaN(d)) date=(d.getMonth()+1)+'/'+(d.getDate());
+  } else if(!isNaN(Number(r.date))&&Number(r.date)>1000){
+    const d=new Date((Number(r.date)-25569)*86400*1000);
+    date=(d.getUTCMonth()+1)+'/'+(d.getUTCDate());
   }
-  return {
-    id: parseInt(clean(r.id)) || Math.floor(Math.random()*9000+1000),
-    cat: clean(r.cat)||'行政準備',
+  return{
+    id:parseInt(clean(r.id))||Math.floor(Math.random()*9000+1000),
+    cat:clean(r.cat)||'行政準備',
     date,
-    task: clean(r.task)||'',
-    unit: clean(r.unit)||'',
-    status: clean(r.status)||'待開始',
-    note: clean(r.note)||'',
-    badge: clean(r.badge)||'',
-    comment: clean(r.comment)||'',
+    task:clean(r.task)||'',
+    unit:clean(r.unit)||'',
+    status:clean(r.status)||'待開始',
+    note:clean(r.note)||'',
+    badge:clean(r.badge)||'',
+    comment:clean(r.comment)||'',
   };
 }
 
@@ -752,28 +771,26 @@ async function loadSaved(){
   document.getElementById('table-body').innerHTML=
     '<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text-muted)">載入中…</td></tr>';
   try{
-    const res = await fetch(SCRIPT_URL+'?action=read');
-    const remote = await res.json();
-    if(Array.isArray(remote) && remote.length >= 10){
-      // Sheets 有足夠資料，正常載入
-      data = remote.map(parseSheetRow);
-      nextId = Math.max(...data.map(r=>typeof r.id==='number'?r.id:0))+1;
+    const res=await fetch(SCRIPT_URL+'?action=read');
+    const remote=await res.json();
+    if(Array.isArray(remote)&&remote.length>=10){
+      data=remote.map(parseSheetRow);
+      nextId=Math.max(...data.map(r=>typeof r.id==='number'?r.id:0))+1;
       document.getElementById('last-saved').textContent='已從雲端載入';
     } else {
-      // Sheets 空的或資料不完整（少於10筆），載入初始資料
-      data = JSON.parse(JSON.stringify(INITIAL_DATA));
-      nextId = 100;
+      data=JSON.parse(JSON.stringify(INITIAL_DATA));
+      nextId=100;
       document.getElementById('last-saved').textContent='請按「儲存」寫入雲端';
       showToast('⚠ 雲端資料不完整，請按「儲存」');
     }
   } catch {
-    const local = localStorage.getItem('tbff3_data');
+    const local=localStorage.getItem('tbff3_data');
     if(local){
-try { data = JSON.parse(local); } catch { data = JSON.parse(JSON.stringify(INITIAL_DATA)); }
+      try{ data=JSON.parse(local); } catch{ data=JSON.parse(JSON.stringify(INITIAL_DATA)); }
     } else {
-      data = JSON.parse(JSON.stringify(INITIAL_DATA));
+      data=JSON.parse(JSON.stringify(INITIAL_DATA));
     }
-    nextId = Math.max(...data.map(r=>typeof r.id==='number'?r.id:0))+1;
+    nextId=Math.max(...data.map(r=>typeof r.id==='number'?r.id:0))+1;
     document.getElementById('last-saved').textContent='離線模式（本機資料）';
   }
 }
@@ -795,37 +812,36 @@ function showToast(msg){
 
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveAll();}});
 
-// ── 靜默輪詢（每 60 秒背景讀取，無彈跳通知，僅更新狀態列）──
-let isEditing = false;
-document.addEventListener('focusin', e => {
-  if(e.target.isContentEditable || ['SELECT','TEXTAREA','INPUT'].includes(e.target.tagName))
-    isEditing = true;
+// ── 靜默輪詢（每 30 秒背景讀取）──
+let isEditing=false;
+document.addEventListener('focusin',e=>{
+  if(e.target.isContentEditable||['SELECT','TEXTAREA','INPUT'].includes(e.target.tagName))
+    isEditing=true;
 });
-document.addEventListener('focusout', () => { setTimeout(()=>{ isEditing=false; },3000); });
+document.addEventListener('focusout',()=>{ setTimeout(()=>{ isEditing=false; },3000); });
 
-async function pollUpdate() {
-  if(isEditing || isDirty) return;
-  try {
-    const res = await fetch(SCRIPT_URL + '?action=read');
-    const remote = await res.json();
-    if(!Array.isArray(remote) || remote.length === 0) return;
-    const newData = remote.map(parseSheetRow);
-    // 有變化才更新，且不彈 Toast，只更新狀態列文字
-    if(JSON.stringify(newData) !== JSON.stringify(data)){
-      data = newData;
+async function pollUpdate(){
+  if(isEditing||isDirty) return;
+  try{
+    const res=await fetch(SCRIPT_URL+'?action=read');
+    const remote=await res.json();
+    if(!Array.isArray(remote)||remote.length===0) return;
+    const newData=remote.map(parseSheetRow);
+    if(JSON.stringify(newData)!==JSON.stringify(data)){
+      data=newData;
       renderTable();
       if(currentView==='calendar') renderCalendar();
-      const n = new Date();
-      document.getElementById('last-saved').textContent =
+      const n=new Date();
+      document.getElementById('last-saved').textContent=
         '自動同步 '+n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
     }
-  } catch { /* 靜默跳過 */ }
+  } catch{ /* 靜默跳過 */ }
 }
 
 (async()=>{
   await loadSaved();
   renderTable();
-  setInterval(pollUpdate, 30000); // 每 30 秒靜默讀取
+  setInterval(pollUpdate,30000);
 })();
 </script>
 </body>
