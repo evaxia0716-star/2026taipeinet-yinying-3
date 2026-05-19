@@ -773,7 +773,7 @@ async function loadSaved(){
   try{
     const res=await fetch(SCRIPT_URL+'?action=read');
     const remote=await res.json();
-    if(Array.isArray(remote)&&remote.length>=10){
+    if(Array.isArray(remote)&&remote.length>0){
       data=remote.map(parseSheetRow);
       nextId=Math.max(...data.map(r=>typeof r.id==='number'?r.id:0))+1;
       document.getElementById('last-saved').textContent='已從雲端載入';
