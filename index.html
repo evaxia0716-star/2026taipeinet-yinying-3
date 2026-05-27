@@ -634,7 +634,6 @@ function submitModal(){
   if(currentView==='calendar')renderCalendar();
   showToast('已新增任務 ✓');
 }
-document.getElementById('add-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
 // ── TASK QUICK EDIT ──
 let taskModalId=null;
@@ -658,7 +657,7 @@ function saveTaskModal(){
   if(currentView==='calendar')renderCalendar();
   showToast('已更新，記得按「儲存」同步');
 }
-document.getElementById('task-modal').addEventListener('click',function(e){if(e.target===this)closeTaskModal();});
+
 
 // ── VIEW ──
 function switchView(view){
