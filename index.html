@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北有影 3｜2026 專案進度追蹤</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
   --bg: #f0faf8;
@@ -48,6 +49,29 @@ header {
 .btn-accent:hover { background:#0f766e; border-color:#0f766e; }
 .font-btn { padding:0.35rem 0.65rem; font-size:0.82rem; font-weight:700; }
 
+/* USER CHIP */
+.user-chip {
+  display:flex; align-items:center; gap:0.5rem;
+  background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3);
+  border-radius:20px; padding:0.3rem 0.85rem 0.3rem 0.4rem;
+  cursor:pointer; transition:all 0.15s;
+}
+.user-chip:hover { background:rgba(255,255,255,0.25); }
+.user-avatar {
+  width:26px; height:26px; border-radius:50%;
+  background:#5eead4; display:flex; align-items:center; justify-content:center;
+  font-size:0.72rem; font-weight:700; color:#134e4a; flex-shrink:0;
+}
+.user-avatar img { width:26px; height:26px; border-radius:50%; object-fit:cover; }
+.user-name { font-size:0.85rem; color:#e0fdf4; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bell-btn { position:relative; }
+.bell-badge {
+  position:absolute; top:-4px; right:-4px; background:#ef4444;
+  color:#fff; font-size:0.65rem; font-weight:700;
+  width:16px; height:16px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+}
+
 /* STATS */
 .stats-bar { background:#fff; border-bottom:1px solid var(--border); padding:0.9rem 2rem; display:flex; align-items:center; gap:2.2rem; overflow-x:auto; }
 .stat-item { display:flex; align-items:center; gap:0.5rem; white-space:nowrap; }
@@ -77,6 +101,7 @@ header {
 .filter-btn[data-cat="頒獎典禮"].active { background:#b45309; border-color:#b45309; }
 .filter-btn[data-cat="市民大聲說"].active { background:#059669; border-color:#059669; }
 .filter-btn[data-cat="人才培訓"].active { background:#be185d; border-color:#be185d; }
+.filter-btn[data-cat="我的任務"].active { background:#134e4a; border-color:#134e4a; }
 
 .toolbar-right { margin-left:auto; display:flex; align-items:center; gap:0.6rem; }
 .add-task-btn {
@@ -109,8 +134,8 @@ thead th {
   position:sticky; top:69px; background:var(--bg); z-index:10;
 }
 thead th:first-child { padding-left:0; }
-.col-group { width:100px; } .col-date { width:120px; } .col-task { min-width:300px; }
-.col-unit { width:180px; } .col-status { width:128px; } .col-note { min-width:260px; } .col-actions { width:50px; }
+.col-group { width:100px; } .col-date { width:120px; } .col-task { min-width:280px; }
+.col-unit { width:160px; } .col-assignee { width:150px; } .col-status { width:128px; } .col-note { min-width:240px; } .col-actions { width:50px; }
 
 tbody tr { border-bottom:1px solid var(--border); transition:background 0.1s; }
 tbody tr:hover { background:#f0fdf8; }
@@ -147,6 +172,12 @@ tbody td:first-child { padding-left:0; }
 .task-editable:focus { background:#f0fdf8; border-radius:4px; outline:1.5px solid var(--accent); padding:0.2rem 0.4rem; margin:-0.2rem -0.4rem; }
 .unit-text { font-size:0.9rem; color:var(--text-dim); }
 
+.assignee-cell { font-size:0.82rem; color:var(--text-dim); }
+.assignee-self { color:#0d9488; font-weight:700; }
+.assignee-input { background:transparent; border:none; border-bottom:1px dashed var(--border2); width:100%; font-family:'Noto Sans TC',sans-serif; font-size:0.82rem; color:var(--text-dim); outline:none; padding:0.1rem 0; }
+.assignee-input:focus { border-bottom-color:var(--accent); background:#f0fdf8; border-radius:4px 4px 0 0; padding:0.1rem 0.3rem; }
+.assignee-input::placeholder { color:var(--text-muted); }
+
 .status-select { appearance:none; background:transparent; border:1.5px solid; border-radius:20px; padding:0.3rem 0.75rem; font-family:'Noto Sans TC',sans-serif; font-size:0.88rem; font-weight:600; cursor:pointer; outline:none; transition:all 0.15s; }
 .status-待開始 { color:#455a64; border-color:#90a4ae; background:#f5f7f8; }
 .status-進行中 { color:#01579b; border-color:#29b6f6; background:#e1f5fe; }
@@ -155,10 +186,7 @@ tbody td:first-child { padding-left:0; }
 .status-延遲 { color:#b71c1c; border-color:#ef9a9a; background:#ffebee; }
 
 .note-cell { display:flex; flex-direction:column; gap:0.5rem; }
-.note-original {
-  font-size:0.9rem; color:var(--text-dim); line-height:1.55;
-  word-break:break-word; white-space:pre-wrap;
-}
+.note-original { font-size:0.9rem; color:var(--text-dim); line-height:1.55; word-break:break-word; white-space:pre-wrap; }
 .note-comment {
   background:#fffde7; border-left:3px solid #f59e0b; border-radius:0 6px 6px 0;
   padding:0.6rem 0.75rem; font-size:0.9rem; color:var(--text); line-height:1.6;
@@ -211,6 +239,28 @@ tr:hover .row-actions { opacity:1; }
 .modal-actions { display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem; }
 .btn-cancel { background:#fff; color:var(--text-dim); border:1.5px solid var(--border2); }
 .btn-cancel:hover { border-color:var(--accent); color:var(--accent); background:#f0faf8; }
+.assignee-row { display:flex; gap:0.5rem; align-items:flex-end; }
+.assignee-row .form-input { flex:1; }
+.assign-me-btn { padding:0.55rem 0.85rem; border-radius:7px; border:1.5px solid var(--border2); background:#fff; color:var(--text-dim); font-family:'Noto Sans TC',sans-serif; font-size:0.82rem; cursor:pointer; white-space:nowrap; transition:all 0.15s; }
+.assign-me-btn:hover { border-color:var(--accent); color:var(--accent); background:#f0faf8; }
+
+/* REMINDER MODAL */
+.reminder-modal { max-height:88vh; overflow-y:auto; }
+.reminder-header { display:flex; align-items:center; gap:1rem; margin-bottom:1.4rem; padding-bottom:1.1rem; border-bottom:1.5px solid var(--border); }
+.reminder-emoji { font-size:2.2rem; line-height:1; }
+.reminder-header h3 { font-size:1.1rem; color:var(--text); margin-bottom:0.2rem; }
+.reminder-header p { font-size:0.9rem; color:var(--text-dim); }
+.reminder-item { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:0.9rem 1rem; margin-bottom:0.75rem; }
+.reminder-task { font-size:0.95rem; color:var(--text); font-weight:500; margin:0.35rem 0 0.3rem; line-height:1.5; }
+.reminder-meta { font-size:0.82rem; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+.reminder-urgent { border-left:3px solid #ef4444; }
+.reminder-soon { border-left:3px solid #f59e0b; }
+
+/* EMAIL PROMPT */
+.email-prompt-inner { text-align:center; }
+.email-prompt-inner .icon { font-size:2.5rem; margin-bottom:0.75rem; }
+.email-prompt-inner h3 { margin-bottom:0.4rem; }
+.email-prompt-inner p { font-size:0.9rem; color:var(--text-dim); margin-bottom:1.3rem; }
 
 /* TOAST */
 .toast { position:fixed; bottom:2rem; right:2rem; background:#134e4a; color:#fff; border-radius:8px; padding:0.85rem 1.4rem; font-size:0.92rem; z-index:2000; transform:translateX(130%); transition:transform 0.25s; box-shadow:0 4px 16px rgba(13,74,70,0.3); }
@@ -241,6 +291,9 @@ tr:hover .row-actions { opacity:1; }
     <button class="btn" onclick="exportCSV()">⬇ 匯出</button>
     <button class="btn" onclick="window.print()">⎙ 列印</button>
     <button class="btn btn-accent" onclick="saveAll()">✓ 儲存</button>
+    <div id="user-area">
+      <button class="btn" onclick="showEmailPrompt()" style="gap:0.35rem;">👤 登入</button>
+    </div>
   </div>
 </header>
 
@@ -267,6 +320,7 @@ tr:hover .row-actions { opacity:1; }
   <button class="filter-btn" data-cat="頒獎典禮" onclick="filterCat(this)">頒獎典禮</button>
   <button class="filter-btn" data-cat="市民大聲說" onclick="filterCat(this)">市民大聲說</button>
   <button class="filter-btn" data-cat="人才培訓" onclick="filterCat(this)">人才培訓</button>
+  <button class="filter-btn" data-cat="我的任務" onclick="filterMyTasks(this)">👤 我的任務</button>
   <div class="toolbar-right">
     <button class="add-task-btn" onclick="openAddModal()">＋ 新增任務</button>
     <div class="view-toggle">
@@ -284,6 +338,7 @@ tr:hover .row-actions { opacity:1; }
   <table><thead><tr>
     <th class="col-group">分類</th><th class="col-date">日期</th>
     <th class="col-task">工作內容</th><th class="col-unit">執行單位</th>
+    <th class="col-assignee">負責人</th>
     <th class="col-status">進度狀態</th><th class="col-note">備註 ／ 補充說明</th><th class="col-actions"></th>
   </tr></thead><tbody id="table-body"></tbody></table>
 </div>
@@ -326,7 +381,7 @@ tr:hover .row-actions { opacity:1; }
   </div>
 </div>
 
-<!-- 新增任務 -->
+<!-- 新增／編輯任務 -->
 <div class="modal-overlay" id="add-modal">
   <div class="modal">
     <h3 id="modal-title">新增任務</h3>
@@ -359,6 +414,13 @@ tr:hover .row-actions { opacity:1; }
       </div>
     </div>
     <div class="form-group">
+      <label class="form-label">負責人 Email</label>
+      <div class="assignee-row">
+        <input class="form-input" type="email" id="m-assignee" placeholder="負責人的 Gmail 信箱">
+        <button class="assign-me-btn" type="button" onclick="assignToMe()">指定給我</button>
+      </div>
+    </div>
+    <div class="form-group">
       <label class="form-label">標籤</label>
       <select class="form-select" id="m-badge">
         <option value="">無</option>
@@ -382,59 +444,222 @@ tr:hover .row-actions { opacity:1; }
   </div>
 </div>
 
+<!-- 到期提醒彈窗 -->
+<div class="modal-overlay" id="reminder-overlay">
+  <div class="modal reminder-modal">
+    <div class="reminder-header">
+      <div class="reminder-emoji">⏰</div>
+      <div>
+        <h3>Hi，<span id="reminder-name"></span>！</h3>
+        <p>你有 <strong id="reminder-count"></strong> 項任務即將到期，請注意安排</p>
+      </div>
+    </div>
+    <div id="reminder-list"></div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeReminder()">稍後再說</button>
+      <button class="btn btn-accent" onclick="goMyTasks()">查看我的任務</button>
+    </div>
+  </div>
+</div>
+
+<!-- Email 登入提示 -->
+<div class="modal-overlay" id="email-prompt-overlay">
+  <div class="modal">
+    <div class="email-prompt-inner">
+      <div class="icon">👤</div>
+      <h3>請輸入你的 Gmail 信箱</h3>
+      <p>登入後可查看分配給你的任務、啟用「我的任務」篩選，並自動顯示到期提醒</p>
+    </div>
+    <div class="form-group">
+      <input class="form-input" type="email" id="email-input" placeholder="yourname@gmail.com"
+        onkeydown="if(event.key==='Enter')submitEmailPrompt()">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeEmailPrompt()">跳過</button>
+      <button class="btn btn-accent" onclick="submitEmailPrompt()">確認登入</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
+// ── USER AUTH ──
+let currentUser = null;
+
+function initUser() {
+  const stored = localStorage.getItem('tbff3_user');
+  if (stored) {
+    try {
+      currentUser = JSON.parse(stored);
+      updateUserUI();
+      return true;
+    } catch {}
+  }
+  return false;
+}
+
+function setUser(email, name, picture) {
+  currentUser = { email, name: name || email.split('@')[0], picture: picture || '' };
+  localStorage.setItem('tbff3_user', JSON.stringify(currentUser));
+  updateUserUI();
+  setTimeout(checkReminders, 900);
+  showToast('👤 已登入：' + currentUser.name);
+}
+
+function updateUserUI() {
+  if (!currentUser) return;
+  const initials = currentUser.name.slice(0, 2).toUpperCase();
+  const avatar = currentUser.picture
+    ? `<img src="${currentUser.picture}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">`
+    : `<div class="user-avatar">${initials}</div>`;
+  document.getElementById('user-area').innerHTML =
+    `<div class="user-chip" onclick="confirmLogout()" title="點此登出">
+      ${avatar}
+      <span class="user-name">${currentUser.name}</span>
+    </div>`;
+}
+
+function showEmailPrompt() {
+  document.getElementById('email-prompt-overlay').classList.add('active');
+  setTimeout(() => document.getElementById('email-input').focus(), 100);
+}
+
+function closeEmailPrompt() {
+  document.getElementById('email-prompt-overlay').classList.remove('active');
+}
+
+function submitEmailPrompt() {
+  const email = document.getElementById('email-input').value.trim();
+  if (!email || !email.includes('@')) { alert('請輸入有效的 email 信箱'); return; }
+  closeEmailPrompt();
+  setUser(email, email.split('@')[0], '');
+}
+
+function confirmLogout() {
+  if (!confirm('確定要登出嗎？')) return;
+  currentUser = null;
+  localStorage.removeItem('tbff3_user');
+  document.getElementById('user-area').innerHTML =
+    '<button class="btn" onclick="showEmailPrompt()" style="gap:0.35rem;">👤 登入</button>';
+  if (currentFilter === '我的任務') {
+    currentFilter = '全部';
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-cat="全部"]').classList.add('active');
+    applyFilter();
+  }
+  showToast('已登出');
+}
+
+function assignToMe() {
+  if (!currentUser) { showEmailPrompt(); return; }
+  document.getElementById('m-assignee').value = currentUser.email;
+}
+
+// ── REMINDER ──
+function checkReminders() {
+  if (!currentUser) return;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const in3 = new Date(today);
+  in3.setDate(today.getDate() + 3);
+
+  const myTasks = data.filter(r => {
+    if (!r.assignee || r.assignee !== currentUser.email) return false;
+    if (r.status === '已完成') return false;
+    const d = parseDateFirst(r.date);
+    if (!d) return false;
+    const yr = new Date().getFullYear();
+    const taskDate = new Date(yr, d.month - 1, d.day);
+    taskDate.setHours(0,0,0,0);
+    return taskDate >= today && taskDate <= in3;
+  });
+
+  if (myTasks.length === 0) return;
+
+  const yr = new Date().getFullYear();
+  const listHTML = myTasks.map(t => {
+    const d = parseDateFirst(t.date);
+    const taskDate = d ? new Date(yr, d.month - 1, d.day) : null;
+    const daysLeft = taskDate ? Math.round((taskDate - today) / 86400000) : null;
+    let urgencyText, urgencyClass;
+    if (daysLeft === 0) { urgencyText = '🔴 今天到期'; urgencyClass = 'reminder-urgent'; }
+    else if (daysLeft === 1) { urgencyText = '🟠 明天到期'; urgencyClass = 'reminder-soon'; }
+    else { urgencyText = `⚡ ${daysLeft} 天後到期`; urgencyClass = ''; }
+    return `<div class="reminder-item ${urgencyClass}">
+      <span class="task-badge ${t.cat==='行政準備'?'badge-new':t.cat==='影片徵選'?'badge-warn':'badge-tip'}" style="font-size:0.75rem">${t.cat}</span>
+      <div class="reminder-task">${t.task.replace(/【.*?】/g,'').trim()}</div>
+      <div class="reminder-meta">${urgencyText}・${t.date}・${t.status}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('reminder-name').textContent = currentUser.name;
+  document.getElementById('reminder-count').textContent = myTasks.length;
+  document.getElementById('reminder-list').innerHTML = listHTML;
+  document.getElementById('reminder-overlay').classList.add('active');
+}
+
+function closeReminder() {
+  document.getElementById('reminder-overlay').classList.remove('active');
+}
+
+function goMyTasks() {
+  closeReminder();
+  const btn = document.querySelector('[data-cat="我的任務"]');
+  if (btn) filterMyTasks(btn);
+}
+
+// ── DATA ──
 const INITIAL_DATA = [
-  {id:1,cat:'行政準備',date:'5/20',task:'公用頻道會議報告企劃案給特助確認最後版本',unit:'北都行銷部（阿皓）',status:'待開始',note:'5/20 跟特助確認',badge:'',comment:''},
-  {id:2,cat:'行政準備',date:'5/22',task:'提交公用頻道會議報告企劃案、徵選辦法、問燈箱費用、電子邀請卡',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:3,cat:'頒獎典禮',date:'5/25–5/27',task:'頒獎典禮硬體廠商會議（三天）',unit:'北都行銷部',status:'待開始',note:'5/25~5/27 三天會議',badge:'',comment:''},
-  {id:4,cat:'行政準備',date:'5/29',task:'衛星頻道執照企劃書',unit:'北都行銷部',status:'待確認',note:'',badge:'',comment:''},
-  {id:5,cat:'影片徵選',date:'6/1',task:'【新增】徵件辦法 ／ 簡章定稿',unit:'北都行銷部',status:'待開始',note:'公告徵件的正式文件',badge:'new',comment:''},
-  {id:6,cat:'人才培訓',date:'6/1',task:'【新增】人才培訓課程報名開放',unit:'北都行銷部',status:'待開始',note:'社群暖身宣傳，課程開始前開放報名',badge:'new',comment:''},
-  {id:7,cat:'影片徵選',date:'6/1–6/30',task:'製作年度活動影片、影片徵選活動影片（預計 7/1 完成）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'⚠ 6月底前拍攝完畢',badge:'warn',comment:''},
-  {id:8,cat:'影片徵選',date:'6/1–6/20',task:'製作及印製影片徵選活動海報 ／ 燈箱廣告（費用問題）、相關宣傳素材',unit:'北都行銷部',status:'待開始',note:'⚠ 6/20 前須完成',badge:'warn',comment:''},
-  {id:9,cat:'影片徵選',date:'6/1–6/30',task:'【新增】影片徵選收件平台 ／ 系統建置',unit:'北都行銷部',status:'待開始',note:'7/1 徵件前需準備完成',badge:'new',comment:''},
-  {id:10,cat:'人才培訓',date:'6/15',task:'社群暖身徵選宣傳，公告人才培訓課程內容，提供雲端表單',unit:'北都行銷部',status:'待開始',note:'',badge:'tip',comment:''},
-  {id:11,cat:'影片徵選',date:'6/24',task:'【新增】徵件事宜線上公告（至少前一週）',unit:'北都行銷部',status:'待開始',note:'線上公告與海報張貼分開規劃',badge:'new',comment:''},
-  {id:12,cat:'影片徵選',date:'6/29',task:'影片徵選活動海報寄送及張貼（高中、大學）',unit:'北都行銷部',status:'待開始',note:'⚠ 須提前 6/20 完成印製',badge:'warn',comment:''},
-  {id:13,cat:'影片徵選',date:'7/1',task:'年度活動影片 ／ 影片徵選活動影片開跑，宣傳培訓 ＋ 徵件啟動',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:14,cat:'影片徵選',date:'7/1',task:'影片徵選活動燈箱上架',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:15,cat:'影片徵選',date:'7/1–9/30',task:'影片徵選收件期間（建議 7/1~9/30；件數不足可延長至 10/10）',unit:'北都行銷部',status:'待開始',note:'建議提早評審',badge:'tip',comment:''},
-  {id:16,cat:'市民大聲說',date:'7/3',task:'市民大聲說 1、2 外景（西門）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'外景期間建議安排側拍人員',badge:'tip',comment:''},
-  {id:17,cat:'人才培訓',date:'7/11',task:'影像人才培訓課程（第 1 場）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'',badge:'',comment:''},
-  {id:18,cat:'市民大聲說',date:'7/18',task:'市民大聲說 1 播出',unit:'北都行銷部',status:'待開始',note:'對應 7/3 外景',badge:'',comment:''},
-  {id:19,cat:'人才培訓',date:'7/25',task:'影像人才培訓課程（第 2 場）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'',badge:'',comment:''},
-  {id:20,cat:'頒獎典禮',date:'8/1–8/31',task:'頒獎典禮主視覺定稿、製作典禮宣傳物（社群、海報）',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:21,cat:'影片徵選',date:'8/1–8/31',task:'注意徵件數量是否足夠；不足需啟動加強宣傳',unit:'北都行銷部',status:'待開始',note:'',badge:'warn',comment:''},
-  {id:22,cat:'市民大聲說',date:'8/7',task:'市民大聲說 3、4 外景（信義）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'外景期間建議安排側拍人員',badge:'tip',comment:''},
-  {id:23,cat:'人才培訓',date:'8/15',task:'影像人才培訓課程（第 3 場）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'',badge:'',comment:''},
-  {id:24,cat:'市民大聲說',date:'8/22',task:'市民大聲說 2 播出',unit:'北都行銷部',status:'待開始',note:'對應 7/3 外景',badge:'',comment:''},
-  {id:25,cat:'人才培訓',date:'8/22',task:'影像人才培訓課程（第 4 場）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'',badge:'',comment:''},
-  {id:26,cat:'影片徵選',date:'9/1',task:'【新增】評審委員邀請與確認',unit:'北都行銷部',status:'待開始',note:'10/15 評審若臨時找會很趕',badge:'new',comment:''},
-  {id:27,cat:'頒獎典禮',date:'9/1–9/30',task:'【新增】頒獎典禮籌備啟動（流程 ／ 貴賓 ／ 影片放映）',unit:'北都行銷部',status:'待開始',note:'5月硬體會議後到 12 月典禮的籌備期',badge:'new',comment:''},
-  {id:28,cat:'頒獎典禮',date:'9/1–9/30',task:'典禮現場製作物（電子邀請卡、背板、頒獎人名牌、舞台設計、拍照牆、獎金手版…）、新聞稿模板',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:29,cat:'市民大聲說',date:'9/19',task:'市民大聲說 3 播出',unit:'北都行銷部',status:'待開始',note:'對應 8/7 外景',badge:'',comment:''},
-  {id:30,cat:'影片徵選',date:'10/1',task:'【新增】評審會議場地與設備預訂',unit:'北都行銷部',status:'待開始',note:'評審期間需要場地與設備',badge:'new',comment:''},
-  {id:31,cat:'影片徵選',date:'10/1–10/10',task:'影片徵選初審',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:32,cat:'頒獎典禮',date:'10/5',task:'主持人確認、表演團體（音樂版權確認）',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:33,cat:'頒獎典禮',date:'10/10',task:'頒獎人確認、邀請',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:34,cat:'市民大聲說',date:'10/10',task:'市民大聲說 4 播出',unit:'北都行銷部',status:'待開始',note:'對應 8/7 外景',badge:'',comment:''},
-  {id:35,cat:'影片徵選',date:'10/15',task:'入圍名單確認',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:36,cat:'頒獎典禮',date:'10/15',task:'典禮流程初版、舞台設計；獎狀、獎盃、入圍名單主視覺動畫（典禮當天用）',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:37,cat:'影片徵選',date:'10/20',task:'入圍通知 ＋ 詢問是否參加頒獎典禮',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:38,cat:'頒獎典禮',date:'10/20',task:'所有影片初版（入圍影片 ／ 得獎影片 ／ 開場影片）',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:39,cat:'頒獎典禮',date:'10/25',task:'典禮流程會議、技術設備會議（硬體規格確認）',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:40,cat:'影片徵選',date:'10/31',task:'決審完成',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:41,cat:'影片徵選',date:'11/1',task:'【新增】得獎名單公告與得獎者通知',unit:'北都行銷部',status:'待開始',note:'評審結束到頒獎中間的空白期',badge:'new',comment:''},
-  {id:42,cat:'頒獎典禮',date:'11/1',task:'入圍名單公布、新聞稿、社群宣傳素材；頒獎典禮宣傳、全部工作人員會議（初步）',unit:'北都行銷部',status:'待開始',note:'入圍名單曝光期',badge:'',comment:''},
-  {id:43,cat:'頒獎典禮',date:'11/1',task:'【新增】貴賓邀請函發送與回覆統計',unit:'北都行銷部',status:'待開始',note:'典禮前一個月需完成貴賓確認',badge:'new',comment:''},
-  {id:44,cat:'頒獎典禮',date:'11/15',task:'頒獎典禮流程定稿、主持稿定稿、流程表定稿、頒獎順序定稿',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:45,cat:'頒獎典禮',date:'11/20',task:'所有影片定稿',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:46,cat:'頒獎典禮',date:'11/23',task:'全部工作人員會議、最後分工確認',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:47,cat:'頒獎典禮',date:'11/30',task:'主持人彩排',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:48,cat:'頒獎典禮',date:'12/3–12/4',task:'全流程總彩排、技術設備彩排',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:''},
-  {id:49,cat:'頒獎典禮',date:'12/5',task:'台北有影 3 頒獎典禮（候選場地：1. 威秀  2. 紅樓）',unit:'北都有線電視 ／ 運豐多媒體',status:'待開始',note:'場地候選：1. 威秀  2. 紅樓',badge:'',comment:''},
+  {id:1,cat:'行政準備',date:'5/20',task:'公用頻道會議報告企劃案給特助確認最後版本',unit:'北都行銷部（阿皓）',status:'待開始',note:'5/20 跟特助確認',badge:'',comment:'',assignee:''},
+  {id:2,cat:'行政準備',date:'5/22',task:'提交公用頻道會議報告企劃案、徵選辦法、問燈箱費用、電子邀請卡',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:3,cat:'頒獎典禮',date:'5/25–5/27',task:'頒獎典禮硬體廠商會議（三天）',unit:'北都行銷部',status:'待開始',note:'5/25~5/27 三天會議',badge:'',comment:'',assignee:''},
+  {id:4,cat:'行政準備',date:'5/29',task:'衛星頻道執照企劃書',unit:'北都行銷部',status:'待確認',note:'',badge:'',comment:'',assignee:''},
+  {id:5,cat:'影片徵選',date:'6/1',task:'【新增】徵件辦法 ／ 簡章定稿',unit:'北都行銷部',status:'待開始',note:'公告徵件的正式文件',badge:'new',comment:'',assignee:''},
+  {id:6,cat:'人才培訓',date:'6/1',task:'【新增】人才培訓課程報名開放',unit:'北都行銷部',status:'待開始',note:'社群暖身宣傳，課程開始前開放報名',badge:'new',comment:'',assignee:''},
+  {id:7,cat:'影片徵選',date:'6/1–6/30',task:'製作年度活動影片、影片徵選活動影片（預計 7/1 完成）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'⚠ 6月底前拍攝完畢',badge:'warn',comment:'',assignee:''},
+  {id:8,cat:'影片徵選',date:'6/1–6/20',task:'製作及印製影片徵選活動海報 ／ 燈箱廣告（費用問題）、相關宣傳素材',unit:'北都行銷部',status:'待開始',note:'⚠ 6/20 前須完成',badge:'warn',comment:'',assignee:''},
+  {id:9,cat:'影片徵選',date:'6/1–6/30',task:'【新增】影片徵選收件平台 ／ 系統建置',unit:'北都行銷部',status:'待開始',note:'7/1 徵件前需準備完成',badge:'new',comment:'',assignee:''},
+  {id:10,cat:'人才培訓',date:'6/15',task:'社群暖身徵選宣傳，公告人才培訓課程內容，提供雲端表單',unit:'北都行銷部',status:'待開始',note:'',badge:'tip',comment:'',assignee:''},
+  {id:11,cat:'影片徵選',date:'6/24',task:'【新增】徵件事宜線上公告（至少前一週）',unit:'北都行銷部',status:'待開始',note:'線上公告與海報張貼分開規劃',badge:'new',comment:'',assignee:''},
+  {id:12,cat:'影片徵選',date:'6/29',task:'影片徵選活動海報寄送及張貼（高中、大學）',unit:'北都行銷部',status:'待開始',note:'⚠ 須提前 6/20 完成印製',badge:'warn',comment:'',assignee:''},
+  {id:13,cat:'影片徵選',date:'7/1',task:'年度活動影片 ／ 影片徵選活動影片開跑，宣傳培訓 ＋ 徵件啟動',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:14,cat:'影片徵選',date:'7/1',task:'影片徵選活動燈箱上架',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:15,cat:'影片徵選',date:'7/1–9/30',task:'影片徵選收件期間（建議 7/1~9/30；件數不足可延長至 10/10）',unit:'北都行銷部',status:'待開始',note:'建議提早評審',badge:'tip',comment:'',assignee:''},
+  {id:16,cat:'市民大聲說',date:'7/3',task:'市民大聲說 1、2 外景（西門）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'外景期間建議安排側拍人員',badge:'tip',comment:'',assignee:''},
+  {id:17,cat:'人才培訓',date:'7/11',task:'影像人才培訓課程（第 1 場）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:18,cat:'市民大聲說',date:'7/18',task:'市民大聲說 1 播出',unit:'北都行銷部',status:'待開始',note:'對應 7/3 外景',badge:'',comment:'',assignee:''},
+  {id:19,cat:'人才培訓',date:'7/25',task:'影像人才培訓課程（第 2 場）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:20,cat:'頒獎典禮',date:'8/1–8/31',task:'頒獎典禮主視覺定稿、製作典禮宣傳物（社群、海報）',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:21,cat:'影片徵選',date:'8/1–8/31',task:'注意徵件數量是否足夠；不足需啟動加強宣傳',unit:'北都行銷部',status:'待開始',note:'',badge:'warn',comment:'',assignee:''},
+  {id:22,cat:'市民大聲說',date:'8/7',task:'市民大聲說 3、4 外景（信義）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'外景期間建議安排側拍人員',badge:'tip',comment:'',assignee:''},
+  {id:23,cat:'人才培訓',date:'8/15',task:'影像人才培訓課程（第 3 場）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:24,cat:'市民大聲說',date:'8/22',task:'市民大聲說 2 播出',unit:'北都行銷部',status:'待開始',note:'對應 7/3 外景',badge:'',comment:'',assignee:''},
+  {id:25,cat:'人才培訓',date:'8/22',task:'影像人才培訓課程（第 4 場）',unit:'北都行銷部 ／ 運豐多媒體',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:26,cat:'影片徵選',date:'9/1',task:'【新增】評審委員邀請與確認',unit:'北都行銷部',status:'待開始',note:'10/15 評審若臨時找會很趕',badge:'new',comment:'',assignee:''},
+  {id:27,cat:'頒獎典禮',date:'9/1–9/30',task:'【新增】頒獎典禮籌備啟動（流程 ／ 貴賓 ／ 影片放映）',unit:'北都行銷部',status:'待開始',note:'5月硬體會議後到 12 月典禮的籌備期',badge:'new',comment:'',assignee:''},
+  {id:28,cat:'頒獎典禮',date:'9/1–9/30',task:'典禮現場製作物（電子邀請卡、背板、頒獎人名牌、舞台設計、拍照牆、獎金手版…）、新聞稿模板',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:29,cat:'市民大聲說',date:'9/19',task:'市民大聲說 3 播出',unit:'北都行銷部',status:'待開始',note:'對應 8/7 外景',badge:'',comment:'',assignee:''},
+  {id:30,cat:'影片徵選',date:'10/1',task:'【新增】評審會議場地與設備預訂',unit:'北都行銷部',status:'待開始',note:'評審期間需要場地與設備',badge:'new',comment:'',assignee:''},
+  {id:31,cat:'影片徵選',date:'10/1–10/10',task:'影片徵選初審',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:32,cat:'頒獎典禮',date:'10/5',task:'主持人確認、表演團體（音樂版權確認）',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:33,cat:'頒獎典禮',date:'10/10',task:'頒獎人確認、邀請',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:34,cat:'市民大聲說',date:'10/10',task:'市民大聲說 4 播出',unit:'北都行銷部',status:'待開始',note:'對應 8/7 外景',badge:'',comment:'',assignee:''},
+  {id:35,cat:'影片徵選',date:'10/15',task:'入圍名單確認',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:36,cat:'頒獎典禮',date:'10/15',task:'典禮流程初版、舞台設計；獎狀、獎盃、入圍名單主視覺動畫（典禮當天用）',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:37,cat:'影片徵選',date:'10/20',task:'入圍通知 ＋ 詢問是否參加頒獎典禮',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:38,cat:'頒獎典禮',date:'10/20',task:'所有影片初版（入圍影片 ／ 得獎影片 ／ 開場影片）',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:39,cat:'頒獎典禮',date:'10/25',task:'典禮流程會議、技術設備會議（硬體規格確認）',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:40,cat:'影片徵選',date:'10/31',task:'決審完成',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:41,cat:'影片徵選',date:'11/1',task:'【新增】得獎名單公告與得獎者通知',unit:'北都行銷部',status:'待開始',note:'評審結束到頒獎中間的空白期',badge:'new',comment:'',assignee:''},
+  {id:42,cat:'頒獎典禮',date:'11/1',task:'入圍名單公布、新聞稿、社群宣傳素材；頒獎典禮宣傳、全部工作人員會議（初步）',unit:'北都行銷部',status:'待開始',note:'入圍名單曝光期',badge:'',comment:'',assignee:''},
+  {id:43,cat:'頒獎典禮',date:'11/1',task:'【新增】貴賓邀請函發送與回覆統計',unit:'北都行銷部',status:'待開始',note:'典禮前一個月需完成貴賓確認',badge:'new',comment:'',assignee:''},
+  {id:44,cat:'頒獎典禮',date:'11/15',task:'頒獎典禮流程定稿、主持稿定稿、流程表定稿、頒獎順序定稿',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:45,cat:'頒獎典禮',date:'11/20',task:'所有影片定稿',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:46,cat:'頒獎典禮',date:'11/23',task:'全部工作人員會議、最後分工確認',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:47,cat:'頒獎典禮',date:'11/30',task:'主持人彩排',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:48,cat:'頒獎典禮',date:'12/3–12/4',task:'全流程總彩排、技術設備彩排',unit:'北都行銷部',status:'待開始',note:'',badge:'',comment:'',assignee:''},
+  {id:49,cat:'頒獎典禮',date:'12/5',task:'台北有影 3 頒獎典禮（候選場地：1. 威秀  2. 紅樓）',unit:'北都有線電視 ／ 運豐多媒體',status:'待開始',note:'場地候選：1. 威秀  2. 紅樓',badge:'',comment:'',assignee:''},
 ];
 
 let data=[], nextId=100, currentFilter='全部', currentSearch='', currentView='list';
@@ -450,12 +675,16 @@ function renderTable(){
     if(m!==lastM){
       const tr=document.createElement('tr');
       tr.className='month-divider'; tr.dataset.month=m;
-      tr.innerHTML=`<td colspan="7"><span class="month-label">${MONTHS_ZH[m]||m}月</span></td>`;
+      tr.innerHTML=`<td colspan="8"><span class="month-label">${MONTHS_ZH[m]||m}月</span></td>`;
       tbody.appendChild(tr); lastM=m;
     }
     const badge=row.badge==='new'?'<span class="task-badge badge-new">NEW</span><br>':
       row.badge==='warn'?'<span class="task-badge badge-warn">⚠ 注意</span><br>':
       row.badge==='tip'?'<span class="task-badge badge-tip">💡 建議</span><br>':'';
+    const isMine = currentUser && row.assignee === currentUser.email;
+    const assigneeDisplay = row.assignee
+      ? `<span class="${isMine?'assignee-self':''}" title="${row.assignee}">${isMine?'👤 我':row.assignee.split('@')[0]}</span>`
+      : '';
     const tr=document.createElement('tr');
     tr.dataset.id=row.id; tr.dataset.cat=row.cat;
     tr.innerHTML=`
@@ -471,6 +700,14 @@ function renderTable(){
       <td><div class="date-text task-editable" contenteditable="true" data-field="date" data-id="${row.id}">${row.date}</div></td>
       <td><div class="task-content">${badge}<span class="task-editable" contenteditable="true" data-field="task" data-id="${row.id}">${row.task}</span></div></td>
       <td><span class="task-editable unit-text" contenteditable="true" data-field="unit" data-id="${row.id}">${row.unit}</span></td>
+      <td class="assignee-cell">
+        <input class="assignee-input" type="email" value="${row.assignee||''}"
+          placeholder="指定 email…" data-id="${row.id}"
+          onblur="changeAssignee(this,${row.id})"
+          onkeydown="if(event.key==='Enter')this.blur()"
+          title="${row.assignee||'未指定'}">
+        ${isMine?'<div style="font-size:0.75rem;color:#0d9488;margin-top:0.15rem;">👤 我</div>':''}
+      </td>
       <td><select class="status-select status-${row.status}" data-id="${row.id}" onchange="changeStatus(this,${row.id})">
         <option ${row.status==='待開始'?'selected':''}>待開始</option>
         <option ${row.status==='進行中'?'selected':''}>進行中</option>
@@ -502,6 +739,26 @@ function renderTable(){
   updateStats();
 }
 
+function changeAssignee(input, id) {
+  const row = data.find(r => r.id === id);
+  if (row) {
+    row.assignee = input.value.trim();
+    isDirty = true;
+    const isMine = currentUser && row.assignee === currentUser.email;
+    let hint = input.nextElementSibling;
+    if (isMine) {
+      if (!hint || !hint.textContent.includes('👤')) {
+        const div = document.createElement('div');
+        div.style.cssText = 'font-size:0.75rem;color:#0d9488;margin-top:0.15rem;';
+        div.textContent = '👤 我';
+        input.after(div);
+      }
+    } else {
+      if (hint && hint.textContent.includes('👤')) hint.remove();
+    }
+  }
+}
+
 // ── FILTER ──
 function filterCat(btn){
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -510,16 +767,37 @@ function filterCat(btn){
   applyFilter();
   if(currentView==='calendar') renderCalendar();
 }
+
+function filterMyTasks(btn) {
+  if (!currentUser) {
+    showEmailPrompt();
+    return;
+  }
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  currentFilter = '我的任務';
+  applyFilter();
+  if (currentView === 'calendar') renderCalendar();
+}
+
 function searchTable(val){
   currentSearch=val.toLowerCase();
   applyFilter();
   if(currentView==='calendar') renderCalendar();
 }
+
 function applyFilter(){
   document.querySelectorAll('#table-body tr:not(.month-divider)').forEach(tr=>{
-    const ok=(currentFilter==='全部'||tr.dataset.cat===currentFilter)&&
-              (!currentSearch||tr.textContent.toLowerCase().includes(currentSearch));
-    tr.classList.toggle('hidden',!ok);
+    const rowId = parseInt(tr.dataset.id);
+    const row = data.find(r => r.id === rowId);
+    let catOk;
+    if (currentFilter === '我的任務') {
+      catOk = currentUser && row && row.assignee === currentUser.email;
+    } else {
+      catOk = currentFilter === '全部' || tr.dataset.cat === currentFilter;
+    }
+    const ok = catOk && (!currentSearch || tr.textContent.toLowerCase().includes(currentSearch));
+    tr.classList.toggle('hidden', !ok);
   });
   document.querySelectorAll('#table-body tr.month-divider').forEach(div=>{
     let nxt=div.nextElementSibling, vis=false;
@@ -577,6 +855,7 @@ function openEditModal(id){
   document.getElementById('m-date').value=row.date;
   document.getElementById('m-task').value=row.task;
   document.getElementById('m-unit').value=row.unit;
+  document.getElementById('m-assignee').value=row.assignee||'';
   document.getElementById('m-status').value=row.status;
   document.getElementById('m-badge').value=row.badge||'';
   document.getElementById('m-note').value=row.note;
@@ -590,6 +869,7 @@ function submitEditModal(id){
   row.date=document.getElementById('m-date').value.trim();
   row.task=document.getElementById('m-task').value.trim();
   row.unit=document.getElementById('m-unit').value.trim();
+  row.assignee=document.getElementById('m-assignee').value.trim();
   row.status=document.getElementById('m-status').value;
   row.badge=document.getElementById('m-badge').value;
   row.note=document.getElementById('m-note').value.trim();
@@ -610,6 +890,7 @@ function openAddModal(){
   document.getElementById('m-date').value='';
   document.getElementById('m-task').value='';
   document.getElementById('m-unit').value='北都行銷部';
+  document.getElementById('m-assignee').value=currentUser?currentUser.email:'';
   document.getElementById('m-status').value='待開始';
   document.getElementById('m-badge').value='';
   document.getElementById('m-note').value='';
@@ -624,6 +905,7 @@ function submitModal(){
   if(!date||!task){alert('請填寫日期與工作內容');return;}
   data.push({id:nextId++,cat:document.getElementById('m-cat').value,date,task,
     unit:document.getElementById('m-unit').value.trim(),
+    assignee:document.getElementById('m-assignee').value.trim(),
     status:document.getElementById('m-status').value,
     note:document.getElementById('m-note').value.trim(),
     badge:document.getElementById('m-badge').value,
@@ -658,7 +940,6 @@ function saveTaskModal(){
   showToast('已更新，記得按「儲存」同步');
 }
 
-
 // ── VIEW ──
 function switchView(view){
   currentView=view;
@@ -690,7 +971,8 @@ function renderCalendar(){
   const today=new Date();
   const byDay={};
   data.forEach(r=>{
-    if(currentFilter!=='全部' && r.cat!==currentFilter) return;
+    if(currentFilter==='我的任務'){if(!currentUser||r.assignee!==currentUser.email)return;}
+    else if(currentFilter!=='全部' && r.cat!==currentFilter) return;
     if(currentSearch && !r.task.toLowerCase().includes(currentSearch) && !r.cat.toLowerCase().includes(currentSearch)) return;
     const d=parseDateFirst(r.date);
     if(d&&d.month===calMonth+1){if(!byDay[d.day])byDay[d.day]=[];byDay[d.day].push(r);}
@@ -723,6 +1005,10 @@ function syncFields(){
   document.querySelectorAll('[contenteditable]').forEach(el=>{
     const row=data.find(r=>r.id===parseInt(el.dataset.id));
     if(row) row[el.dataset.field]=el.innerText.trim();
+  });
+  document.querySelectorAll('.assignee-input').forEach(el=>{
+    const row=data.find(r=>r.id===parseInt(el.dataset.id));
+    if(row) row.assignee=el.value.trim();
   });
 }
 
@@ -773,6 +1059,7 @@ function parseSheetRow(r){
     date,
     task:clean(r.task)||'',
     unit:clean(r.unit)||'',
+    assignee:clean(r.assignee)||'',
     status:clean(r.status)||'待開始',
     note:clean(r.note)||'',
     badge:clean(r.badge)||'',
@@ -782,7 +1069,7 @@ function parseSheetRow(r){
 
 async function loadSaved(){
   document.getElementById('table-body').innerHTML=
-    '<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text-muted)">載入中…</td></tr>';
+    '<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--text-muted)">載入中…</td></tr>';
   try{
     const res=await fetch(SCRIPT_URL+'?action=read');
     const remote=await res.json();
@@ -810,8 +1097,8 @@ async function loadSaved(){
 
 function exportCSV(){
   syncFields();
-  const h=['分類','日期','工作內容','執行單位','進度狀態','備註','補充說明'];
-  const csv='\uFEFF'+[h,...data.map(r=>[r.cat,r.date,r.task,r.unit,r.status,r.note,r.comment])].map(r=>r.map(c=>`"${(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const h=['分類','日期','工作內容','執行單位','負責人','進度狀態','備註','補充說明'];
+  const csv='﻿'+[h,...data.map(r=>[r.cat,r.date,r.task,r.unit,r.assignee||'',r.status,r.note,r.comment])].map(r=>r.map(c=>`"${(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
   a.download='台北有影3_進度表.csv'; a.click(); showToast('CSV 匯出成功');
@@ -853,7 +1140,9 @@ async function pollUpdate(){
 
 (async()=>{
   await loadSaved();
+  initUser();
   renderTable();
+  if (currentUser) setTimeout(checkReminders, 1200);
   setInterval(pollUpdate,30000);
 })();
 </script>
