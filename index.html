@@ -100,13 +100,34 @@ header {
 .search-icon { position:absolute; left:0.6rem; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem; pointer-events:none; }
 
 /* TABLE */
-.table-wrap { overflow-x:auto; padding:0 2rem 5rem; }
-table { width:100%; border-collapse:collapse; margin-top:1rem; font-size:0.97rem; }
+.table-wrap {
+  overflow-x:auto;
+  padding:0 2rem 5rem;
+}
+
+/* sticky 表頭用 separate 比 collapse 穩定，避免第一個月份列被裁切 */
+table {
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  margin-top:1rem;
+  font-size:0.97rem;
+}
+
 thead th {
-  padding:0.75rem 0.9rem; text-align:left; font-size:0.8rem; font-weight:700;
-  letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim);
-  border-bottom:2px solid var(--border); white-space:nowrap;
-  position:sticky; top:69px; background:var(--bg); z-index:10;
+  padding:0.75rem 0.9rem;
+  text-align:left;
+  font-size:0.8rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  border-bottom:2px solid var(--border);
+  white-space:nowrap;
+  position:sticky;
+  top:68px;
+  background:var(--bg);
+  z-index:30;
 }
 thead th:first-child { padding-left:0; }
 .col-group { width:100px; } .col-date { width:120px; } .col-task { min-width:280px; }
@@ -179,9 +200,31 @@ tr:hover .row-actions { opacity:1; }
 .action-btn:hover { border-color:#fca5a5; color:#dc2626; background:#fef2f2; }
 .action-btn.edit-btn:hover { border-color:#6ee7b7; color:#059669; background:#f0fdf8; }
 
-.month-divider td { padding:1.75rem 0.9rem 0.55rem; background:var(--bg)!important; }
-.month-label { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-dim); font-weight:700; padding:0.3rem 0.75rem; border:1.5px solid var(--border2); border-radius:5px; background:#fff; display:inline-block; }
+.month-divider td {
+  padding:2.35rem 0.9rem 0.65rem;
+  background:var(--bg)!important;
+  position:relative;
+  z-index:5;
+}
 
+/* 第一個月份標籤額外補一點上方空間，避免被 sticky thead 壓住 */
+#table-body tr.month-divider:first-child td {
+  padding-top:2.65rem;
+}
+
+.month-label {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.75rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  font-weight:700;
+  padding:0.3rem 0.75rem;
+  border:1.5px solid var(--border2);
+  border-radius:5px;
+  background:#fff;
+  display:inline-block;
+}
 /* CALENDAR */
 #calendar-view { padding:0 2rem 5rem; }
 .cal-nav { display:flex; align-items:center; justify-content:space-between; padding:1.5rem 0 1rem; }
