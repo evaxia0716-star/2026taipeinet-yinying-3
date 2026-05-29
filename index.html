@@ -1591,61 +1591,84 @@
     <div class="toast" id="toast"></div>
     <script>
       // ──────────────────────────────────────────────────────────────
-      // INITIAL_DATA：原始 49 筆任務
-      //  · rows 3 / 15 / 21 / 48 已加上 kind:"window"（真持續任務）
-      //  · rows 7 / 9 日期已修正為 6/1–7/1（原本備註裡藏的真正截止日）
-      // 其他列不需要 kind 欄位，getKind() 會自動從日期格式推斷。
+      // INITIAL_DATA：完整版專案任務資料
+      // 來源表非空列共 73 筆，最後一筆為 ID 81／12/20「找春酒的場地+長官/業者伴手禮」。
+      // 注意：若遠端 Google Sheets 仍是舊版 49 筆，本頁會自動改用這份完整版，請點「儲存」同步。
       // ──────────────────────────────────────────────────────────────
       const INITIAL_DATA = [
-        { id: 1, cat: "行政準備", date: "5/20", task: "公用頻道會議報告企劃案給特助確認最後版本", unit: "北都行銷部（阿皓）", status: "待開始", note: "5/20 跟特助確認", badge: "", comment: "" },
-        { id: 2, cat: "行政準備", date: "5/22", task: "提交公用頻道會議報告企劃案、徵選辦法、問燈箱費用、電子邀請卡", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 3, cat: "頒獎典禮", date: "5/25–5/27", task: "頒獎典禮硬體廠商會議（三天）", unit: "北都行銷部", status: "待開始", note: "5/25~5/27 三天會議", badge: "", comment: "", kind: "window" },
-        { id: 4, cat: "行政準備", date: "5/29", task: "衛星頻道執照企劃書", unit: "北都行銷部", status: "待確認", note: "", badge: "", comment: "" },
-        { id: 5, cat: "影片徵選", date: "6/1", task: "【新增】徵件辦法 ／ 簡章定稿", unit: "北都行銷部", status: "待開始", note: "公告徵件的正式文件", badge: "new", comment: "" },
-        { id: 6, cat: "人才培訓", date: "6/1", task: "【新增】人才培訓課程報名開放", unit: "北都行銷部", status: "待開始", note: "社群暖身宣傳，課程開始前開放報名", badge: "new", comment: "" },
-        { id: 7, cat: "影片徵選", date: "6/1–7/1", task: "製作年度活動影片、影片徵選活動影片（預計 7/1 完成）", unit: "北都行銷部 ／ 運豐多媒體", status: "待開始", note: "⚠ 6月底前拍攝完畢", badge: "warn", comment: "" },
-        { id: 8, cat: "影片徵選", date: "6/1–6/20", task: "製作及印製影片徵選活動海報 ／ 燈箱廣告（費用問題）、相關宣傳素材", unit: "北都行銷部", status: "待開始", note: "⚠ 6/20 前須完成", badge: "warn", comment: "" },
-        { id: 9, cat: "影片徵選", date: "6/1–7/1", task: "【新增】影片徵選收件平台 ／ 系統建置", unit: "北都行銷部", status: "待開始", note: "7/1 徵件前需準備完成", badge: "new", comment: "" },
-        { id: 10, cat: "人才培訓", date: "6/15", task: "社群暖身徵選宣傳，公告人才培訓課程內容，提供雲端表單", unit: "北都行銷部", status: "待開始", note: "", badge: "tip", comment: "" },
-        { id: 11, cat: "影片徵選", date: "6/24", task: "【新增】徵件事宜線上公告（至少前一週）", unit: "北都行銷部", status: "待開始", note: "線上公告與海報張貼分開規劃", badge: "new", comment: "" },
-        { id: 12, cat: "影片徵選", date: "6/29", task: "影片徵選活動海報寄送及張貼（高中、大學）", unit: "北都行銷部", status: "待開始", note: "⚠ 須提前 6/20 完成印製", badge: "warn", comment: "" },
-        { id: 13, cat: "影片徵選", date: "7/1", task: "年度活動影片 ／ 影片徵選活動影片開跑，宣傳培訓 ＋ 徵件啟動", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 14, cat: "影片徵選", date: "7/1", task: "影片徵選活動燈箱上架", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 15, cat: "影片徵選", date: "7/1–9/30", task: "影片徵選收件期間（建議 7/1~9/30；件數不足可延長至 10/10）", unit: "北都行銷部", status: "待開始", note: "建議提早評審", badge: "tip", comment: "", kind: "window" },
-        { id: 16, cat: "市民大聲說", date: "7/3", task: "市民大聲說 1、2 外景（西門）", unit: "北都行銷部 ／ 運豐多媒體", status: "待開始", note: "外景期間建議安排側拍人員", badge: "tip", comment: "" },
-        { id: 17, cat: "人才培訓", date: "7/11", task: "影像人才培訓課程（第 1 場）", unit: "北都行銷部 ／ 運豐多媒體", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 18, cat: "市民大聲說", date: "7/18", task: "市民大聲說 1 播出", unit: "北都行銷部", status: "待開始", note: "對應 7/3 外景", badge: "", comment: "" },
-        { id: 19, cat: "人才培訓", date: "7/25", task: "影像人才培訓課程（第 2 場）", unit: "北都行銷部 ／ 運豐多媒體", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 20, cat: "頒獎典禮", date: "8/1–8/31", task: "頒獎典禮主視覺定稿、製作典禮宣傳物（社群、海報）", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 21, cat: "影片徵選", date: "8/1–8/31", task: "注意徵件數量是否足夠；不足需啟動加強宣傳", unit: "北都行銷部", status: "待開始", note: "", badge: "warn", comment: "", kind: "window" },
-        { id: 22, cat: "市民大聲說", date: "8/7", task: "市民大聲說 3、4 外景（信義）", unit: "北都行銷部 ／ 運豐多媒體", status: "待開始", note: "外景期間建議安排側拍人員", badge: "tip", comment: "" },
-        { id: 23, cat: "人才培訓", date: "8/15", task: "影像人才培訓課程（第 3 場）", unit: "北都行銷部 ／ 運豐多媒體", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 24, cat: "市民大聲說", date: "8/22", task: "市民大聲說 2 播出", unit: "北都行銷部", status: "待開始", note: "對應 7/3 外景", badge: "", comment: "" },
-        { id: 25, cat: "人才培訓", date: "8/22", task: "影像人才培訓課程（第 4 場）", unit: "北都行銷部 ／ 運豐多媒體", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 26, cat: "影片徵選", date: "9/1", task: "【新增】評審委員邀請與確認", unit: "北都行銷部", status: "待開始", note: "10/15 評審若臨時找會很趕", badge: "new", comment: "" },
-        { id: 27, cat: "頒獎典禮", date: "9/1–9/30", task: "【新增】頒獎典禮籌備啟動（流程 ／ 貴賓 ／ 影片放映）", unit: "北都行銷部", status: "待開始", note: "5月硬體會議後到 12 月典禮的籌備期", badge: "new", comment: "" },
-        { id: 28, cat: "頒獎典禮", date: "9/1–9/30", task: "典禮現場製作物（電子邀請卡、背板、頒獎人名牌、舞台設計、拍照牆、獎金手版…）、新聞稿模板", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 29, cat: "市民大聲說", date: "9/19", task: "市民大聲說 3 播出", unit: "北都行銷部", status: "待開始", note: "對應 8/7 外景", badge: "", comment: "" },
-        { id: 30, cat: "影片徵選", date: "10/1", task: "【新增】評審會議場地與設備預訂", unit: "北都行銷部", status: "待開始", note: "評審期間需要場地與設備", badge: "new", comment: "" },
-        { id: 31, cat: "影片徵選", date: "10/1–10/10", task: "影片徵選初審", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 32, cat: "頒獎典禮", date: "10/5", task: "主持人確認、表演團體（音樂版權確認）", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 33, cat: "頒獎典禮", date: "10/10", task: "頒獎人確認、邀請", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 34, cat: "市民大聲說", date: "10/10", task: "市民大聲說 4 播出", unit: "北都行銷部", status: "待開始", note: "對應 8/7 外景", badge: "", comment: "" },
-        { id: 35, cat: "影片徵選", date: "10/15", task: "入圍名單確認", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 36, cat: "頒獎典禮", date: "10/15", task: "典禮流程初版、舞台設計；獎狀、獎盃、入圍名單主視覺動畫（典禮當天用）", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 37, cat: "影片徵選", date: "10/20", task: "入圍通知 ＋ 詢問是否參加頒獎典禮", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 38, cat: "頒獎典禮", date: "10/20", task: "所有影片初版（入圍影片 ／ 得獎影片 ／ 開場影片）", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 39, cat: "頒獎典禮", date: "10/25", task: "典禮流程會議、技術設備會議（硬體規格確認）", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 40, cat: "影片徵選", date: "10/31", task: "決審完成", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 41, cat: "影片徵選", date: "11/1", task: "【新增】得獎名單公告與得獎者通知", unit: "北都行銷部", status: "待開始", note: "評審結束到頒獎中間的空白期", badge: "new", comment: "" },
-        { id: 42, cat: "頒獎典禮", date: "11/1", task: "入圍名單公布、新聞稿、社群宣傳素材；頒獎典禮宣傳、全部工作人員會議（初步）", unit: "北都行銷部", status: "待開始", note: "入圍名單曝光期", badge: "", comment: "" },
-        { id: 43, cat: "頒獎典禮", date: "11/1", task: "【新增】貴賓邀請函發送與回覆統計", unit: "北都行銷部", status: "待開始", note: "典禮前一個月需完成貴賓確認", badge: "new", comment: "" },
-        { id: 44, cat: "頒獎典禮", date: "11/15", task: "頒獎典禮流程定稿、主持稿定稿、流程表定稿、頒獎順序定稿", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 45, cat: "頒獎典禮", date: "11/20", task: "所有影片定稿", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 46, cat: "頒獎典禮", date: "11/23", task: "全部工作人員會議、最後分工確認", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 47, cat: "頒獎典禮", date: "11/30", task: "主持人彩排", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "" },
-        { id: 48, cat: "頒獎典禮", date: "12/3–12/4", task: "全流程總彩排、技術設備彩排", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "", kind: "window" },
-        { id: 49, cat: "頒獎典禮", date: "12/5", task: "台北有影 3 頒獎典禮（候選場地：1. 威秀  2. 紅樓）", unit: "北都有線電視 ／ 運豐多媒體", status: "待開始", note: "場地候選：1. 威秀  2. 紅樓", badge: "", comment: "" }
+        { id: 1, cat: "行政準備", date: "5/20", task: "有影3企劃案、徵選報名辦法(含音樂版權)，版本最後確認", unit: "阿皓", status: "已完成", note: "5/20 跟特助確認", badge: "", comment: "同步確認授權書、同意書、切結書" },
+        { id: 2, cat: "行政準備", date: "5/22", task: "公用頻道會議：提交有影3企劃案、提交徵選報名辦法", unit: "阿皓", status: "已完成", note: "記得詢問：", badge: "", comment: "1. 詢問燈箱費用/聯絡窗口/刊登位置/刊登時間\n2. 詢問電子邀請卡\n3. 詢問人才培訓上課講師/講師費/時間\n4. 詢問可以找維尼當代言人嗎？" },
+        { id: 11, cat: "行政準備", date: "5/23", task: "找維尼談代言合約、費用等事宜", unit: "阿皓", status: "進行中", note: "", badge: "", comment: "" },
+        { id: 3, cat: "頒獎典禮", date: "5/26 14:00", task: "頒獎典禮硬體廠商面談（展億）", unit: "阿皓、特助", status: "已完成", note: "", badge: "", comment: "等廠商提供報價單" },
+        { id: 4, cat: "行政準備", date: "5/29", task: "完成衛星頻道執照企劃書", unit: "阿皓", status: "進行中", note: "", badge: "new", comment: "" },
+        { id: 14, cat: "行政準備", date: "6/1", task: "找2-3間活動公司、硬體設備商來報價", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "6/30前完成" },
+        { id: 12, cat: "影片徵選", date: "6/1", task: "製作徵選活動影片", unit: "運豐", status: "待開始", note: "", badge: "", comment: "6/30前完成" },
+        { id: 15, cat: "頒獎典禮", date: "6/1", task: "製作年度活動影片", unit: "運豐", status: "待開始", note: "", badge: "", comment: "6/30前完成" },
+        { id: 16, cat: "影片徵選", date: "6/1", task: "製作影片徵選、人才培訓社群宣傳素材", unit: "思嘉", status: "待開始", note: "", badge: "", comment: "6/15前完成" },
+        { id: 17, cat: "行政準備", date: "6/1", task: "製作人才培訓課程、影片徵選雲端報名表單", unit: "阿皓", status: "已完成", note: "", badge: "", comment: "6/15前完成" },
+        { id: 18, cat: "影片徵選", date: "6/1", task: "製作徵選海報", unit: "思嘉", status: "待開始", note: "", badge: "", comment: "6/20前完成\n注意印製時間" },
+        { id: 19, cat: "頒獎典禮", date: "6/1", task: "製作燈箱廣告視覺", unit: "思嘉", status: "待開始", note: "", badge: "", comment: "6/30前完成" },
+        { id: 20, cat: "影片徵選", date: "6/1", task: "準備所有國小、國中、高中、大學的清單 for 徵選海報寄送", unit: "夏天", status: "待開始", note: "", badge: "", comment: "6/30前完成\n注意印製時間" },
+        { id: 21, cat: "人才培訓", date: "6/1", task: "確認人才培訓課程講師名單", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "6/30前完成" },
+        { id: 71, cat: "行政準備", date: "6/1", task: "選舉標案撰寫", unit: "阿皓", status: "待開始", note: "", badge: "new", comment: "" },
+        { id: 77, cat: "市民大聲說", date: "6/1", task: "活動公告手板", unit: "思嘉", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 22, cat: "頒獎典禮", date: "6/8~6/12", task: "代言人拍攝 (維尼)", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "", kind: "window" },
+        { id: 23, cat: "行政準備", date: "6/15", task: "社群宣傳：年度活動影片、影片徵選活動、人才培訓課程", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "提供雲端報名表QR code" },
+        { id: 24, cat: "頒獎典禮", date: "6/15", task: "確認燈箱廣告上架地點等相關事宜", unit: "偵倚", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 25, cat: "影片徵選", date: "6/15", task: "確認徵選海報印製時間及寄送相關事宜", unit: "偵倚", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 26, cat: "人才培訓", date: "6/15", task: "確認人才培訓課程場地租借", unit: "志明", status: "待開始", note: "", badge: "", comment: "6000元/場*4=24,000元" },
+        { id: 27, cat: "人才培訓", date: "6/15", task: "購買人才培訓課程 500元禮券", unit: "夏天", status: "待開始", note: "", badge: "", comment: "禮券數量跟後面有獎徵答、典禮打卡小禮物一起採購\n人才培訓：20人*4場*$500\n有獎徵答：5人*2場*$500\n現場打卡：50人*1場*$100\n市民大聲說：50人*$100" },
+        { id: 28, cat: "人才培訓", date: "6/15", task: "製作人才培訓結業證書", unit: "思嘉", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 35, cat: "影片徵選", date: "6/30", task: "彙整公用頻道後台帳號給大家，可以幫忙注意徵件狀況", unit: "阿皓", status: "已完成", note: "", badge: "", comment: "公用頻道帳密相關\n官方網站：https://www.pac.org.tw/\n網站後台：\nhttps://system6.webtech.com.tw/webadmin/login.php?web=MjAxNzAwOTgw\n\n帳號：taipeipac03\n密碼：tpc354139810\n\n******\n協會信箱Google 2TB\n帳號：tpcpac3@gmail.com\n密碼：tpcpac354139810" },
+        { id: 73, cat: "行政準備", date: "6/30", task: "10/13 前完成衛星頻道執照撰寫", unit: "夏天、特助", status: "進行中", note: "", badge: "new", comment: "" },
+        { id: 75, cat: "行政準備", date: "6/30", task: "7/31前 完成滿意度調查報告及換照評鑑企劃書", unit: "特助", status: "進行中", note: "", badge: "new", comment: "" },
+        { id: 29, cat: "影片徵選", date: "7/1", task: "寄送及張貼徵選海報", unit: "偵倚", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 30, cat: "頒獎典禮", date: "7/1", task: "上架年度活動影片", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 31, cat: "影片徵選", date: "7/1", task: "上架徵選活動影片", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 32, cat: "頒獎典禮", date: "7/1", task: "上架燈箱廣告", unit: "偵倚", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 33, cat: "人才培訓", date: "7/1", task: "跟運豐確認人才培訓拍攝事宜", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 34, cat: "人才培訓", date: "7/1", task: "準備人才培訓課程簽到表、請款講師費", unit: "夏天", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 40, cat: "影片徵選", date: "7/1~9/30", task: "影片徵件", unit: "北都行銷部", status: "待開始", note: "", badge: "warn", comment: "若件數不夠 再延期", kind: "window" },
+        { id: 69, cat: "行政準備", date: "7/1~8/14", task: "金采獎報名", unit: "阿皓", status: "待開始", note: "", badge: "new", comment: "" },
+        { id: 72, cat: "行政準備", date: "7/1", task: "注意選舉標案投標時間", unit: "阿皓、特助", status: "待開始", note: "", badge: "new", comment: "" },
+        { id: 79, cat: "市民大聲說", date: "7/2~7/3", task: "拍攝市民大聲說1、市民大聲說2 (西門)", unit: "阿皓、偵倚", status: "待開始", note: "", badge: "", comment: "", kind: "window" },
+        { id: 48, cat: "行政準備", date: "7/15", task: "社群宣傳：年度活動影片、影片徵選活動、人才培訓課程", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "提供雲端報名表QR code" },
+        { id: 36, cat: "人才培訓", date: "7/18", task: "影像人才培訓課程 1", unit: "北都行銷部", status: "待開始", note: "", badge: "warn", comment: "" },
+        { id: 42, cat: "市民大聲說", date: "7/18", task: "播出市民大聲說1", unit: "北都行銷部", status: "待開始", note: "", badge: "warn", comment: "" },
+        { id: 37, cat: "人才培訓", date: "7/25", task: "影像人才培訓課程 2", unit: "北都行銷部", status: "待開始", note: "", badge: "warn", comment: "" },
+        { id: 76, cat: "行政準備", date: "8/1", task: "8/31前 完成地方頻道補助結案報告", unit: "阿皓", status: "待開始", note: "", badge: "new", comment: "" },
+        { id: 80, cat: "影片徵選", date: "8/1~8/10", task: "確認評審人選", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 43, cat: "市民大聲說", date: "8/6~8/7", task: "拍攝市民大聲說3、市民大聲說4 (信義)", unit: "阿皓、偵倚", status: "待開始", note: "", badge: "", comment: "", kind: "window" },
+        { id: 38, cat: "人才培訓", date: "8/15", task: "影像人才培訓課程 3", unit: "北都行銷部", status: "待開始", note: "", badge: "warn", comment: "" },
+        { id: 49, cat: "行政準備", date: "8/15", task: "社群宣傳：年度活動影片、影片徵選活動", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "提供雲端報名表QR code" },
+        { id: 70, cat: "行政準備", date: "8/15", task: "費率審查 8/31 前提交", unit: "阿皓、偵倚、特助", status: "待開始", note: "", badge: "new", comment: "" },
+        { id: 39, cat: "人才培訓", date: "8/22", task: "影像人才培訓課程 4", unit: "北都行銷部", status: "待開始", note: "", badge: "warn", comment: "" },
+        { id: 44, cat: "市民大聲說", date: "8/22", task: "播出市民大聲說2", unit: "北都行銷部", status: "待開始", note: "", badge: "warn", comment: "" },
+        { id: 47, cat: "頒獎典禮", date: "9/1", task: "製作頒獎典禮所有製作物", unit: "思嘉", status: "待開始", note: "", badge: "", comment: "電子邀請卡、舞台背板、工作證、座位貼、座位表、拍照牆、得獎手板、獎狀、帳篷名牌等" },
+        { id: 50, cat: "行政準備", date: "9/15", task: "社群宣傳：年度活動影片、影片徵選活動", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "提供雲端報名表QR code" },
+        { id: 45, cat: "市民大聲說", date: "9/19", task: "播出市民大聲說3", unit: "北都行銷部", status: "待開始", note: "", badge: "warn", comment: "" },
+        { id: 53, cat: "影片徵選", date: "10/1~10/20", task: "影片評審", unit: "北都行銷部", status: "待開始", note: "", badge: "warn", comment: "", kind: "window" },
+        { id: 54, cat: "影片徵選", date: "10/1~10/15", task: "入圍名單確認", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 78, cat: "頒獎典禮", date: "10/1", task: "頒獎典禮長官、業者小禮物(餐盒)", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 46, cat: "市民大聲說", date: "10/10", task: "播出市民大聲說4", unit: "北都行銷部", status: "待開始", note: "", badge: "warn", comment: "" },
+        { id: 55, cat: "頒獎典禮", date: "10/12", task: "確認表演團體（含音樂版權確認）、確認主持人、確認頒獎人、確認嘉賓名單", unit: "阿皓、夏天", status: "待開始", note: "", badge: "", comment: "預計四個表演：兩個社大、兩個年輕人" },
+        { id: 56, cat: "頒獎典禮", date: "10/12", task: "邀請相關單位長官、同業、協會 + 確認有無要致詞", unit: "阿皓、偵倚、夏天", status: "待開始", note: "", badge: "", comment: "名單阿皓提供，偵倚協助電話確認，最後的文書，由夏天彙整" },
+        { id: 51, cat: "行政準備", date: "10/15", task: "社群宣傳：年度活動影片、頒獎典禮", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 57, cat: "頒獎典禮", date: "10/15", task: "典禮流程初版、舞台設計", unit: "阿皓、思嘉", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 58, cat: "頒獎典禮", date: "10/20", task: "通知入圍者 + 詢問是否參加頒獎典禮 + 提供申報單", unit: "阿皓、偵倚、夏天", status: "待開始", note: "【詢問是否參加頒獎典禮 】", badge: "", comment: "名單阿皓提供，偵倚協助電話確認，最後的文書，由夏天彙整\n【申報單須檢附雙證件影本】" },
+        { id: 59, cat: "頒獎典禮", date: "10/20", task: "製作頒獎典禮活動影片、入圍名單主視覺動畫", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 60, cat: "頒獎典禮", date: "10/25", task: "典禮流程會議、技術設備會議(硬體規格確認)", unit: "所有工作人員、廠商", status: "待開始", note: "", badge: "warn", comment: "" },
+        { id: 61, cat: "頒獎典禮", date: "10/25", task: "下單得獎獎狀(含框)、獎盃、有獎徵答獎品", unit: "夏天", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 52, cat: "行政準備", date: "11/1", task: "社群宣傳：年度活動影片、頒獎典禮", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 74, cat: "行政準備", date: "11/1", task: "費率審查口頭報告", unit: "特助", status: "待開始", note: "", badge: "new", comment: "" },
+        { id: 62, cat: "行政準備", date: "11/15", task: "社群宣傳：年度活動影片、頒獎典禮", unit: "阿皓", status: "待開始", note: "", badge: "", comment: "" },
+        { id: 63, cat: "頒獎典禮", date: "11/15", task: "頒獎典禮流程定稿、主持稿定稿、表演活動定稿、長官致詞定稿", unit: "阿皓", status: "待開始", note: "", badge: "tip", comment: "" },
+        { id: 66, cat: "影片徵選", date: "11/15", task: "公布入圍名單", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "Google報名表有告知11月中旬公告名單" },
+        { id: 64, cat: "頒獎典禮", date: "11/20", task: "所有影片/動畫定稿", unit: "阿皓", status: "待開始", note: "", badge: "tip", comment: "" },
+        { id: 65, cat: "頒獎典禮", date: "11/23", task: "全部工作人員最後分工確認", unit: "所有工作人員", status: "待開始", note: "", badge: "warn", comment: "" },
+        { id: 67, cat: "頒獎典禮", date: "12/4 (暫)", task: "技術設備準備就緒、流程彩排", unit: "北都行銷部", status: "待開始", note: "", badge: "warn", comment: "" },
+        { id: 68, cat: "頒獎典禮", date: "12/5 (暫)", task: "台北有影3頒獎典禮(威秀)", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "準備額外申報單給得獎者填寫\n申報單須檢附雙證件影本\n現場簽到表" },
+        { id: 81, cat: "行政準備", date: "12/20", task: "找春酒的場地+長官/業者伴手禮", unit: "北都行銷部", status: "待開始", note: "", badge: "", comment: "以往是訂在3月中\n國軍英雄館、驥元" }
       ];
       let data = [], nextId = 100, currentFilter = "全部", currentSearch = "", currentView = "list";
       const MONTHS_ZH = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"];
@@ -1666,7 +1689,7 @@
       // 範圍日期的開頭 = 可開始日；尾巴 = 截止日
       // 單一日期的開始與截止相同
       // ──────────────────────────────────────────────────────────────
-      const WINDOW_TASK_IDS = new Set([3, 15, 21, 48]);
+      const WINDOW_TASK_IDS = new Set([22, 40, 79, 43, 53]);
 
       function getKind(row) {
         if (row && row.kind) return row.kind;
@@ -2298,8 +2321,9 @@
       function showToast(msg) {
         const el = document.getElementById("toast");
         el.textContent = msg;
-        el.classList.add("active");
-        setTimeout(() => el.classList.remove("active"), 2200);
+        el.classList.add("show");
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => el.classList.remove("show"), 2200);
       }
 
       // ──────────────────────────────────────────────────────────────
@@ -2342,23 +2366,15 @@
         };
       }
 
-      // 一次性自動修正：第 7、9 列日期 6/1–6/30 → 6/1–7/1
-      // 真正截止日是 7/1 徵件，原 6/30 是備註裡藏的錯誤值
-      function applyOneTimeMigration() {
-        let migrated = false;
-        const targets = [7, 9];
-        targets.forEach((id) => {
-          const row = data.find((r) => r.id === id);
-          if (row && /^6\/1\s*[–\-~～]\s*6\/30$/.test(row.date)) {
-            row.date = "6/1–7/1";
-            migrated = true;
-          }
+      function hasFullSchedule(rows) {
+        return Array.isArray(rows) && rows.some((r) => {
+          const date = clean(r.date).replace(/\s/g, "");
+          return date.startsWith("12/20") && clean(r.task).includes("春酒");
         });
-        if (migrated) {
-          isDirty = true;
-          showToast("已自動修正第 7、9 項日期，請點儲存");
-        }
       }
+
+      // 保留 migration hook，之後若資料欄位規格變更，可在此集中處理。
+      function applyOneTimeMigration() {}
 
       async function loadSaved() {
         try {
@@ -2366,9 +2382,21 @@
           if (!res.ok) throw new Error("fetch failed");
           const j = await res.json();
           if (j.rows && Array.isArray(j.rows) && j.rows.length) {
-            data = j.rows.map(parseSheetRow);
+            const savedRows = j.rows.map(parseSheetRow);
+            if (hasFullSchedule(savedRows)) {
+              data = savedRows;
+              nextId = Math.max(...data.map((r) => r.id), 0) + 1;
+              if (j.lastUpdated) document.getElementById("last-saved").textContent = j.lastUpdated;
+              return;
+            }
+
+            // 遠端仍是舊版 49 筆時，直接改用內建完整版，避免畫面停在 12/5。
+            console.warn("遠端資料缺少 12/20 任務，已改用內建完整版資料。");
+            data = INITIAL_DATA.slice();
             nextId = Math.max(...data.map((r) => r.id), 0) + 1;
-            if (j.lastUpdated) document.getElementById("last-saved").textContent = j.lastUpdated;
+            isDirty = true;
+            document.getElementById("last-saved").textContent = "已載入完整版，尚未同步";
+            showToast("已載入完整版資料，請點儲存同步");
             return;
           }
         } catch (e) {
