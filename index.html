@@ -1,439 +1,1204 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>台北有影 3｜2026 專案進度追蹤</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #f0faf8;
-      --surface: #ffffff;
-      --surface-2: #e6f5f2;
-      --border: #c8e6e0;
-      --border-2: #a8d5cc;
-      --accent: #0d9488;
-      --accent-hover: #0f766e;
-      --header: #134e4a;
-      --text: #1a3330;
-      --text-dim: #3d5c57;
-      --text-muted: #5f8a84;
-      --danger: #dc2626;
-      --warning: #d97706;
-      --shadow: 0 2px 12px rgba(13, 74, 70, 0.25);
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>台北有影 3｜2026 專案進度追蹤</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f0faf8;
+        --surface: #ffffff;
+        --surface2: #e6f5f2;
+        --border: #c8e6e0;
+        --border2: #a8d5cc;
+        --accent: #0d9488;
+        --accent-hover: #0f766e;
+        --text: #1a3330;
+        --text-dim: #3d5c57;
+        --text-muted: #5f8a84;
+      }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 16px; }
-    body {
-      min-height: 100vh;
-      background: var(--bg);
-      color: var(--text);
-      font-family: "Noto Sans TC", sans-serif;
-    }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        font-size: 16px;
+      }
+      body {
+        font-family: "Noto Sans TC", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
 
-    .mono { font-family: "IBM Plex Mono", monospace; }
-    .hidden { display: none !important; }
+      /* ── HEADER ── */
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: #134e4a;
+        padding: 0 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 68px;
+        box-shadow: 0 2px 12px rgba(13, 74, 70, 0.25);
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+      .logo {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.2em;
+        color: #5eead4;
+        text-transform: uppercase;
+      }
+      .project-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #ffffff;
+      }
+      .project-title .year {
+        color: #99f6e4;
+        font-size: 0.9rem;
+        font-weight: 400;
+        margin-left: 0.5rem;
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .font-ctrl {
+        display: flex;
+        gap: 0.3rem;
+      }
 
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      height: 68px;
-      padding: 0 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      background: var(--header);
-      box-shadow: var(--shadow);
-    }
-    .header-left, .header-right, .toolbar-right, .font-controls {
-      display: flex;
-      align-items: center;
-      gap: .65rem;
-      flex-wrap: wrap;
-    }
-    .header-left { gap: 1.5rem; }
-    .logo {
-      color: #5eead4;
-      font: 700 .72rem/1 "IBM Plex Mono", monospace;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    .project-title {
-      color: #fff;
-      font-size: 1.1rem;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-    .project-title .year {
-      margin-left: .5rem;
-      color: #99f6e4;
-      font-size: .9rem;
-      font-weight: 400;
-    }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem 1rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        background: rgba(255, 255, 255, 0.12);
+        color: #e0fdf4;
+        font-family: "Noto Sans TC", sans-serif;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-decoration: none;
+      }
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.24);
+        color: #fff;
+      }
+      .btn-accent {
+        background: #0d9488;
+        border-color: #0d9488;
+        color: #fff;
+        font-weight: 700;
+        box-shadow: 0 2px 6px rgba(13, 148, 136, 0.4);
+      }
+      .btn-accent:hover {
+        background: #0f766e;
+        border-color: #0f766e;
+      }
+      .font-btn {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
 
-    .btn, .filter-btn, .view-btn, .add-task-btn {
-      border: 1px solid rgba(255,255,255,.22);
-      border-radius: 8px;
-      background: rgba(255,255,255,.12);
-      color: #e0fdf4;
-      padding: .45rem 1rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: .35rem;
-      text-decoration: none;
-      font-size: .88rem;
-      transition: .15s ease;
-    }
-    .btn:hover { background: rgba(255,255,255,.24); color: #fff; }
-    .btn-accent, .add-task-btn {
-      border-color: var(--accent);
-      background: var(--accent);
-      color: #fff;
-      font-weight: 800;
-      box-shadow: 0 2px 6px rgba(13,148,136,.3);
-    }
-    .btn-accent:hover, .add-task-btn:hover { background: var(--accent-hover); }
-    .font-btn { padding: .35rem .65rem; font-size: .82rem; font-weight: 800; }
+      /* ── STATS ── */
+      .stats-bar {
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+        padding: 0.9rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 2.2rem;
+        overflow-x: auto;
+      }
+      .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+      }
+      .stat-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-dim);
+        font-weight: 500;
+      }
+      .stat-val {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text);
+      }
 
-    .stats-bar, .progress-section, .toolbar {
-      background: #fff;
-      border-bottom: 1px solid var(--border);
-      padding: .9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem 2.2rem;
-      overflow-x: auto;
-    }
-    .toolbar { border-bottom-width: 2px; flex-wrap: wrap; }
-    .stat-item { display: flex; align-items: center; gap: .5rem; white-space: nowrap; }
-    .stat-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
-    .stat-label, .progress-label, .filter-label { color: var(--text-dim); font-size: .9rem; font-weight: 700; }
-    .stat-val, .progress-pct { color: var(--text); font: 800 1.05rem/1 "IBM Plex Mono", monospace; }
-    .progress-pct { color: var(--accent); }
-    .progress-bar-wrap { min-width: 180px; flex: 1; height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
-    .progress-bar-fill { height: 100%; width: 0; background: linear-gradient(90deg, #0d9488, #059669); border-radius: inherit; transition: width .35s ease; }
+      /* ── PROGRESS ── */
+      .progress-section {
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+        padding: 0.9rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+      .progress-label {
+        font-size: 0.9rem;
+        color: var(--text-dim);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .progress-bar-wrap {
+        flex: 1;
+        min-width: 180px;
+        height: 8px;
+        background: var(--surface2);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #0d9488, #059669);
+        border-radius: 4px;
+        transition: width 0.4s;
+      }
+      .progress-pct {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--accent);
+      }
 
-    .filter-btn {
-      border: 1.5px solid var(--border-2);
-      border-radius: 999px;
-      background: #fff;
-      color: var(--text-dim);
-      font-weight: 700;
-    }
-    .filter-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0faf8; }
-    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .filter-btn[data-cat="行政準備"].active { background: #2563eb; border-color: #2563eb; }
-    .filter-btn[data-cat="影片徵選"].active { background: #7c3aed; border-color: #7c3aed; }
-    .filter-btn[data-cat="頒獎典禮"].active { background: #b45309; border-color: #b45309; }
-    .filter-btn[data-cat="市民大聲說"].active { background: #059669; border-color: #059669; }
-    .filter-btn[data-cat="人才培訓"].active { background: #be185d; border-color: #be185d; }
-    .toolbar-right { margin-left: auto; }
-    .view-toggle { display: flex; border: 1.5px solid var(--border-2); border-radius: 8px; overflow: hidden; }
-    .view-btn {
-      border: 0;
-      border-radius: 0;
-      background: #fff;
-      color: var(--text-dim);
-      font-weight: 700;
-      box-shadow: none;
-    }
-    .view-btn.active { background: var(--accent); color: #fff; }
-    .view-btn:hover:not(.active) { background: var(--surface-2); color: var(--text); }
-    .search-wrap { position: relative; }
-    .search-input {
-      width: 210px;
-      border: 1.5px solid var(--border-2);
-      border-radius: 8px;
-      outline: 0;
-      padding: .42rem .85rem .42rem 2.1rem;
-      color: var(--text);
-      background: #fff;
-    }
-    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
-    .search-icon { position: absolute; left: .6rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+      /* ── TOOLBAR ── */
+      .toolbar {
+        background: #fff;
+        border-bottom: 2px solid var(--border);
+        padding: 0.55rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+      }
+      .filter-label {
+        font-size: 0.88rem;
+        color: var(--text-dim);
+        font-weight: 700;
+        margin-right: 0.1rem;
+      }
+      .filter-btn {
+        padding: 0.3rem 0.7rem;
+        border-radius: 20px;
+        border: 1.5px solid var(--border2);
+        background: #fff;
+        color: var(--text-dim);
+        font-family: "Noto Sans TC", sans-serif;
+        font-size: 0.84rem;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-weight: 500;
+      }
+      .filter-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: #f0faf8;
+      }
+      .filter-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+        font-weight: 700;
+      }
+      .filter-btn[data-cat="行政準備"].active {
+        background: #2563eb;
+        border-color: #2563eb;
+      }
+      .filter-btn[data-cat="影片徵選"].active {
+        background: #7c3aed;
+        border-color: #7c3aed;
+      }
+      .filter-btn[data-cat="頒獎典禮"].active {
+        background: #b45309;
+        border-color: #b45309;
+      }
+      .filter-btn[data-cat="市民大聲說"].active {
+        background: #059669;
+        border-color: #059669;
+      }
+      .filter-btn[data-cat="人才培訓"].active {
+        background: #be185d;
+        border-color: #be185d;
+      }
 
-    .table-wrap, #calendar-view, #dashboard-view { padding: 0 2rem 5rem; }
-    table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 1rem; font-size: .97rem; }
-    thead th {
-      position: sticky;
-      top: 68px;
-      z-index: 30;
-      background: var(--bg);
-      padding: .75rem .9rem;
-      border-bottom: 2px solid var(--border);
-      color: var(--text-dim);
-      text-align: left;
-      font-size: .8rem;
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    thead th:first-child, tbody td:first-child { padding-left: 0; }
-    tbody td { padding: .95rem .9rem; vertical-align: top; border-bottom: 1px solid var(--border); }
-    tbody tr:hover { background: #f0fdf8; }
-    tbody tr.row-overdue { background: #fff5f5; }
-    tbody tr.row-overdue:hover { background: #fee8e8; }
-    tbody tr.row-warning { background: #fffdf0; }
-    tbody tr.row-warning:hover { background: #fef9c3; }
+      .toolbar-right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .add-task-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.48rem 1.15rem;
+        border-radius: 8px;
+        background: var(--accent);
+        border: none;
+        color: #fff;
+        font-family: "Noto Sans TC", sans-serif;
+        font-size: 0.92rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s;
+        box-shadow: 0 2px 6px rgba(13, 148, 136, 0.3);
+      }
+      .add-task-btn:hover {
+        background: var(--accent-hover);
+        box-shadow: 0 3px 10px rgba(13, 148, 136, 0.4);
+      }
 
-    .col-group { width: 110px; }
-    .col-date { width: 120px; }
-    .col-task { min-width: 300px; }
-    .col-unit { width: 170px; }
-    .col-status { width: 128px; }
-    .col-note { min-width: 240px; }
-    .col-actions { width: 60px; }
+      .view-toggle {
+        display: flex;
+        border: 1.5px solid var(--border2);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .view-btn {
+        padding: 0.4rem 0.95rem;
+        border: none;
+        background: transparent;
+        color: var(--text-dim);
+        font-family: "Noto Sans TC", sans-serif;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-weight: 500;
+      }
+      .view-btn.active {
+        background: var(--accent);
+        color: #fff;
+        font-weight: 700;
+      }
+      .view-btn:hover:not(.active) {
+        background: var(--surface2);
+        color: var(--text);
+      }
 
-    .month-divider td {
-      padding: 1.7rem .9rem .65rem;
-      background: var(--bg) !important;
-      border-bottom: 0;
-    }
-    #table-body tr.month-divider:first-child td { padding-top: 2rem; }
-    .month-label {
-      display: inline-block;
-      border: 1.5px solid var(--border-2);
-      border-radius: 5px;
-      background: #fff;
-      padding: .3rem .75rem;
-      color: var(--text-dim);
-      font: 800 .75rem/1 "IBM Plex Mono", monospace;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-    }
+      .search-wrap {
+        position: relative;
+      }
+      .search-input {
+        background: #fff;
+        border: 1.5px solid var(--border2);
+        border-radius: 8px;
+        padding: 0.42rem 0.85rem 0.42rem 2.1rem;
+        color: var(--text);
+        font-family: "Noto Sans TC", sans-serif;
+        font-size: 0.9rem;
+        width: 210px;
+        outline: none;
+        transition: all 0.15s;
+      }
+      .search-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+      }
+      .search-input::placeholder {
+        color: var(--text-muted);
+      }
+      .search-icon {
+        position: absolute;
+        left: 0.6rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        pointer-events: none;
+      }
 
-    .group-tag-select, .status-select {
-      appearance: none;
-      outline: 0;
-      cursor: pointer;
-      border: 1.5px solid;
-      font-weight: 800;
-    }
-    .group-tag-select { padding: .28rem .7rem; border-radius: 5px; font-size: .82rem; }
-    .status-select { padding: .3rem .75rem; border-radius: 999px; font-size: .88rem; }
-    .tag-行政準備 { background:#dbeafe; color:#1e40af; border-color:#93c5fd; }
-    .tag-影片徵選 { background:#ede9fe; color:#5b21b6; border-color:#c4b5fd; }
-    .tag-頒獎典禮 { background:#fef3c7; color:#92400e; border-color:#fcd34d; }
-    .tag-市民大聲說 { background:#d1fae5; color:#065f46; border-color:#6ee7b7; }
-    .tag-人才培訓 { background:#fce7f3; color:#9d174d; border-color:#f9a8d4; }
-    .status-待開始 { color:#455a64; border-color:#90a4ae; background:#f5f7f8; }
-    .status-進行中 { color:#01579b; border-color:#29b6f6; background:#e1f5fe; }
-    .status-已完成 { color:#1b5e20; border-color:#66bb6a; background:#e8f5e9; }
-    .status-待確認 { color:#bf360c; border-color:#ffa726; background:#fff3e0; }
-    .status-延遲 { color:#b71c1c; border-color:#ef9a9a; background:#ffebee; }
+      /* ── TABLE ── */
+      .table-wrap {
+        overflow-x: auto;
+        padding: 0 2rem 5rem;
+      }
 
-    .date-text { color: var(--text-dim); font: 700 .9rem/1.5 "IBM Plex Mono", monospace; }
-    .date-overdue { color: var(--danger) !important; font-weight: 900 !important; }
-    .date-warning { color: var(--warning) !important; font-weight: 900 !important; }
-    .task-content { line-height: 1.65; }
-    .task-badge { display: inline-block; margin-bottom: .35rem; border-radius: 3px; padding: .12rem .42rem; font-size: .75rem; font-weight: 900; letter-spacing: .04em; }
-    .badge-new { background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; }
-    .badge-warn { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
-    .badge-tip { background:#fef9c3; color:#854d0e; border:1px solid #fde047; }
-    .unit-text, .note-original { color: var(--text-dim); font-size: .9rem; }
-    .note-cell { display: flex; flex-direction: column; gap: .5rem; }
-    .note-original, .note-comment { line-height: 1.55; white-space: pre-wrap; overflow-wrap: break-word; }
-    .note-comment {
-      min-height: 3.5rem;
-      border-left: 3px solid #f59e0b;
-      border-radius: 0 6px 6px 0;
-      background: #fffde7;
-      padding: .6rem .75rem;
-      outline: 0;
-      color: var(--text);
-      font-size: .9rem;
-    }
-    .note-comment:focus { background:#fff9c4; border-left-color:#d97706; }
-    .note-comment:empty::before { content: attr(data-placeholder); color: var(--text-muted); }
-    .task-editable { display: block; cursor: text; outline: 0; }
-    .task-editable:focus {
-      margin: -.2rem -.4rem;
-      padding: .2rem .4rem;
-      border-radius: 4px;
-      outline: 1.5px solid var(--accent);
-      background: #f0fdf8;
-    }
-    .row-actions { display: flex; gap: .25rem; opacity: 0; transition: opacity .15s; }
-    tbody tr:hover .row-actions { opacity: 1; }
-    .action-btn {
-      width: 28px; height: 28px;
-      display: grid; place-items: center;
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      background: #fff;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-    .action-btn:hover { border-color:#fca5a5; color:#dc2626; background:#fef2f2; }
-    .action-btn.edit-btn:hover { border-color:#6ee7b7; color:#059669; background:#f0fdf8; }
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 1rem;
+        font-size: 0.97rem;
+      }
 
-    .cal-nav { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 0 1rem; }
-    .cal-nav .btn { background:#fff; color:var(--text); border:1.5px solid var(--border-2); }
-    .cal-title { color: var(--text); font-size: 1.25rem; font-weight: 900; }
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--border); }
-    .cal-day-header { background: var(--header); color: #99f6e4; padding: .65rem; text-align: center; font-weight: 900; }
-    .cal-day { min-height: 115px; background: #fff; padding: .65rem; }
-    .cal-day.empty { background:#f5faf8; }
-    .cal-day.today { background:#f0fdf8; }
-    .cal-day-num { margin-bottom: .45rem; color: var(--text-dim); font: 900 .9rem/1 "IBM Plex Mono", monospace; }
-    .cal-day.today .cal-day-num { color: var(--accent); }
-    .cal-task-chip { display: block; margin-bottom: .28rem; border-radius: 4px; padding: .2rem .48rem; font-size: .78rem; font-weight: 800; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
-    .cal-task-chip:hover { opacity: .72; }
-    .cal-more { color: var(--text-muted); font-size: .78rem; font-weight: 800; cursor: pointer; }
-    .cal-legend { display: flex; gap: .85rem; flex-wrap: wrap; margin-top: 1.1rem; }
-    .cal-leg-dot { display: inline-block; padding: .13rem .5rem; border-radius: 4px; font-size: .8rem; font-weight: 800; }
+      thead th {
+        padding: 0.75rem 0.9rem;
+        text-align: left;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        border-bottom: 2px solid var(--border);
+        white-space: nowrap;
+        position: sticky;
+        top: 68px;
+        background: var(--bg);
+        z-index: 30;
+      }
+      thead th:first-child {
+        padding-left: 0;
+      }
 
-    .dash-header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; padding: 1.4rem 0 1.2rem; }
-    .dash-header h2 { font-size: 1.12rem; }
-    .dash-header p { margin-top: .2rem; color: var(--text-muted); font-size: .84rem; }
-    .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.15rem; margin-bottom: 1.15rem; }
-    .dash-card { background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:1.2rem 1.4rem; }
-    .dash-card-title { margin-bottom:.9rem; padding-bottom:.5rem; border-bottom:1.5px solid var(--border); color:var(--text-muted); font-size:.75rem; font-weight:900; text-transform:uppercase; letter-spacing:.1em; }
-    .cat-row { display:flex; align-items:center; gap:.65rem; margin-bottom:.65rem; }
-    .cat-name { min-width:78px; font-size:.84rem; font-weight:900; }
-    .cat-bar-wrap { flex:1; height:8px; border-radius:999px; background:var(--surface-2); overflow:hidden; }
-    .cat-bar-fill { height:100%; border-radius:inherit; transition:width .4s ease; }
-    .cat-pct { min-width:34px; text-align:right; font:900 .8rem/1 "IBM Plex Mono", monospace; }
-    .risk-block { display:flex; align-items:center; gap:.85rem; margin-bottom:.65rem; padding:.85rem 1rem; border-radius:9px; }
-    .risk-num { font:900 1.85rem/1 "IBM Plex Mono", monospace; }
-    .risk-label { font-size:.86rem; font-weight:900; }
-    .risk-sub { margin-top:.15rem; font-size:.76rem; }
-    .dl-item { display:flex; align-items:baseline; gap:.5rem; padding:.4rem 0; border-bottom:1px solid var(--border); font-size:.85rem; }
-    .dl-tag { flex:0 0 auto; border-radius:4px; padding:.12rem .4rem; font:900 .74rem/1.3 "IBM Plex Mono", monospace; }
-    .overdue-row { margin-bottom:.3rem; border-left:3px solid #ef4444; border-radius:5px; background:#fef2f2; padding:.28rem .55rem; color:#dc2626; font-size:.82rem; line-height:1.4; }
-    .cat-status-grid { display:grid; grid-template-columns: repeat(5, 1fr); gap:.75rem; }
-    .cat-status-card { background: var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:.7rem; }
-    .cat-status-name { margin-bottom:.45rem; font-size:.78rem; font-weight:900; }
-    .cat-status-line { display:flex; justify-content:space-between; margin-bottom:.2rem; color:var(--text-dim); font-size:.76rem; }
-    .cat-status-line span:last-child { font-family:"IBM Plex Mono", monospace; font-weight:900; }
+      .col-group {
+        width: 100px;
+      }
+      .col-date {
+        width: 120px;
+      }
+      .col-task {
+        min-width: 280px;
+      }
+      .col-unit {
+        width: 160px;
+      }
+      .col-status {
+        width: 128px;
+      }
+      .col-note {
+        min-width: 240px;
+      }
+      .col-actions {
+        width: 50px;
+      }
 
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      background: rgba(15,40,35,.45);
-      backdrop-filter: blur(3px);
-    }
-    .modal-overlay.active { display: flex; }
-    .modal {
-      width: 530px;
-      max-width: 93vw;
-      max-height: 92vh;
-      overflow: auto;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: #fff;
-      padding: 2.1rem;
-      box-shadow: 0 20px 60px rgba(0,0,0,.18);
-    }
-    .modal-wide { width: 660px; }
-    .modal h3 { margin-bottom: 1.3rem; color: var(--text); font-size: 1.08rem; font-weight: 900; line-height: 1.5; }
-    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:.9rem; }
-    .form-group { margin-bottom: 1.05rem; }
-    .form-label { display:block; margin-bottom:.4rem; color:var(--text-dim); font-size:.85rem; font-weight:900; }
-    .form-input, .form-select, .form-textarea {
-      width:100%; outline:0; border:1.5px solid var(--border-2); border-radius:7px; background:#f8faf9;
-      padding:.58rem .88rem; color:var(--text); font-size:.95rem;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(13,148,136,.12); background:#fff; }
-    .form-textarea { min-height: 90px; resize: vertical; }
-    .modal-actions, .report-actions { display:flex; justify-content:flex-end; align-items:center; gap:.75rem; flex-wrap:wrap; margin-top:1.5rem; }
-    .btn-cancel { background:#fff; color:var(--text-dim); border:1.5px solid var(--border-2); box-shadow:none; }
-    #report-text { width:100%; height:50vh; resize:none; outline:0; border:1.5px solid var(--border); border-radius:8px; background:#f8faf9; padding:1rem; color:var(--text); font:400 .82rem/1.78 "IBM Plex Mono", monospace; }
-    #report-text:focus { border-color:var(--accent); }
-    .toast { position:fixed; right:2rem; bottom:2rem; z-index:2000; transform:translateX(130%); border-radius:8px; background:var(--header); color:#fff; padding:.85rem 1.4rem; font-size:.92rem; box-shadow:0 4px 16px rgba(13,74,70,.3); transition:transform .25s; }
-    .toast.show { transform:translateX(0); }
+      tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background 0.1s;
+      }
+      tbody tr:hover {
+        background: #f0fdf8;
+      }
+      tbody tr.hidden {
+        display: none;
+      }
+      tbody td {
+        padding: 0.95rem 0.9rem;
+        vertical-align: top;
+      }
+      tbody td:first-child {
+        padding-left: 0;
+      }
 
-    @media (max-width: 1000px) { .dash-grid { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 900px) { .cat-status-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 760px) {
-      header { height:auto; min-height:68px; padding:.8rem 1rem; align-items:flex-start; flex-direction:column; }
-      thead th { top:0; }
-      .stats-bar, .progress-section, .toolbar, .table-wrap, #calendar-view, #dashboard-view { padding-left:1rem; padding-right:1rem; }
-      .toolbar-right { margin-left:0; }
-      .dash-grid, .cat-status-grid, .form-row { grid-template-columns:1fr; }
-      .cal-grid { grid-template-columns: repeat(7, minmax(90px, 1fr)); overflow-x:auto; }
-      .project-title { white-space:normal; }
-    }
-    @media print {
-      header, .stats-bar, .toolbar, .progress-section, .row-actions, .modal-overlay, .toast { display:none!important; }
-      body { background:#fff; }
-      .table-wrap { padding:0; }
-      thead th { position:static; }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="header-left">
-      <div class="logo">PAC · 公用頻道</div>
-      <div class="project-title">台北有影 3<span class="year">2026 專案進度追蹤</span></div>
-    </div>
-    <div class="header-right">
-      <div class="font-controls">
-        <button class="btn font-btn" type="button" data-action="font-minus">A－</button>
-        <button class="btn font-btn" type="button" data-action="font-plus">A＋</button>
+      tbody tr.row-overdue {
+        background: #fff5f5;
+      }
+      tbody tr.row-overdue:hover {
+        background: #fee8e8;
+      }
+      tbody tr.row-warning {
+        background: #fffdf0;
+      }
+      tbody tr.row-warning:hover {
+        background: #fef9c3;
+      }
+      .date-overdue {
+        color: #dc2626 !important;
+        font-weight: 800 !important;
+      }
+      .date-warning {
+        color: #d97706 !important;
+        font-weight: 700 !important;
+      }
+
+      /* ── TAGS ── */
+      .group-tag-select {
+        appearance: none;
+        padding: 0.28rem 0.7rem;
+        border-radius: 5px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        white-space: nowrap;
+        cursor: pointer;
+        outline: none;
+        border: 1.5px solid;
+        font-family: "Noto Sans TC", sans-serif;
+        transition: all 0.15s;
+      }
+      .group-tag-select.tag-行政準備 {
+        background: #dbeafe;
+        color: #1e40af;
+        border-color: #93c5fd;
+      }
+      .group-tag-select.tag-影片徵選 {
+        background: #ede9fe;
+        color: #5b21b6;
+        border-color: #c4b5fd;
+      }
+      .group-tag-select.tag-頒獎典禮 {
+        background: #fef3c7;
+        color: #92400e;
+        border-color: #fcd34d;
+      }
+      .group-tag-select.tag-市民大聲說 {
+        background: #d1fae5;
+        color: #065f46;
+        border-color: #6ee7b7;
+      }
+      .group-tag-select.tag-人才培訓 {
+        background: #fce7f3;
+        color: #9d174d;
+        border-color: #f9a8d4;
+      }
+      .tag-行政準備 {
+        background: #dbeafe;
+        color: #1e40af;
+        border: 1.5px solid #93c5fd;
+      }
+      .tag-影片徵選 {
+        background: #ede9fe;
+        color: #5b21b6;
+        border: 1.5px solid #c4b5fd;
+      }
+      .tag-頒獎典禮 {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1.5px solid #fcd34d;
+      }
+      .tag-市民大聲說 {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1.5px solid #6ee7b7;
+      }
+      .tag-人才培訓 {
+        background: #fce7f3;
+        color: #9d174d;
+        border: 1.5px solid #f9a8d4;
+      }
+
+      .date-text {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.9rem;
+        color: var(--text-dim);
+        font-weight: 600;
+      }
+      .task-content {
+        line-height: 1.65;
+        color: var(--text);
+      }
+      .task-badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        padding: 0.12rem 0.42rem;
+        border-radius: 3px;
+        margin-bottom: 0.35rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+      .badge-new {
+        background: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #93c5fd;
+      }
+      .badge-warn {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+      }
+      .badge-tip {
+        background: #fef9c3;
+        color: #854d0e;
+        border: 1px solid #fde047;
+      }
+
+      .task-editable {
+        cursor: text;
+        outline: none;
+        display: block;
+      }
+      .task-editable:focus {
+        background: #f0fdf8;
+        border-radius: 4px;
+        outline: 1.5px solid var(--accent);
+        padding: 0.2rem 0.4rem;
+        margin: -0.2rem -0.4rem;
+      }
+      .unit-text {
+        font-size: 0.9rem;
+        color: var(--text-dim);
+      }
+
+      .status-select {
+        appearance: none;
+        background: transparent;
+        border: 1.5px solid;
+        border-radius: 20px;
+        padding: 0.3rem 0.75rem;
+        font-family: "Noto Sans TC", sans-serif;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.15s;
+      }
+      .status-待開始 {
+        color: #455a64;
+        border-color: #90a4ae;
+        background: #f5f7f8;
+      }
+      .status-進行中 {
+        color: #01579b;
+        border-color: #29b6f6;
+        background: #e1f5fe;
+      }
+      .status-已完成 {
+        color: #1b5e20;
+        border-color: #66bb6a;
+        background: #e8f5e9;
+      }
+      .status-待確認 {
+        color: #bf360c;
+        border-color: #ffa726;
+        background: #fff3e0;
+      }
+      .status-延遲 {
+        color: #b71c1c;
+        border-color: #ef9a9a;
+        background: #ffebee;
+      }
+
+      .note-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .note-original {
+        font-size: 0.9rem;
+        color: var(--text-dim);
+        line-height: 1.55;
+        word-break: break-word;
+        white-space: pre-wrap;
+      }
+      .note-comment {
+        background: #fffde7;
+        border-left: 3px solid #f59e0b;
+        border-radius: 0 6px 6px 0;
+        padding: 0.6rem 0.75rem;
+        font-size: 0.9rem;
+        color: var(--text);
+        line-height: 1.6;
+        min-height: 3.5rem;
+        outline: none;
+        transition: all 0.15s;
+        font-family: "Noto Sans TC", sans-serif;
+        word-break: break-word;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+      }
+      .note-comment:focus {
+        background: #fff9c4;
+        border-left-color: #d97706;
+      }
+      .note-comment:empty::before {
+        content: attr(data-placeholder);
+        color: var(--text-muted);
+        white-space: normal;
+      }
+
+      .row-actions {
+        display: flex;
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      tr:hover .row-actions {
+        opacity: 1;
+      }
+      .action-btn {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 5px;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 0.82rem;
+        transition: all 0.15s;
+      }
+      .action-btn:hover {
+        border-color: #fca5a5;
+        color: #dc2626;
+        background: #fef2f2;
+      }
+      .action-btn.edit-btn:hover {
+        border-color: #6ee7b7;
+        color: #059669;
+        background: #f0fdf8;
+      }
+
+      .month-divider td {
+        padding: 2.35rem 0.9rem 0.65rem;
+        background: var(--bg) !important;
+        position: relative;
+        z-index: 5;
+      }
+      #table-body tr.month-divider:first-child td {
+        padding-top: calc(24px + 2rem);
+      }
+      .month-label {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.75rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        font-weight: 700;
+        padding: 0.3rem 0.75rem;
+        border: 1.5px solid var(--border2);
+        border-radius: 5px;
+        background: #fff;
+        display: inline-block;
+      }
+
+      /* ── CALENDAR ── */
+      #calendar-view {
+        padding: 0 2rem 5rem;
+      }
+      .cal-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.5rem 0 1rem;
+      }
+      .cal-nav .btn {
+        background: #fff;
+        color: var(--text);
+        border: 1.5px solid var(--border2);
+      }
+      .cal-nav .btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: #f0faf8;
+      }
+      .cal-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .cal-day-header {
+        background: #134e4a;
+        color: #99f6e4;
+        padding: 0.65rem;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 700;
+      }
+      .cal-day {
+        background: #fff;
+        min-height: 115px;
+        padding: 0.65rem;
+      }
+      .cal-day.empty {
+        background: #f5faf8;
+      }
+      .cal-day.today {
+        background: #f0fdf8;
+      }
+      .cal-day-num {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-dim);
+        margin-bottom: 0.45rem;
+      }
+      .cal-day.today .cal-day-num {
+        color: var(--accent);
+        font-weight: 900;
+      }
+      .cal-task-chip {
+        display: block;
+        font-size: 0.78rem;
+        padding: 0.2rem 0.48rem;
+        border-radius: 4px;
+        margin-bottom: 0.28rem;
+        line-height: 1.4;
+        cursor: pointer;
+        transition: opacity 0.12s;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 600;
+      }
+      .cal-task-chip:hover {
+        opacity: 0.7;
+      }
+      .cal-more {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        margin-top: 0.15rem;
+        font-weight: 600;
+      }
+      .cal-legend {
+        display: flex;
+        gap: 0.85rem;
+        margin-top: 1.1rem;
+        flex-wrap: wrap;
+      }
+      .cal-leg-dot {
+        display: inline-block;
+        padding: 0.13rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      /* ── DASHBOARD ── */
+      #dashboard-view {
+        padding: 0 2rem 5rem;
+      }
+      .dash-header {
+        padding: 1.4rem 0 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+      .dash-header h2 {
+        font-size: 1.12rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .dash-header p {
+        font-size: 0.84rem;
+        color: var(--text-muted);
+        margin-top: 0.2rem;
+      }
+      .dash-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.15rem;
+        margin-bottom: 1.15rem;
+      }
+      @media (max-width: 1000px) {
+        .dash-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 640px) {
+        .dash-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dash-card {
+        background: #fff;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 1.2rem 1.4rem;
+      }
+      .dash-card-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-bottom: 0.9rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1.5px solid var(--border);
+      }
+      .cat-row {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0.65rem;
+      }
+      .cat-row:last-child {
+        margin-bottom: 0;
+      }
+      .cat-name {
+        font-size: 0.84rem;
+        font-weight: 600;
+        min-width: 78px;
+      }
+      .cat-bar-wrap {
+        flex: 1;
+        height: 8px;
+        background: var(--surface2);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .cat-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s ease;
+      }
+      .cat-pct {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.8rem;
+        font-weight: 700;
+        min-width: 34px;
+        text-align: right;
+      }
+      .risk-block {
+        padding: 0.85rem 1rem;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        margin-bottom: 0.65rem;
+      }
+      .risk-num {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 1.85rem;
+        font-weight: 900;
+        line-height: 1;
+      }
+      .risk-label {
+        font-size: 0.86rem;
+        font-weight: 700;
+      }
+      .risk-sub {
+        font-size: 0.76rem;
+        margin-top: 0.15rem;
+      }
+      .dl-item {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        padding: 0.4rem 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.85rem;
+      }
+      .dl-item:last-child {
+        border-bottom: none;
+      }
+      .dl-tag {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.74rem;
+        font-weight: 700;
+        padding: 0.12rem 0.4rem;
+        border-radius: 4px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .overdue-row {
+        font-size: 0.82rem;
+        padding: 0.28rem 0.55rem;
+        border-radius: 5px;
+        margin-bottom: 0.3rem;
+        background: #fef2f2;
+        border-left: 3px solid #ef4444;
+        color: #dc2626;
+        line-height: 1.4;
+      }
+      .cat-status-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.75rem;
+      }
+      @media (max-width: 900px) {
+        .cat-status-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      .cat-status-card {
+        background: var(--surface2);
+        border-radius: 8px;
+        padding: 0.7rem;
+        border: 1px solid var(--border);
+      }
+      .cat-status-name {
+        font-size: 0.78rem;
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+      }
+      .cat-status-line {
+        font-size: 0.76rem;
+        color: var(--text-dim);
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.2rem;
+      }
+      .cat-status-line span:last-child {
+        font-family: "IBM Plex Mono", monospace;
+        font-weight: 700;
+      }
+
+      /* ── WEEKLY REPORT ── */
+      .modal-wide {
+        width: 660px;
+      }
+      #report-text {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.82rem;
+        background: #f8faf9;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+        line-height: 1.78;
+        color: var(--text);
+        height: 50vh;
+        resize: none;
+        width: 100%;
+        outline: none;
+      }
+      #report-text:focus {
+        border-color: var(--accent);
+      }
+      .report-actions {
+        display: flex;
+        gap: 0.65rem;
+        align-items: center;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+      }
+
+      /* ── MODALS ── */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 40, 35, 0.45);
+        backdrop-filter: blur(3px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-overlay.active {
+        display: flex;
+      }
+      .modal {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 2.1rem;
+        width: 530px;
+        max-width: 93vw;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+      }
+      .modal h3 {
+        font-size: 1.08rem;
+        margin-bottom: 1.3rem;
+        color: var(--text);
+        font-weight: 700;
+      }
+      .form-group {
+        margin-bottom: 1.05rem;
+      }
+      .form-label {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-dim);
+        margin-bottom: 0.4rem;
+        font-weight: 700;
+      }
+      .form-input,
+      .form-select,
+      .form-textarea {
+        width: 100%;
+        background: #f8faf9;
+        border: 1.5px solid var(--border2);
+        border-radius: 7px;
+        padding: 0.58rem 0.88rem;
+        color: var(--text);
+        font-family: "Noto Sans TC", sans-serif;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.15s;
+      }
+      .form-input:focus,
+      .form-select:focus,
+      .form-textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+        background: #fff;
+      }
+      .form-select {
+        cursor: pointer;
+      }
+      .form-textarea {
+        resize: vertical;
+        min-height: 90px;
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.9rem;
+      }
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+      }
+      .btn-cancel {
+        background: #fff;
+        color: var(--text-dim);
+        border: 1.5px solid var(--border2);
+      }
+      .btn-cancel:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: #f0faf8;
+      }
+
+      /* ── TOAST ── */
+      .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: #134e4a;
+        color: #fff;
+        border-radius: 8px;
+        padding: 0.85rem 1.4rem;
+        font-size: 0.92rem;
+        z-index: 2000;
+        transform: translateX(130%);
+        transition: transform 0.25s;
+        box-shadow: 0 4px 16px rgba(13, 74, 70, 0.3);
+      }
+      .toast.show {
+        transform: translateX(0);
+      }
+
+      @media print {
+        header,
+        .stats-bar,
+        .toolbar,
+        .progress-section,
+        .row-actions,
+        .modal-overlay,
+        .toast {
+          display: none !important;
+        }
+        body {
+          background: white;
+        }
+        .table-wrap {
+          padding: 0;
+        }
+      }
+
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border2);
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <div class="logo">PAC · 公用頻道</div>
+        <div class="project-title">台北有影 3<span class="year">2026 專案進度追蹤</span></div>
       </div>
-      <button class="btn" type="button" data-action="export-csv">⬇ 匯出</button>
-      <button class="btn" type="button" data-action="print">⎙ 列印</button>
-      <button class="btn btn-accent" id="save-btn" type="button" data-action="save-all">✓ 儲存</button>
-    </div>
-  </header>
-
-  <section class="stats-bar" aria-label="專案狀態統計">
-    <div class="stat-item"><span class="stat-dot" style="background:#90a4ae"></span><span class="stat-label">待開始</span><span class="stat-val" id="stat-pending">—</span></div>
-    <div class="stat-item"><span class="stat-dot" style="background:#29b6f6"></span><span class="stat-label">進行中</span><span class="stat-val" id="stat-ongoing">—</span></div>
-    <div class="stat-item"><span class="stat-dot" style="background:#66bb6a"></span><span class="stat-label">已完成</span><span class="stat-val" id="stat-done">—</span></div>
-    <div class="stat-item"><span class="stat-dot" style="background:#ffa726"></span><span class="stat-label">待確認</span><span class="stat-val" id="stat-confirm">—</span></div>
-    <div class="stat-item"><span class="stat-dot" style="background:#ef9a9a"></span><span class="stat-label">延遲</span><span class="stat-val" id="stat-late">—</span></div>
-    <div class="stat-item" style="border-left:1.5px solid var(--border);padding-left:1.5rem;"><span class="stat-dot" style="background:#ef4444"></span><span class="stat-label">逾期警示</span><span class="stat-val" id="stat-overdue" style="color:var(--text-muted)">0</span></div>
-    <div class="stat-item" style="margin-left:auto;"><span class="stat-label">最後同步：</span><span class="stat-val" id="last-saved" style="font-size:.88rem;color:var(--text-muted)">尚未儲存</span></div>
-  </section>
-
-  <section class="progress-section" aria-label="整體完成度">
-    <span class="progress-label">整體完成度</span>
-    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill"></div></div>
-    <span class="progress-pct" id="progress-pct">0%</span>
-  </section>
-
-  <nav class="toolbar" aria-label="工具列">
-    <span class="filter-label">篩選：</span>
-    <button class="filter-btn active" type="button" data-cat="全部">全部</button>
-    <button class="filter-btn" type="button" data-cat="行政準備">行政準備</button>
-    <button class="filter-btn" type="button" data-cat="影片徵選">影片徵選</button>
-    <button class="filter-btn" type="button" data-cat="頒獎典禮">頒獎典禮</button>
-    <button class="filter-btn" type="button" data-cat="市民大聲說">市民大聲說</button>
-    <button class="filter-btn" type="button" data-cat="人才培訓">人才培訓</button>
-    <div class="toolbar-right">
-      <button class="filter-btn" type="button" data-action="weekly-report" style="white-space:nowrap;padding:.42rem 1rem;">📋 週報</button>
-      <button class="add-task-btn" type="button" data-action="add-task">＋ 新增任務</button>
-      <div class="view-toggle" role="group" aria-label="切換檢視">
-        <button class="view-btn active" type="button" data-view="list">☰ 清單</button>
-        <button class="view-btn" type="button" data-view="dashboard">📊 儀表板</button>
-        <button class="view-btn" type="button" data-view="calendar">▦ 行事曆</button>
+      <div class="header-right">
+        <div class="font-ctrl">
+          <button class="btn font-btn" onclick="adjustFont(-1)">A－</button>
+          <button class="btn font-btn" onclick="adjustFont(1)">A＋</button>
+        </div>
+        <button class="btn" onclick="exportCSV()">⬇ 匯出</button>
+        <button class="btn" onclick="window.print()">⎙ 列印</button>
+        <button class="btn btn-accent" onclick="saveAll()">✓ 儲存</button>
       </div>
-      <label class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input class="search-input" id="search-input" type="text" placeholder="搜尋工作內容…" autocomplete="off" />
-      </label>
+    </header>
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-dot" style="background: #90a4ae"></div>
+        <span class="stat-label">待開始</span><span class="stat-val" id="stat-pending">—</span>
+      </div>
+      <div class="stat-item">
+        <div class="stat-dot" style="background: #29b6f6"></div>
+        <span class="stat-label">進行中</span><span class="stat-val" id="stat-ongoing">—</span>
+      </div>
+      <div class="stat-item">
+        <div class="stat-dot" style="background: #66bb6a"></div>
+        <span class="stat-label">已完成</span><span class="stat-val" id="stat-done">—</span>
+      </div>
+      <div class="stat-item">
+        <div class="stat-dot" style="background: #ffa726"></div>
+        <span class="stat-label">待確認</span><span class="stat-val" id="stat-confirm">—</span>
+      </div>
+      <div class="stat-item">
+        <div class="stat-dot" style="background: #ef9a9a"></div>
+        <span class="stat-label">延遲</span><span class="stat-val" id="stat-late">—</span>
+      </div>
+      <div class="stat-item" style="border-left: 1.5px solid var(--border); padding-left: 1.5rem">
+        <div class="stat-dot" style="background: #ef4444"></div>
+        <span class="stat-label">逾期警示</span
+        ><span class="stat-val" id="stat-overdue" style="color: var(--text-muted)">0</span>
+      </div>
+      <div class="stat-item" style="margin-left: auto">
+        <span class="stat-label">最後同步：</span
+        ><span class="stat-val" id="last-saved" style="font-size: 0.88rem; color: var(--text-muted)">尚未儲存</span>
+      </div>
     </div>
-  </nav>
-
-  <main>
-    <section class="table-wrap" id="table-view">
+    <div class="progress-section">
+      <span class="progress-label">整體完成度</span>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div></div>
+      <span class="progress-pct" id="progress-pct">0%</span>
+    </div>
+    <div class="toolbar">
+      <span class="filter-label">篩選：</span>
+      <button class="filter-btn active" data-cat="全部" onclick="filterCat(this)">全部</button>
+      <button class="filter-btn" data-cat="行政準備" onclick="filterCat(this)">行政準備</button>
+      <button class="filter-btn" data-cat="影片徵選" onclick="filterCat(this)">影片徵選</button>
+      <button class="filter-btn" data-cat="頒獎典禮" onclick="filterCat(this)">頒獎典禮</button>
+      <button class="filter-btn" data-cat="市民大聲說" onclick="filterCat(this)">市民大聲說</button>
+      <button class="filter-btn" data-cat="人才培訓" onclick="filterCat(this)">人才培訓</button>
+      <div class="toolbar-right">
+        <button class="filter-btn" onclick="openWeeklyReport()" style="white-space: nowrap; padding: 0.42rem 1rem">
+          📋 週報
+        </button>
+        <button class="add-task-btn" onclick="openAddModal()">＋ 新增任務</button>
+        <div class="view-toggle">
+          <button class="view-btn active" id="btn-list" onclick="switchView('list')">☰ 清單</button>
+          <button class="view-btn" id="btn-dash" onclick="switchView('dashboard')">📊 儀表板</button>
+          <button class="view-btn" id="btn-cal" onclick="switchView('calendar')">▦ 行事曆</button>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" placeholder="搜尋工作內容…" oninput="searchTable(this.value)" />
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap" id="table-view">
       <table>
         <thead>
           <tr>
@@ -442,897 +1207,1497 @@
             <th class="col-task">工作內容</th>
             <th class="col-unit">執行單位</th>
             <th class="col-status">進度狀態</th>
-            <th class="col-note">備註／補充說明</th>
+            <th class="col-note">備註 ／ 補充說明</th>
             <th class="col-actions"></th>
           </tr>
         </thead>
         <tbody id="table-body"></tbody>
       </table>
-    </section>
-
-    <section id="dashboard-view" style="display:none;"></section>
-
-    <section id="calendar-view" style="display:none;">
+    </div>
+    <div id="calendar-view" style="display: none">
       <div class="cal-nav">
-        <button class="btn" type="button" data-action="cal-prev">← 上個月</button>
+        <button class="btn" onclick="calPrev()">← 上個月</button>
         <span class="cal-title" id="cal-title"></span>
-        <button class="btn" type="button" data-action="cal-next">下個月 →</button>
+        <button class="btn" onclick="calNext()">下個月 →</button>
       </div>
       <div class="cal-grid" id="cal-grid"></div>
       <div class="cal-legend">
-        <span class="cal-leg-dot tag-行政準備">行政準備</span>
-        <span class="cal-leg-dot tag-影片徵選">影片徵選</span>
-        <span class="cal-leg-dot tag-頒獎典禮">頒獎典禮</span>
-        <span class="cal-leg-dot tag-市民大聲說">市民大聲說</span>
-        <span class="cal-leg-dot tag-人才培訓">人才培訓</span>
-      </div>
-    </section>
-  </main>
-
-  <div class="modal-overlay" id="task-modal" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
-    <div class="modal">
-      <h3 id="task-modal-title"></h3>
-      <div id="task-modal-meta" style="font-size:.88rem;color:var(--text-muted);margin-top:-.75rem;margin-bottom:1.3rem;"></div>
-      <div class="form-group">
-        <label class="form-label" for="tm-status">進度狀態</label>
-        <select class="form-select" id="tm-status"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="tm-comment">補充說明</label>
-        <textarea class="form-textarea" id="tm-comment" placeholder="在這裡新增說明、備忘、聯絡事項…" rows="4"></textarea>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-cancel" type="button" data-action="close-task-modal">取消</button>
-        <button class="btn btn-accent" type="button" data-action="save-task-modal">儲存更新</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
-    <div class="modal">
-      <h3 id="edit-modal-title">新增任務</h3>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label" for="m-cat">分類</label><select class="form-select" id="m-cat"></select></div>
-        <div class="form-group"><label class="form-label" for="m-date">日期</label><input class="form-input" type="text" id="m-date" placeholder="例：7/1 或 7/1–7/31"></div>
-      </div>
-      <div class="form-group"><label class="form-label" for="m-task">工作內容</label><textarea class="form-textarea" id="m-task" placeholder="任務描述…" rows="3"></textarea></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label" for="m-unit">執行單位</label><input class="form-input" type="text" id="m-unit" placeholder="北都行銷部"></div>
-        <div class="form-group"><label class="form-label" for="m-status">進度狀態</label><select class="form-select" id="m-status"></select></div>
-      </div>
-      <div class="form-group"><label class="form-label" for="m-badge">標籤</label><select class="form-select" id="m-badge"><option value="">無</option><option value="new">🔵 NEW（新增）</option><option value="warn">🔴 注意</option><option value="tip">💡 建議</option></select></div>
-      <div class="form-group"><label class="form-label" for="m-note">備註說明</label><input class="form-input" type="text" id="m-note" placeholder="補充資訊…"></div>
-      <div class="form-group"><label class="form-label" for="m-comment">補充說明（黃色備忘欄）</label><textarea class="form-textarea" id="m-comment" placeholder="備忘、聯絡事項…" rows="2"></textarea></div>
-      <div class="modal-actions">
-        <button class="btn btn-cancel" type="button" data-action="close-edit-modal">取消</button>
-        <button class="btn btn-accent" type="button" data-action="submit-edit-modal">確認新增</button>
+        <span
+          ><span class="cal-leg-dot" style="background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd"
+            >行政準備</span
+          ></span
+        >
+        <span
+          ><span class="cal-leg-dot" style="background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd"
+            >影片徵選</span
+          ></span
+        >
+        <span
+          ><span class="cal-leg-dot" style="background: #fef3c7; color: #92400e; border: 1px solid #fcd34d"
+            >頒獎典禮</span
+          ></span
+        >
+        <span
+          ><span class="cal-leg-dot" style="background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7"
+            >市民大聲說</span
+          ></span
+        >
+        <span
+          ><span class="cal-leg-dot" style="background: #fce7f3; color: #9d174d; border: 1px solid #f9a8d4"
+            >人才培訓</span
+          ></span
+        >
       </div>
     </div>
-  </div>
-
-  <div class="modal-overlay" id="weekly-report-modal" role="dialog" aria-modal="true" aria-labelledby="weekly-report-title">
-    <div class="modal modal-wide">
-      <h3 id="weekly-report-title">📋 本週進度週報</h3>
-      <p style="font-size:.85rem;color:var(--text-muted);margin:-.9rem 0 1.1rem;">複製後貼到 Email，或點「用 Email 傳送」開啟郵件程式。</p>
-      <textarea id="report-text" readonly></textarea>
-      <div class="report-actions">
-        <button class="btn btn-accent" type="button" data-action="copy-report">⎘ 複製內容</button>
-        <button class="btn" id="mailto-btn" type="button" style="background:#fff;color:var(--text);border:1.5px solid var(--border-2);">✉ 用 Email 傳送</button>
-        <div style="margin-left:auto;"><button class="btn btn-cancel" type="button" data-action="close-report-modal">關閉</button></div>
+    <div id="dashboard-view" style="display: none"></div>
+    <div class="modal-overlay" id="task-modal">
+      <div class="modal">
+        <h3 id="task-modal-title" style="line-height: 1.5"></h3>
+        <div
+          style="font-size: 0.88rem; color: var(--text-muted); margin-top: -0.75rem; margin-bottom: 1.3rem"
+          id="task-modal-meta"
+        ></div>
+        <div class="form-group">
+          <label class="form-label">進度狀態</label>
+          <select class="form-select" id="tm-status">
+            <option>待開始</option>
+            <option>進行中</option>
+            <option>已完成</option>
+            <option>待確認</option>
+            <option>延遲</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">補充說明</label>
+          <textarea
+            class="form-textarea"
+            id="tm-comment"
+            placeholder="在這裡新增說明、備忘、聯絡事項…"
+            rows="4"
+          ></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-cancel" onclick="closeTaskModal()">取消</button>
+          <button class="btn btn-accent" onclick="saveTaskModal()">儲存更新</button>
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <script>
-    "use strict";
-
-    // GitHub Pages 會公開此檔案內容。若此 Apps Script 端點不應公開，請移到後端或改用權限控管。
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec";
-
-    const CATS = ["行政準備", "影片徵選", "頒獎典禮", "市民大聲說", "人才培訓"];
-    const STATUS_KEYS = ["待開始", "進行中", "已完成", "待確認", "延遲"];
-    const MONTHS_ZH = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"];
-    const CAL_MONTH_ZH = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"];
-    const CAL_DAY = ["日", "一", "二", "三", "四", "五", "六"];
-    const CAT_COLORS = { "行政準備":"#3b82f6", "影片徵選":"#8b5cf6", "頒獎典禮":"#f59e0b", "市民大聲說":"#10b981", "人才培訓":"#ec4899" };
-
-    const INITIAL_DATA = [
-      {id:1,cat:"行政準備",date:"5/20",task:"公用頻道會議報告企劃案給特助確認最後版本",unit:"北都行銷部（阿皓）",status:"待開始",note:"5/20 跟特助確認",badge:"",comment:""},
-      {id:2,cat:"行政準備",date:"5/22",task:"提交公用頻道會議報告企劃案、徵選辦法、問燈箱費用、電子邀請卡",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:3,cat:"頒獎典禮",date:"5/25–5/27",task:"頒獎典禮硬體廠商會議（三天）",unit:"北都行銷部",status:"待開始",note:"5/25~5/27 三天會議",badge:"",comment:""},
-      {id:4,cat:"行政準備",date:"5/29",task:"衛星頻道執照企劃書",unit:"北都行銷部",status:"待確認",note:"",badge:"",comment:""},
-      {id:5,cat:"影片徵選",date:"6/1",task:"【新增】徵件辦法／簡章定稿",unit:"北都行銷部",status:"待開始",note:"公告徵件的正式文件",badge:"new",comment:""},
-      {id:6,cat:"人才培訓",date:"6/1",task:"【新增】人才培訓課程報名開放",unit:"北都行銷部",status:"待開始",note:"社群暖身宣傳，課程開始前開放報名",badge:"new",comment:""},
-      {id:7,cat:"影片徵選",date:"6/1–6/30",task:"製作年度活動影片、影片徵選活動影片（預計 7/1 完成）",unit:"北都行銷部／運豐多媒體",status:"待開始",note:"⚠ 6月底前拍攝完畢",badge:"warn",comment:""},
-      {id:8,cat:"影片徵選",date:"6/1–6/20",task:"製作及印製影片徵選活動海報／燈箱廣告（費用問題）、相關宣傳素材",unit:"北都行銷部",status:"待開始",note:"⚠ 6/20 前須完成",badge:"warn",comment:""},
-      {id:9,cat:"影片徵選",date:"6/1–6/30",task:"【新增】影片徵選收件平台／系統建置",unit:"北都行銷部",status:"待開始",note:"7/1 徵件前需準備完成",badge:"new",comment:""},
-      {id:10,cat:"人才培訓",date:"6/15",task:"社群暖身徵選宣傳，公告人才培訓課程內容，提供雲端表單",unit:"北都行銷部",status:"待開始",note:"",badge:"tip",comment:""},
-      {id:11,cat:"影片徵選",date:"6/24",task:"【新增】徵件事宜線上公告（至少前一週）",unit:"北都行銷部",status:"待開始",note:"線上公告與海報張貼分開規劃",badge:"new",comment:""},
-      {id:12,cat:"影片徵選",date:"6/29",task:"影片徵選活動海報寄送及張貼（高中、大學）",unit:"北都行銷部",status:"待開始",note:"⚠ 須提前 6/20 完成印製",badge:"warn",comment:""},
-      {id:13,cat:"影片徵選",date:"7/1",task:"年度活動影片／影片徵選活動影片開跑，宣傳培訓＋徵件啟動",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:14,cat:"影片徵選",date:"7/1",task:"影片徵選活動燈箱上架",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:15,cat:"影片徵選",date:"7/1–9/30",task:"影片徵選收件期間（建議 7/1~9/30；件數不足可延長至 10/10）",unit:"北都行銷部",status:"待開始",note:"建議提早評審",badge:"tip",comment:""},
-      {id:16,cat:"市民大聲說",date:"7/3",task:"市民大聲說 1、2 外景（西門）",unit:"北都行銷部／運豐多媒體",status:"待開始",note:"外景期間建議安排側拍人員",badge:"tip",comment:""},
-      {id:17,cat:"人才培訓",date:"7/11",task:"影像人才培訓課程（第 1 場）",unit:"北都行銷部／運豐多媒體",status:"待開始",note:"",badge:"",comment:""},
-      {id:18,cat:"市民大聲說",date:"7/18",task:"市民大聲說 1 播出",unit:"北都行銷部",status:"待開始",note:"對應 7/3 外景",badge:"",comment:""},
-      {id:19,cat:"人才培訓",date:"7/25",task:"影像人才培訓課程（第 2 場）",unit:"北都行銷部／運豐多媒體",status:"待開始",note:"",badge:"",comment:""},
-      {id:20,cat:"頒獎典禮",date:"8/1–8/31",task:"頒獎典禮主視覺定稿、製作典禮宣傳物（社群、海報）",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:21,cat:"影片徵選",date:"8/1–8/31",task:"注意徵件數量是否足夠；不足需啟動加強宣傳",unit:"北都行銷部",status:"待開始",note:"",badge:"warn",comment:""},
-      {id:22,cat:"市民大聲說",date:"8/7",task:"市民大聲說 3、4 外景（信義）",unit:"北都行銷部／運豐多媒體",status:"待開始",note:"外景期間建議安排側拍人員",badge:"tip",comment:""},
-      {id:23,cat:"人才培訓",date:"8/15",task:"影像人才培訓課程（第 3 場）",unit:"北都行銷部／運豐多媒體",status:"待開始",note:"",badge:"",comment:""},
-      {id:24,cat:"市民大聲說",date:"8/22",task:"市民大聲說 2 播出",unit:"北都行銷部",status:"待開始",note:"對應 7/3 外景",badge:"",comment:""},
-      {id:25,cat:"人才培訓",date:"8/22",task:"影像人才培訓課程（第 4 場）",unit:"北都行銷部／運豐多媒體",status:"待開始",note:"",badge:"",comment:""},
-      {id:26,cat:"影片徵選",date:"9/1",task:"【新增】評審委員邀請與確認",unit:"北都行銷部",status:"待開始",note:"10/15 評審若臨時找會很趕",badge:"new",comment:""},
-      {id:27,cat:"頒獎典禮",date:"9/1–9/30",task:"【新增】頒獎典禮籌備啟動（流程／貴賓／影片放映）",unit:"北都行銷部",status:"待開始",note:"5月硬體會議後到 12 月典禮的籌備期",badge:"new",comment:""},
-      {id:28,cat:"頒獎典禮",date:"9/1–9/30",task:"典禮現場製作物（電子邀請卡、背板、頒獎人名牌、舞台設計、拍照牆、獎金手版…）、新聞稿模板",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:29,cat:"市民大聲說",date:"9/19",task:"市民大聲說 3 播出",unit:"北都行銷部",status:"待開始",note:"對應 8/7 外景",badge:"",comment:""},
-      {id:30,cat:"影片徵選",date:"10/1",task:"【新增】評審會議場地與設備預訂",unit:"北都行銷部",status:"待開始",note:"評審期間需要場地與設備",badge:"new",comment:""},
-      {id:31,cat:"影片徵選",date:"10/1–10/10",task:"影片徵選初審",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:32,cat:"頒獎典禮",date:"10/5",task:"主持人確認、表演團體（音樂版權確認）",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:33,cat:"頒獎典禮",date:"10/10",task:"頒獎人確認、邀請",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:34,cat:"市民大聲說",date:"10/10",task:"市民大聲說 4 播出",unit:"北都行銷部",status:"待開始",note:"對應 8/7 外景",badge:"",comment:""},
-      {id:35,cat:"影片徵選",date:"10/15",task:"入圍名單確認",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:36,cat:"頒獎典禮",date:"10/15",task:"典禮流程初版、舞台設計；獎狀、獎盃、入圍名單主視覺動畫（典禮當天用）",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:37,cat:"影片徵選",date:"10/20",task:"入圍通知＋詢問是否參加頒獎典禮",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:38,cat:"頒獎典禮",date:"10/20",task:"所有影片初版（入圍影片／得獎影片／開場影片）",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:39,cat:"頒獎典禮",date:"10/25",task:"典禮流程會議、技術設備會議（硬體規格確認）",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:40,cat:"影片徵選",date:"10/31",task:"決審完成",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:41,cat:"影片徵選",date:"11/1",task:"【新增】得獎名單公告與得獎者通知",unit:"北都行銷部",status:"待開始",note:"評審結束到頒獎中間的空白期",badge:"new",comment:""},
-      {id:42,cat:"頒獎典禮",date:"11/1",task:"入圍名單公布、新聞稿、社群宣傳素材；頒獎典禮宣傳、全部工作人員會議（初步）",unit:"北都行銷部",status:"待開始",note:"入圍名單曝光期",badge:"",comment:""},
-      {id:43,cat:"頒獎典禮",date:"11/1",task:"【新增】貴賓邀請函發送與回覆統計",unit:"北都行銷部",status:"待開始",note:"典禮前一個月需完成貴賓確認",badge:"new",comment:""},
-      {id:44,cat:"頒獎典禮",date:"11/15",task:"頒獎典禮流程定稿、主持稿定稿、流程表定稿、頒獎順序定稿",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:45,cat:"頒獎典禮",date:"11/20",task:"所有影片定稿",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:46,cat:"頒獎典禮",date:"11/23",task:"全部工作人員會議、最後分工確認",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:47,cat:"頒獎典禮",date:"11/30",task:"主持人彩排",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:48,cat:"頒獎典禮",date:"12/3–12/4",task:"全流程總彩排、技術設備彩排",unit:"北都行銷部",status:"待開始",note:"",badge:"",comment:""},
-      {id:49,cat:"頒獎典禮",date:"12/5",task:"台北有影 3 頒獎典禮（候選場地：1. 威秀  2. 紅樓）",unit:"北都有線電視／運豐多媒體",status:"待開始",note:"場地候選：1. 威秀  2. 紅樓",badge:"",comment:""}
-    ];
-
-    let data = [];
-    let nextId = 100;
-    let currentFilter = "全部";
-    let currentSearch = "";
-    let currentView = "list";
-    let calMonth = 4;
-    let calYear = 2026;
-    let taskModalId = null;
-    let editingId = null;
-    let isDirty = false;
-    let isEditing = false;
-    let fontSize = parseInt(localStorage.getItem("tbff3_font") || "16", 10);
-
-    const $ = (selector, root = document) => root.querySelector(selector);
-    const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
-    const esc = (value = "") => String(value).replace(/[&<>'"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch]));
-    const cleanLabel = task => String(task || "").replace(/【.*?】/g, "").trim();
-
-    function showToast(message) {
-      const toast = $("#toast");
-      toast.textContent = message;
-      toast.classList.add("show");
-      window.setTimeout(() => toast.classList.remove("show"), 2800);
-    }
-
-    function applyFont() {
-      document.documentElement.style.fontSize = `${fontSize}px`;
-    }
-
-    function adjustFont(delta) {
-      fontSize = Math.min(22, Math.max(12, fontSize + delta));
-      localStorage.setItem("tbff3_font", String(fontSize));
-      applyFont();
-      showToast(`字體：${fontSize}px`);
-    }
-
-    function parseDateFirst(value) {
-      const raw = String(value || "").trim();
-      const match = raw.match(/(\d{1,2})\s*\/\s*(\d{1,2})/);
-      if (!match) return null;
-      return { month: Number(match[1]), day: Number(match[2]) };
-    }
-
-    function sortKey(row) {
-      const parsed = parseDateFirst(row.date);
-      return parsed ? parsed.month * 100 + parsed.day : 9999;
-    }
-
-    function getTaskType(row) {
-      if (/\d{1,2}\s*\/\s*\d{1,2}[^\d]*(前|前須|前需).{0,4}(完成|繳|送|確認|定稿|印製)/.test(row.task + row.note)) return "deadline";
-      if (/[–\-~～]/.test(row.date)) return "ongoing";
-      return "reminder";
-    }
-
-    function extractDeadline(row) {
-      const text = `${row.task || ""} ${row.note || ""}`;
-      const match = text.match(/(\d{1,2})\s*\/\s*(\d{1,2})[^\d]*(前|前須|前需)/);
-      if (!match) return null;
-      const date = new Date(new Date().getFullYear(), Number(match[1]) - 1, Number(match[2]));
-      date.setHours(0, 0, 0, 0);
-      return date;
-    }
-
-    function getDaysLeft(row) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (getTaskType(row) === "deadline") {
-        const deadline = extractDeadline(row);
-        return deadline ? Math.round((deadline - today) / 86400000) : null;
-      }
-      const parsed = parseDateFirst(row.date);
-      if (!parsed) return null;
-      const date = new Date(today.getFullYear(), parsed.month - 1, parsed.day);
-      date.setHours(0, 0, 0, 0);
-      return Math.round((date - today) / 86400000);
-    }
-
-    function urgencyLevel(row) {
-      if (row.status === "已完成") return "";
-      if (getTaskType(row) === "ongoing") return "";
-      const daysLeft = getDaysLeft(row);
-      if (daysLeft === null) return "";
-      if (daysLeft < 0) return "overdue";
-      if (daysLeft <= 3 && row.status === "待開始") return "warning";
-      return "";
-    }
-
-    function normalizeRow(row) {
-      return {
-        id: Number(row.id) || Math.floor(Math.random() * 9000 + 1000),
-        cat: CATS.includes(row.cat) ? row.cat : "行政準備",
-        date: String(row.date || "").trim(),
-        task: String(row.task || "").trim(),
-        unit: String(row.unit || "").trim(),
-        status: STATUS_KEYS.includes(row.status) ? row.status : "待開始",
-        note: String(row.note || "").trim(),
-        badge: ["", "new", "warn", "tip"].includes(row.badge) ? row.badge : "",
-        comment: String(row.comment || "").trim()
+    <div class="modal-overlay" id="add-modal">
+      <div class="modal">
+        <h3 id="modal-title">新增任務</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">分類</label>
+            <select class="form-select" id="m-cat">
+              <option>行政準備</option>
+              <option>影片徵選</option>
+              <option>頒獎典禮</option>
+              <option>市民大聲說</option>
+              <option>人才培訓</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">日期</label>
+            <input class="form-input" type="text" id="m-date" placeholder="例：7/1 或 7/1–7/31" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">工作內容</label>
+          <textarea class="form-textarea" id="m-task" placeholder="任務描述…" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">執行單位</label>
+            <input class="form-input" type="text" id="m-unit" placeholder="北都行銷部" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">進度狀態</label>
+            <select class="form-select" id="m-status">
+              <option>待開始</option>
+              <option>進行中</option>
+              <option>已完成</option>
+              <option>待確認</option>
+              <option>延遲</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">標籤</label>
+          <select class="form-select" id="m-badge">
+            <option value="">無</option>
+            <option value="new">🔵 NEW（新增）</option>
+            <option value="warn">🔴 注意</option>
+            <option value="tip">💡 建議</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">備註說明</label>
+          <input class="form-input" type="text" id="m-note" placeholder="補充資訊…" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">補充說明（黃色備忘欄）</label>
+          <textarea class="form-textarea" id="m-comment" placeholder="備忘、聯絡事項…" rows="2"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+          <button class="btn btn-accent" id="modal-submit-btn" onclick="submitModal()">確認新增</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-overlay" id="weekly-report-modal">
+      <div class="modal modal-wide">
+        <h3>📋 本週進度週報</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: -0.9rem 0 1.1rem">
+          複製後貼到 Email 寄給主管，或點「用 Email 傳送」直接開啟郵件程式
+        </p>
+        <textarea id="report-text" readonly onclick="this.select()"></textarea>
+        <div class="report-actions">
+          <button class="btn-accent btn" onclick="copyReport()">⎘ 複製內容</button>
+          <button
+            class="btn"
+            id="mailto-btn"
+            style="background: #fff; color: var(--text); border: 1.5px solid var(--border2)"
+          >
+            ✉ 用 Email 傳送
+          </button>
+          <div style="margin-left: auto">
+            <button
+              class="btn btn-cancel"
+              onclick="document.getElementById('weekly-report-modal').classList.remove('active')"
+            >
+              關閉
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+      const INITIAL_DATA = [
+        {
+          id: 1,
+          cat: "行政準備",
+          date: "5/20",
+          task: "公用頻道會議報告企劃案給特助確認最後版本",
+          unit: "北都行銷部（阿皓）",
+          status: "待開始",
+          note: "5/20 跟特助確認",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 2,
+          cat: "行政準備",
+          date: "5/22",
+          task: "提交公用頻道會議報告企劃案、徵選辦法、問燈箱費用、電子邀請卡",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 3,
+          cat: "頒獎典禮",
+          date: "5/25–5/27",
+          task: "頒獎典禮硬體廠商會議（三天）",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "5/25~5/27 三天會議",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 4,
+          cat: "行政準備",
+          date: "5/29",
+          task: "衛星頻道執照企劃書",
+          unit: "北都行銷部",
+          status: "待確認",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 5,
+          cat: "影片徵選",
+          date: "6/1",
+          task: "【新增】徵件辦法 ／ 簡章定稿",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "公告徵件的正式文件",
+          badge: "new",
+          comment: "",
+        },
+        {
+          id: 6,
+          cat: "人才培訓",
+          date: "6/1",
+          task: "【新增】人才培訓課程報名開放",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "社群暖身宣傳，課程開始前開放報名",
+          badge: "new",
+          comment: "",
+        },
+        {
+          id: 7,
+          cat: "影片徵選",
+          date: "6/1–6/30",
+          task: "製作年度活動影片、影片徵選活動影片（預計 7/1 完成）",
+          unit: "北都行銷部 ／ 運豐多媒體",
+          status: "待開始",
+          note: "⚠ 6月底前拍攝完畢",
+          badge: "warn",
+          comment: "",
+        },
+        {
+          id: 8,
+          cat: "影片徵選",
+          date: "6/1–6/20",
+          task: "製作及印製影片徵選活動海報 ／ 燈箱廣告（費用問題）、相關宣傳素材",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "⚠ 6/20 前須完成",
+          badge: "warn",
+          comment: "",
+        },
+        {
+          id: 9,
+          cat: "影片徵選",
+          date: "6/1–6/30",
+          task: "【新增】影片徵選收件平台 ／ 系統建置",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "7/1 徵件前需準備完成",
+          badge: "new",
+          comment: "",
+        },
+        {
+          id: 10,
+          cat: "人才培訓",
+          date: "6/15",
+          task: "社群暖身徵選宣傳，公告人才培訓課程內容，提供雲端表單",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "tip",
+          comment: "",
+        },
+        {
+          id: 11,
+          cat: "影片徵選",
+          date: "6/24",
+          task: "【新增】徵件事宜線上公告（至少前一週）",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "線上公告與海報張貼分開規劃",
+          badge: "new",
+          comment: "",
+        },
+        {
+          id: 12,
+          cat: "影片徵選",
+          date: "6/29",
+          task: "影片徵選活動海報寄送及張貼（高中、大學）",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "⚠ 須提前 6/20 完成印製",
+          badge: "warn",
+          comment: "",
+        },
+        {
+          id: 13,
+          cat: "影片徵選",
+          date: "7/1",
+          task: "年度活動影片 ／ 影片徵選活動影片開跑，宣傳培訓 ＋ 徵件啟動",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 14,
+          cat: "影片徵選",
+          date: "7/1",
+          task: "影片徵選活動燈箱上架",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 15,
+          cat: "影片徵選",
+          date: "7/1–9/30",
+          task: "影片徵選收件期間（建議 7/1~9/30；件數不足可延長至 10/10）",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "建議提早評審",
+          badge: "tip",
+          comment: "",
+        },
+        {
+          id: 16,
+          cat: "市民大聲說",
+          date: "7/3",
+          task: "市民大聲說 1、2 外景（西門）",
+          unit: "北都行銷部 ／ 運豐多媒體",
+          status: "待開始",
+          note: "外景期間建議安排側拍人員",
+          badge: "tip",
+          comment: "",
+        },
+        {
+          id: 17,
+          cat: "人才培訓",
+          date: "7/11",
+          task: "影像人才培訓課程（第 1 場）",
+          unit: "北都行銷部 ／ 運豐多媒體",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 18,
+          cat: "市民大聲說",
+          date: "7/18",
+          task: "市民大聲說 1 播出",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "對應 7/3 外景",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 19,
+          cat: "人才培訓",
+          date: "7/25",
+          task: "影像人才培訓課程（第 2 場）",
+          unit: "北都行銷部 ／ 運豐多媒體",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 20,
+          cat: "頒獎典禮",
+          date: "8/1–8/31",
+          task: "頒獎典禮主視覺定稿、製作典禮宣傳物（社群、海報）",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 21,
+          cat: "影片徵選",
+          date: "8/1–8/31",
+          task: "注意徵件數量是否足夠；不足需啟動加強宣傳",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "warn",
+          comment: "",
+        },
+        {
+          id: 22,
+          cat: "市民大聲說",
+          date: "8/7",
+          task: "市民大聲說 3、4 外景（信義）",
+          unit: "北都行銷部 ／ 運豐多媒體",
+          status: "待開始",
+          note: "外景期間建議安排側拍人員",
+          badge: "tip",
+          comment: "",
+        },
+        {
+          id: 23,
+          cat: "人才培訓",
+          date: "8/15",
+          task: "影像人才培訓課程（第 3 場）",
+          unit: "北都行銷部 ／ 運豐多媒體",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 24,
+          cat: "市民大聲說",
+          date: "8/22",
+          task: "市民大聲說 2 播出",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "對應 7/3 外景",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 25,
+          cat: "人才培訓",
+          date: "8/22",
+          task: "影像人才培訓課程（第 4 場）",
+          unit: "北都行銷部 ／ 運豐多媒體",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 26,
+          cat: "影片徵選",
+          date: "9/1",
+          task: "【新增】評審委員邀請與確認",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "10/15 評審若臨時找會很趕",
+          badge: "new",
+          comment: "",
+        },
+        {
+          id: 27,
+          cat: "頒獎典禮",
+          date: "9/1–9/30",
+          task: "【新增】頒獎典禮籌備啟動（流程 ／ 貴賓 ／ 影片放映）",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "5月硬體會議後到 12 月典禮的籌備期",
+          badge: "new",
+          comment: "",
+        },
+        {
+          id: 28,
+          cat: "頒獎典禮",
+          date: "9/1–9/30",
+          task: "典禮現場製作物（電子邀請卡、背板、頒獎人名牌、舞台設計、拍照牆、獎金手版…）、新聞稿模板",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 29,
+          cat: "市民大聲說",
+          date: "9/19",
+          task: "市民大聲說 3 播出",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "對應 8/7 外景",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 30,
+          cat: "影片徵選",
+          date: "10/1",
+          task: "【新增】評審會議場地與設備預訂",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "評審期間需要場地與設備",
+          badge: "new",
+          comment: "",
+        },
+        {
+          id: 31,
+          cat: "影片徵選",
+          date: "10/1–10/10",
+          task: "影片徵選初審",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 32,
+          cat: "頒獎典禮",
+          date: "10/5",
+          task: "主持人確認、表演團體（音樂版權確認）",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 33,
+          cat: "頒獎典禮",
+          date: "10/10",
+          task: "頒獎人確認、邀請",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 34,
+          cat: "市民大聲說",
+          date: "10/10",
+          task: "市民大聲說 4 播出",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "對應 8/7 外景",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 35,
+          cat: "影片徵選",
+          date: "10/15",
+          task: "入圍名單確認",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 36,
+          cat: "頒獎典禮",
+          date: "10/15",
+          task: "典禮流程初版、舞台設計；獎狀、獎盃、入圍名單主視覺動畫（典禮當天用）",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 37,
+          cat: "影片徵選",
+          date: "10/20",
+          task: "入圍通知 ＋ 詢問是否參加頒獎典禮",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 38,
+          cat: "頒獎典禮",
+          date: "10/20",
+          task: "所有影片初版（入圍影片 ／ 得獎影片 ／ 開場影片）",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 39,
+          cat: "頒獎典禮",
+          date: "10/25",
+          task: "典禮流程會議、技術設備會議（硬體規格確認）",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 40,
+          cat: "影片徵選",
+          date: "10/31",
+          task: "決審完成",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 41,
+          cat: "影片徵選",
+          date: "11/1",
+          task: "【新增】得獎名單公告與得獎者通知",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "評審結束到頒獎中間的空白期",
+          badge: "new",
+          comment: "",
+        },
+        {
+          id: 42,
+          cat: "頒獎典禮",
+          date: "11/1",
+          task: "入圍名單公布、新聞稿、社群宣傳素材；頒獎典禮宣傳、全部工作人員會議（初步）",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "入圍名單曝光期",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 43,
+          cat: "頒獎典禮",
+          date: "11/1",
+          task: "【新增】貴賓邀請函發送與回覆統計",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "典禮前一個月需完成貴賓確認",
+          badge: "new",
+          comment: "",
+        },
+        {
+          id: 44,
+          cat: "頒獎典禮",
+          date: "11/15",
+          task: "頒獎典禮流程定稿、主持稿定稿、流程表定稿、頒獎順序定稿",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 45,
+          cat: "頒獎典禮",
+          date: "11/20",
+          task: "所有影片定稿",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 46,
+          cat: "頒獎典禮",
+          date: "11/23",
+          task: "全部工作人員會議、最後分工確認",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 47,
+          cat: "頒獎典禮",
+          date: "11/30",
+          task: "主持人彩排",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 48,
+          cat: "頒獎典禮",
+          date: "12/3–12/4",
+          task: "全流程總彩排、技術設備彩排",
+          unit: "北都行銷部",
+          status: "待開始",
+          note: "",
+          badge: "",
+          comment: "",
+        },
+        {
+          id: 49,
+          cat: "頒獎典禮",
+          date: "12/5",
+          task: "台北有影 3 頒獎典禮（候選場地：1. 威秀  2. 紅樓）",
+          unit: "北都有線電視 ／ 運豐多媒體",
+          status: "待開始",
+          note: "場地候選：1. 威秀  2. 紅樓",
+          badge: "",
+          comment: "",
+        },
+      ];
+      let data = [],
+        nextId = 100,
+        currentFilter = "全部",
+        currentSearch = "",
+        currentView = "list";
+      const MONTHS_ZH = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"];
+      const CATS = ["行政準備", "影片徵選", "頒獎典禮", "市民大聲說", "人才培訓"];
+      const CAT_COLORS = {
+        行政準備: "#3b82f6",
+        影片徵選: "#8b5cf6",
+        頒獎典禮: "#f59e0b",
+        市民大聲說: "#10b981",
+        人才培訓: "#ec4899",
       };
-    }
 
-    function syncEditableFields() {
-      $$("[contenteditable][data-id]").forEach(el => {
-        const row = data.find(item => item.id === Number(el.dataset.id));
-        if (row) row[el.dataset.field] = el.textContent.trim();
-      });
-    }
-
-    function badgeHTML(badge) {
-      if (badge === "new") return '<span class="task-badge badge-new">NEW</span><br>';
-      if (badge === "warn") return '<span class="task-badge badge-warn">⚠ 注意</span><br>';
-      if (badge === "tip") return '<span class="task-badge badge-tip">💡 建議</span><br>';
-      return "";
-    }
-
-    function optionsHTML(values, selected) {
-      return values.map(value => `<option value="${esc(value)}" ${value === selected ? "selected" : ""}>${esc(value)}</option>`).join("");
-    }
-
-    function renderTable() {
-      const tbody = $("#table-body");
-      tbody.innerHTML = "";
-      let lastMonth = null;
-
-      data.sort((a, b) => sortKey(a) - sortKey(b)).forEach(row => {
-        const parsed = parseDateFirst(row.date);
-        const month = parsed?.month || "";
-        if (month !== lastMonth) {
-          const monthRow = document.createElement("tr");
-          monthRow.className = "month-divider";
-          monthRow.dataset.month = month;
-          monthRow.innerHTML = `<td colspan="7"><span class="month-label">${esc(MONTHS_ZH[month] || month)}月</span></td>`;
-          tbody.appendChild(monthRow);
-          lastMonth = month;
+      // ── 任務類型判斷 ──
+      // deadline：工作內容含「前完成／前繳／前送／前確」→ 從內容抓截止日
+      // ongoing：日期欄是範圍格式（含 – 或 ~）→ 持續進行，不算逾期
+      // reminder：其餘 → 當天執行提醒
+      function getTaskType(row) {
+        if (/前[完繳送確]/.test(row.task)) return "deadline";
+        if (/[–\-~～]/.test(row.date)) return "ongoing";
+        return "reminder";
+      }
+      function extractDeadline(task) {
+        const m = task.match(/(\d{1,2})\/(\d{1,2})[^\d]*前[完繳送確]/);
+        if (!m) return null;
+        const dt = new Date(new Date().getFullYear(), parseInt(m[1]) - 1, parseInt(m[2]));
+        dt.setHours(0, 0, 0, 0);
+        return dt;
+      }
+      function parseDateFirst(s) {
+        const f = s
+          .split(/[–\-~～]/)[0]
+          .trim()
+          .split("/");
+        return f.length < 2 ? null : { month: parseInt(f[0]), day: parseInt(f[1]) };
+      }
+      function getDaysLeft(row) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const type = getTaskType(row);
+        if (type === "deadline") {
+          const dl = extractDeadline(row.task);
+          if (!dl) return null;
+          return Math.round((dl - today) / 86400000);
         }
-
-        const urgency = urgencyLevel(row);
-        const dateClass = urgency === "overdue" ? " date-overdue" : urgency === "warning" ? " date-warning" : "";
-        const tr = document.createElement("tr");
-        tr.dataset.id = row.id;
-        tr.dataset.cat = row.cat;
-        if (urgency === "overdue") tr.classList.add("row-overdue");
-        if (urgency === "warning") tr.classList.add("row-warning");
-
-        tr.innerHTML = `
-          <td>
-            <select class="group-tag-select tag-${esc(row.cat)}" data-action="change-cat" data-id="${row.id}">
-              ${optionsHTML(CATS, row.cat)}
-            </select>
-          </td>
-          <td><div class="date-text task-editable${dateClass}" contenteditable="true" data-field="date" data-id="${row.id}">${esc(row.date)}</div></td>
-          <td><div class="task-content">${badgeHTML(row.badge)}<span class="task-editable" contenteditable="true" data-field="task" data-id="${row.id}">${esc(row.task)}</span></div></td>
-          <td><span class="task-editable unit-text" contenteditable="true" data-field="unit" data-id="${row.id}">${esc(row.unit)}</span></td>
-          <td>
-            <select class="status-select status-${esc(row.status)}" data-action="change-status" data-id="${row.id}">
-              ${optionsHTML(STATUS_KEYS, row.status)}
-            </select>
-          </td>
-          <td>
-            <div class="note-cell">
-              ${row.note ? `<div class="note-original">${esc(row.note)}</div>` : ""}
-              <div class="note-comment" contenteditable="true" data-field="comment" data-id="${row.id}" data-placeholder="點此新增說明、備忘…">${esc(row.comment)}</div>
-            </div>
-          </td>
-          <td>
-            <div class="row-actions">
-              <button class="action-btn edit-btn" type="button" data-action="edit-row" data-id="${row.id}" title="編輯">✎</button>
-              <button class="action-btn" type="button" data-action="delete-row" data-id="${row.id}" title="刪除">✕</button>
-            </div>
-          </td>`;
-        tbody.appendChild(tr);
-      });
-
-      $$("[contenteditable]", tbody).forEach(el => {
-        el.addEventListener("blur", () => {
-          const row = data.find(item => item.id === Number(el.dataset.id));
-          if (!row) return;
-          row[el.dataset.field] = el.textContent.trim();
+        const d = parseDateFirst(row.date);
+        if (!d) return null;
+        const dt = new Date(today.getFullYear(), d.month - 1, d.day);
+        dt.setHours(0, 0, 0, 0);
+        return Math.round((dt - today) / 86400000);
+      }
+      function urgencyLevel(row) {
+        if (row.status === "已完成") return "";
+        if (getTaskType(row) === "ongoing") return "";
+        const d = getDaysLeft(row);
+        if (d === null) return "";
+        if (d < 0) return "overdue";
+        if (d <= 3 && row.status === "待開始") return "warning";
+        return "";
+      }
+      function renderTable() {
+        const tbody = document.getElementById("table-body");
+        tbody.innerHTML = "";
+        let lastM = null;
+        data.forEach((row) => {
+          const m = parseInt(row.date.split("/")[0]);
+          if (m !== lastM) {
+            const tr = document.createElement("tr");
+            tr.className = "month-divider";
+            tr.dataset.month = m;
+            tr.innerHTML = `<td colspan="7"><span class="month-label">${MONTHS_ZH[m] || m}月</span></td>`;
+            tbody.appendChild(tr);
+            lastM = m;
+          }
+          const badge =
+            row.badge === "new"
+              ? '<span class="task-badge badge-new">NEW</span><br>'
+              : row.badge === "warn"
+                ? '<span class="task-badge badge-warn">⚠ 注意</span><br>'
+                : row.badge === "tip"
+                  ? '<span class="task-badge badge-tip">💡 建議</span><br>'
+                  : "";
+          const urg = urgencyLevel(row);
+          const dateCls = urg === "overdue" ? " date-overdue" : urg === "warning" ? " date-warning" : "";
+          const tr = document.createElement("tr");
+          tr.dataset.id = row.id;
+          tr.dataset.cat = row.cat;
+          if (urg === "overdue") tr.classList.add("row-overdue");
+          else if (urg === "warning") tr.classList.add("row-warning");
+          tr.innerHTML = `
+      <td><select class="group-tag-select tag-${row.cat}" data-id="${row.id}" onchange="changeCat(this,${row.id})">
+        <option value="行政準備" ${row.cat === "行政準備" ? "selected" : ""}>行政準備</option>
+        <option value="影片徵選" ${row.cat === "影片徵選" ? "selected" : ""}>影片徵選</option>
+        <option value="頒獎典禮" ${row.cat === "頒獎典禮" ? "selected" : ""}>頒獎典禮</option>
+        <option value="市民大聲說" ${row.cat === "市民大聲說" ? "selected" : ""}>市民大聲說</option>
+        <option value="人才培訓" ${row.cat === "人才培訓" ? "selected" : ""}>人才培訓</option>
+      </select></td>
+      <td><div class="date-text task-editable${dateCls}" contenteditable="true" data-field="date" data-id="${row.id}">${row.date}</div></td>
+      <td><div class="task-content">${badge}<span class="task-editable" contenteditable="true" data-field="task" data-id="${row.id}">${row.task}</span></div></td>
+      <td><span class="task-editable unit-text" contenteditable="true" data-field="unit" data-id="${row.id}">${row.unit}</span></td>
+      <td><select class="status-select status-${row.status}" data-id="${row.id}" onchange="changeStatus(this,${row.id})">
+        <option ${row.status === "待開始" ? "selected" : ""}>待開始</option><option ${row.status === "進行中" ? "selected" : ""}>進行中</option>
+        <option ${row.status === "已完成" ? "selected" : ""}>已完成</option><option ${row.status === "待確認" ? "selected" : ""}>待確認</option>
+        <option ${row.status === "延遲" ? "selected" : ""}>延遲</option>
+      </select></td>
+      <td><div class="note-cell">${row.note ? `<div class="note-original">${row.note}</div>` : ""}
+        <div class="note-comment" contenteditable="true" data-field="comment" data-id="${row.id}" data-placeholder="點此新增說明、備忘…">${row.comment || ""}</div>
+      </div></td>
+      <td><div class="row-actions">
+        <div class="action-btn edit-btn" onclick="openEditModal(${row.id})" title="編輯">✎</div>
+        <div class="action-btn" onclick="deleteRow(${row.id})" title="刪除">✕</div>
+      </div></td>`;
+          tbody.appendChild(tr);
+        });
+        tbody.querySelectorAll("[contenteditable]").forEach((el) => {
+          el.addEventListener("blur", () => {
+            const row = data.find((r) => r.id === parseInt(el.dataset.id));
+            if (row) {
+              row[el.dataset.field] = el.innerText.trim();
+              isDirty = true;
+              if (el.dataset.field === "date" && currentView === "calendar") renderCalendar();
+            }
+          });
+        });
+        applyFilter();
+        updateStats();
+      }
+      function filterCat(btn) {
+        document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentFilter = btn.dataset.cat;
+        applyFilter();
+        if (currentView === "calendar") renderCalendar();
+        if (currentView === "dashboard") renderDashboard();
+      }
+      function searchTable(val) {
+        currentSearch = val.toLowerCase();
+        applyFilter();
+        if (currentView === "calendar") renderCalendar();
+        if (currentView === "dashboard") renderDashboard();
+      }
+      function applyFilter() {
+        document.querySelectorAll("#table-body tr:not(.month-divider)").forEach((tr) => {
+          const catOk = currentFilter === "全部" || tr.dataset.cat === currentFilter;
+          const ok = catOk && (!currentSearch || tr.textContent.toLowerCase().includes(currentSearch));
+          tr.classList.toggle("hidden", !ok);
+        });
+        document.querySelectorAll("#table-body tr.month-divider").forEach((div) => {
+          let nxt = div.nextElementSibling,
+            vis = false;
+          while (nxt && !nxt.classList.contains("month-divider")) {
+            if (!nxt.classList.contains("hidden")) {
+              vis = true;
+              break;
+            }
+            nxt = nxt.nextElementSibling;
+          }
+          div.classList.toggle("hidden", !vis);
+        });
+      }
+      function changeCat(sel, id) {
+        const row = data.find((r) => r.id === id);
+        if (row) {
+          row.cat = sel.value;
           isDirty = true;
-          if (el.dataset.field === "date") {
+          sel.className = `group-tag-select tag-${sel.value}`;
+          sel.closest("tr").dataset.cat = sel.value;
+          applyFilter();
+          if (currentView === "calendar") renderCalendar();
+        }
+      }
+      function changeStatus(sel, id) {
+        const row = data.find((r) => r.id === id);
+        if (row) {
+          row.status = sel.value;
+          isDirty = true;
+          sel.className = `status-select status-${sel.value}`;
+          updateStats();
+          if (currentView === "dashboard") renderDashboard();
+        }
+      }
+      function updateStats() {
+        const c = { 待開始: 0, 進行中: 0, 已完成: 0, 待確認: 0, 延遲: 0 };
+        data.forEach((r) => {
+          if (c[r.status] !== undefined) c[r.status]++;
+        });
+        ["pending", "ongoing", "done", "confirm", "late"].forEach((k, i) => {
+          document.getElementById("stat-" + k).textContent = Object.values(c)[i];
+        });
+        const overdueCnt = data.filter((r) => urgencyLevel(r) === "overdue").length;
+        const el = document.getElementById("stat-overdue");
+        el.textContent = overdueCnt;
+        el.style.color = overdueCnt > 0 ? "#dc2626" : "var(--text-muted)";
+        const pct = data.length ? Math.round((c["已完成"] / data.length) * 100) : 0;
+        document.getElementById("progress-fill").style.width = pct + "%";
+        document.getElementById("progress-pct").textContent = pct + "%";
+      }
+      function deleteRow(id) {
+        if (!confirm("確定刪除此任務？")) return;
+        data = data.filter((r) => r.id !== id);
+        isDirty = true;
+        renderTable();
+        showToast("已刪除任務");
+      }
+      function openEditModal(id) {
+        const row = data.find((r) => r.id === id);
+        if (!row) return;
+        document.getElementById("modal-title").textContent = "編輯任務";
+        document.getElementById("m-cat").value = row.cat;
+        document.getElementById("m-date").value = row.date;
+        document.getElementById("m-task").value = row.task;
+        document.getElementById("m-unit").value = row.unit;
+        document.getElementById("m-status").value = row.status;
+        document.getElementById("m-badge").value = row.badge || "";
+        document.getElementById("m-note").value = row.note;
+        document.getElementById("m-comment").value = row.comment || "";
+        document.getElementById("modal-submit-btn").onclick = () => submitEditModal(id);
+        document.getElementById("add-modal").classList.add("active");
+      }
+      function submitEditModal(id) {
+        const row = data.find((r) => r.id === id);
+        if (!row) return;
+        row.cat = document.getElementById("m-cat").value;
+        row.date = document.getElementById("m-date").value.trim();
+        row.task = document.getElementById("m-task").value.trim();
+        row.unit = document.getElementById("m-unit").value.trim();
+        row.status = document.getElementById("m-status").value;
+        row.badge = document.getElementById("m-badge").value;
+        row.note = document.getElementById("m-note").value.trim();
+        row.comment = document.getElementById("m-comment").value.trim();
+        if (!row.date || !row.task) {
+          alert("請填寫日期與工作內容");
+          return;
+        }
+        isDirty = true;
+        data.sort((a, b) => {
+          const p = (s) => parseInt(s.split(/[\/\-–]/)[0] || 0) * 100 + parseInt(s.split(/[\/\-–]/)[1] || 0);
+          return p(a.date) - p(b.date);
+        });
+        closeModal();
+        renderTable();
+        if (currentView === "calendar") renderCalendar();
+        if (currentView === "dashboard") renderDashboard();
+        showToast("已更新，記得按「儲存」同步");
+      }
+      function openAddModal() {
+        document.getElementById("modal-title").textContent = "新增任務";
+        document.getElementById("m-cat").value = "影片徵選";
+        document.getElementById("m-date").value = "";
+        document.getElementById("m-task").value = "";
+        document.getElementById("m-unit").value = "北都行銷部";
+        document.getElementById("m-status").value = "待開始";
+        document.getElementById("m-badge").value = "";
+        document.getElementById("m-note").value = "";
+        document.getElementById("m-comment").value = "";
+        document.getElementById("modal-submit-btn").onclick = submitModal;
+        document.getElementById("add-modal").classList.add("active");
+      }
+      function closeModal() {
+        document.getElementById("add-modal").classList.remove("active");
+      }
+      function submitModal() {
+        const date = document.getElementById("m-date").value.trim();
+        const task = document.getElementById("m-task").value.trim();
+        if (!date || !task) {
+          alert("請填寫日期與工作內容");
+          return;
+        }
+        data.push({
+          id: nextId++,
+          cat: document.getElementById("m-cat").value,
+          date,
+          task,
+          unit: document.getElementById("m-unit").value.trim(),
+          status: document.getElementById("m-status").value,
+          note: document.getElementById("m-note").value.trim(),
+          badge: document.getElementById("m-badge").value,
+          comment: "",
+        });
+        isDirty = true;
+        data.sort((a, b) => {
+          const p = (s) => parseInt(s.split(/[\/\-–]/)[0] || 0) * 100 + parseInt(s.split(/[\/\-–]/)[1] || 0);
+          return p(a.date) - p(b.date);
+        });
+        closeModal();
+        renderTable();
+        if (currentView === "calendar") renderCalendar();
+        showToast("已新增任務 ✓");
+      }
+      let taskModalId = null;
+      function openTaskModal(id) {
+        const row = data.find((r) => r.id === id);
+        if (!row) return;
+        taskModalId = id;
+        document.getElementById("task-modal-title").textContent = row.task;
+        document.getElementById("task-modal-meta").textContent = `${row.cat} · ${row.date} · ${row.unit}`;
+        document.getElementById("tm-status").value = row.status;
+        document.getElementById("tm-comment").value = row.comment || "";
+        document.getElementById("task-modal").classList.add("active");
+      }
+      function closeTaskModal() {
+        document.getElementById("task-modal").classList.remove("active");
+        taskModalId = null;
+      }
+      function saveTaskModal() {
+        if (!taskModalId) return;
+        const row = data.find((r) => r.id === taskModalId);
+        if (!row) return;
+        row.status = document.getElementById("tm-status").value;
+        row.comment = document.getElementById("tm-comment").value.trim();
+        isDirty = true;
+        closeTaskModal();
+        renderTable();
+        if (currentView === "calendar") renderCalendar();
+        if (currentView === "dashboard") renderDashboard();
+        showToast("已更新，記得按「儲存」同步");
+      }
+      function switchView(view) {
+        currentView = view;
+        document.getElementById("btn-list").classList.toggle("active", view === "list");
+        document.getElementById("btn-dash").classList.toggle("active", view === "dashboard");
+        document.getElementById("btn-cal").classList.toggle("active", view === "calendar");
+        document.getElementById("table-view").style.display = view === "list" ? "" : "none";
+        document.getElementById("dashboard-view").style.display = view === "dashboard" ? "" : "none";
+        document.getElementById("calendar-view").style.display = view === "calendar" ? "" : "none";
+        if (view === "calendar") renderCalendar();
+        if (view === "dashboard") renderDashboard();
+      }
+      let calMonth = 4,
+        calYear = 2026;
+      const CAL_MONTH_ZH = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"];
+      const CAL_DAY = ["日", "一", "二", "三", "四", "五", "六"];
+      function chipStyle(cat) {
+        return (
+          {
+            行政準備: "background:#dbeafe;border:1px solid #93c5fd;color:#1e40af",
+            影片徵選: "background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6",
+            頒獎典禮: "background:#fef3c7;border:1px solid #fcd34d;color:#92400e",
+            市民大聲說: "background:#d1fae5;border:1px solid #6ee7b7;color:#065f46",
+            人才培訓: "background:#fce7f3;border:1px solid #f9a8d4;color:#9d174d",
+          }[cat] || "background:#f0f4f4;color:#3d5c57"
+        );
+      }
+      function renderCalendar() {
+        document.getElementById("cal-title").textContent = `${calYear} 年　${CAL_MONTH_ZH[calMonth]}月`;
+        const first = new Date(calYear, calMonth, 1).getDay();
+        const days = new Date(calYear, calMonth + 1, 0).getDate();
+        const today = new Date();
+        const byDay = {};
+        data.forEach((r) => {
+          if (currentFilter !== "全部" && r.cat !== currentFilter) return;
+          if (
+            currentSearch &&
+            !r.task.toLowerCase().includes(currentSearch) &&
+            !r.cat.toLowerCase().includes(currentSearch)
+          )
+            return;
+          const d = parseDateFirst(r.date);
+          if (d && d.month === calMonth + 1) {
+            if (!byDay[d.day]) byDay[d.day] = [];
+            byDay[d.day].push(r);
+          }
+        });
+        let h = CAL_DAY.map((d) => `<div class="cal-day-header">${d}</div>`).join("");
+        for (let i = 0; i < first; i++) h += `<div class="cal-day empty"></div>`;
+        for (let d = 1; d <= days; d++) {
+          const isToday = today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === d;
+          const tasks = byDay[d] || [],
+            show = tasks.slice(0, 3),
+            more = tasks.length - 3;
+          const chips = show
+            .map(
+              (t) =>
+                `<span class="cal-task-chip" style="${chipStyle(t.cat)}" onclick="openTaskModal(${t.id})" title="${t.task}">${t.task
+                  .replace(/【.*?】/g, "")
+                  .trim()
+                  .slice(0, 14)}</span>`,
+            )
+            .join("");
+          const moreBtn = more > 0 ? `<div class="cal-more" onclick="switchView('list')">+${more} 項</div>` : "";
+          h += `<div class="cal-day${isToday ? " today" : ""}"><div class="cal-day-num">${d}</div>${chips}${moreBtn}</div>`;
+        }
+        document.getElementById("cal-grid").innerHTML = h;
+      }
+      function calPrev() {
+        calMonth--;
+        if (calMonth < 0) {
+          calMonth = 11;
+          calYear--;
+        }
+        renderCalendar();
+      }
+      function calNext() {
+        calMonth++;
+        if (calMonth > 11) {
+          calMonth = 0;
+          calYear++;
+        }
+        renderCalendar();
+      }
+      function renderDashboard() {
+        const overdueTasks = data.filter((r) => urgencyLevel(r) === "overdue");
+        const warningTasks = data.filter((r) => urgencyLevel(r) === "warning");
+        const catStats = CATS.map((cat) => {
+          const tasks = data.filter((r) => r.cat === cat);
+          const done = tasks.filter((r) => r.status === "已完成").length;
+          const total = tasks.length;
+          const pct = total ? Math.round((done / total) * 100) : 0;
+          return { cat, done, total, pct };
+        });
+        const upcoming = data
+          .filter((r) => {
+            if (r.status === "已完成") return false;
+            if (getTaskType(r) === "ongoing") return false;
+            const d = getDaysLeft(r);
+            return d !== null && d >= -7 && d <= 14;
+          })
+          .sort((a, b) => (getDaysLeft(a) ?? 999) - (getDaysLeft(b) ?? 999))
+          .slice(0, 9);
+        const upcomingStart = data
+          .filter((r) => {
+            if (r.status === "已完成") return false;
+            if (getTaskType(r) !== "ongoing") return false;
+            const d = getDaysLeft(r);
+            return d !== null && d >= 0 && d <= 14;
+          })
+          .sort((a, b) => (getDaysLeft(a) ?? 999) - (getDaysLeft(b) ?? 999))
+          .slice(0, 5);
+        const statusKeys = ["待開始", "進行中", "已完成", "待確認", "延遲"];
+        const catStatusCards = CATS.map((cat) => {
+          const tasks = data.filter((r) => r.cat === cat);
+          const cnt = {};
+          statusKeys.forEach((s) => {
+            cnt[s] = tasks.filter((r) => r.status === s).length;
+          });
+          const pct = tasks.length ? Math.round((cnt["已完成"] / tasks.length) * 100) : 0;
+          const lines = statusKeys
+            .filter((s) => cnt[s] > 0)
+            .map((s) => `<div class="cat-status-line"><span>${s}</span><span>${cnt[s]}</span></div>`)
+            .join("");
+          return `<div class="cat-status-card"><div class="cat-status-name" style="color:${CAT_COLORS[cat]}">${cat}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:900;color:${CAT_COLORS[cat]};margin-bottom:0.4rem">${pct}%</div>${lines}</div>`;
+        }).join("");
+        const overdueHTML = overdueTasks.length
+          ? overdueTasks
+              .slice(0, 5)
+              .map((r) => {
+                const d = getDaysLeft(r);
+                return `<div class="overdue-row">逾${Math.abs(d)}天・${r.task
+                  .replace(/【.*?】/g, "")
+                  .trim()
+                  .slice(0, 22)}（${r.date}）</div>`;
+              })
+              .join("") +
+            (overdueTasks.length > 5
+              ? `<div style="font-size:0.8rem;color:#dc2626;margin-top:0.3rem">...共 ${overdueTasks.length} 項逾期</div>`
+              : "")
+          : '<div style="color:#059669;font-size:0.85rem;padding:0.3rem 0">✅ 無逾期任務</div>';
+        const upcomingHTML = upcoming.length
+          ? upcoming
+              .map((r) => {
+                const d = getDaysLeft(r);
+                const color = d < 0 ? "#dc2626" : d <= 3 ? "#d97706" : "#059669";
+                const bg = d < 0 ? "#fee2e2" : d <= 3 ? "#fff3e0" : "#f0fdf8";
+                const label = d < 0 ? `逾${Math.abs(d)}天` : d === 0 ? "今天" : d === 1 ? "明天" : `${d}天後`;
+                return `<div class="dl-item"><span class="dl-tag" style="background:${bg};color:${color}">${label}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">${r.task
+                  .replace(/【.*?】/g, "")
+                  .trim()
+                  .slice(
+                    0,
+                    20,
+                  )}</span><span style="font-size:0.76rem;color:var(--text-muted);flex-shrink:0;font-family:'IBM Plex Mono',monospace">${r.cat.slice(0, 4)}</span></div>`;
+              })
+              .join("")
+          : '<div style="color:var(--text-muted);font-size:0.88rem;padding:0.3rem 0">近期無截止任務</div>';
+        const upcomingStartHTML = upcomingStart.length
+          ? upcomingStart
+              .map((r) => {
+                const d = getDaysLeft(r);
+                const label = d === 0 ? "今天" : d === 1 ? "明天" : `${d}天後`;
+                return `<div class="dl-item"><span class="dl-tag" style="background:#f0fdf8;color:#059669">${label}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">${r.task
+                  .replace(/【.*?】/g, "")
+                  .trim()
+                  .slice(
+                    0,
+                    20,
+                  )}</span><span style="font-size:0.76rem;color:var(--text-muted);flex-shrink:0;font-family:'IBM Plex Mono',monospace">${r.cat.slice(0, 4)}</span></div>`;
+              })
+              .join("")
+          : '<div style="color:var(--text-muted);font-size:0.88rem;padding:0.3rem 0">近期無即將啟動任務</div>';
+        document.getElementById("dashboard-view").innerHTML = `
+    <div class="dash-header"><div><h2>📊 專案儀表板</h2><p>自動撈取進度報表</p></div><div style="font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--text-muted)">更新時間：${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })}</div></div>
+    <div class="dash-grid">
+      <div class="dash-card"><div class="dash-card-title">各分類完成率</div>${catStats.map((s) => `<div class="cat-row"><div class="cat-name" style="color:${CAT_COLORS[s.cat]}">${s.cat}</div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:${s.pct}%;background:${CAT_COLORS[s.cat]}"></div></div><div class="cat-pct" style="color:${CAT_COLORS[s.cat]}">${s.pct}%</div></div><div style="font-size:0.73rem;color:var(--text-muted);margin:-0.35rem 0 0.6rem 82px;font-family:'IBM Plex Mono',monospace">${s.done}/${s.total} 完成</div>`).join("")}</div>
+      <div class="dash-card"><div class="dash-card-title">風險預警</div>
+        <div class="risk-block" style="background:#fef2f2;border:1px solid #fca5a5"><div class="risk-num" style="color:#dc2626">${overdueTasks.length}</div><div><div class="risk-label" style="color:#991b1b">🔴 已逾期任務</div><div class="risk-sub" style="color:#dc2626">需立即關注</div></div></div>
+        <div class="risk-block" style="background:#fffbeb;border:1px solid #fcd34d;margin-bottom:1rem"><div class="risk-num" style="color:#d97706">${warningTasks.length}</div><div><div class="risk-label" style="color:#92400e">🟠 3天內截止（待開始）</div><div class="risk-sub" style="color:#d97706">建議提前啟動</div></div></div>
+        ${overdueHTML}
+      </div>
+      <div class="dash-card"><div class="dash-card-title">近期截止（14天內）</div>${upcomingHTML}<div class="dash-card-title" style="margin-top:1rem">即將啟動（14天內）</div>${upcomingStartHTML}</div>
+    </div>
+    <div class="dash-card" style="margin-bottom:1.15rem"><div class="dash-card-title">各分類任務狀態分布</div><div class="cat-status-grid">${catStatusCards}</div></div>`;
+      }
+      function openWeeklyReport() {
+        const today = new Date();
+        const mon = new Date(today);
+        mon.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+        const sun = new Date(mon);
+        sun.setDate(mon.getDate() + 6);
+        const fmt = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+        const totalDone = data.filter((r) => r.status === "已完成").length;
+        const pct = data.length ? Math.round((totalDone / data.length) * 100) : 0;
+        const catLines = CATS.map((cat) => {
+          const tasks = data.filter((r) => r.cat === cat);
+          const done = tasks.filter((r) => r.status === "已完成").length;
+          const p = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+          return `  ${cat}：${p}%（${done}/${tasks.length} 完成）`;
+        }).join("\n");
+        const overdueTasks = data.filter((r) => urgencyLevel(r) === "overdue");
+        const warningTasks = data.filter((r) => urgencyLevel(r) === "warning");
+        const weekStartTasks = data.filter((r) => {
+          if (r.status === "已完成") return false;
+          if (getTaskType(r) === "deadline") return false;
+          const d = getDaysLeft(r);
+          return d !== null && d >= 0 && d <= 7;
+        });
+        const weekDeadlineTasks = data.filter((r) => {
+          if (r.status === "已完成") return false;
+          if (getTaskType(r) !== "deadline") return false;
+          const d = getDaysLeft(r);
+          return d !== null && d >= 0 && d <= 7;
+        });
+        const overdueLines = overdueTasks.length
+          ? overdueTasks
+              .map((r, i) => {
+                const d = getDaysLeft(r);
+                return `  ${i + 1}. 🔴 逾${Math.abs(d)}天｜${r.task
+                  .replace(/【.*?】/g, "")
+                  .trim()
+                  .slice(0, 30)}（${r.date}，${r.status}）`;
+              })
+              .join("\n")
+          : "  ✅ 無逾期任務";
+        const warningLines = warningTasks.length
+          ? warningTasks
+              .map((r, i) => {
+                const d = getDaysLeft(r);
+                const when = d === 0 ? "今天" : `${d}天後`;
+                return `  ${i + 1}. 🟠 ${when}｜${r.task
+                  .replace(/【.*?】/g, "")
+                  .trim()
+                  .slice(0, 30)}（${r.date}）`;
+              })
+              .join("\n")
+          : "  ✅ 無即將到期任務";
+        const weekStartLines = weekStartTasks.length
+          ? weekStartTasks
+              .slice(0, 6)
+              .map((r, i) => {
+                const d = getDaysLeft(r);
+                const when = d === 0 ? "今天" : d === 1 ? "明天" : `${d}天後`;
+                const label = getTaskType(r) === "ongoing" ? "持續" : "提醒";
+                return `  ${i + 1}. ${when}｜${r.task
+                  .replace(/【.*?】/g, "")
+                  .trim()
+                  .slice(0, 30)}\n      分類：${r.cat}　類型：${label}`;
+              })
+              .join("\n")
+          : "  暫無";
+        const weekDeadlineLines = weekDeadlineTasks.length
+          ? weekDeadlineTasks
+              .slice(0, 6)
+              .map((r, i) => {
+                const d = getDaysLeft(r);
+                const when = d === 0 ? "今天截止" : d === 1 ? "明天截止" : `${d}天後截止`;
+                return `  ${i + 1}. ${when}｜${r.task
+                  .replace(/【.*?】/g, "")
+                  .trim()
+                  .slice(0, 30)}\n      分類：${r.cat}　狀態：${r.status}`;
+              })
+              .join("\n")
+          : "  暫無";
+        const sep = "─".repeat(38);
+        const report = `【台北有影 3｜2026】本週進度週報\n期間：${fmt(mon)} – ${fmt(sun)}\n產出：${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}\n${sep}\n\n📊 整體進度\n  完成率：${pct}%（已完成 ${totalDone} / 共 ${data.length} 項）\n\n📋 各分類進度\n${catLines}\n\n🔴 逾期任務（共 ${overdueTasks.length} 項）\n${overdueLines}\n\n🟠 3 天內到期・尚未開始（共 ${warningTasks.length} 項）\n${warningLines}\n\n📅 本週啟動／提醒（共 ${weekStartTasks.length} 項）\n${weekStartLines}\n\n📌 本週截止任務（共 ${weekDeadlineTasks.length} 項）\n${weekDeadlineLines}\n\n${sep}\n此週報由台北有影 3 專案追蹤系統自動產出`;
+        document.getElementById("report-text").value = report;
+        const subject = encodeURIComponent(`【台北有影 3】本週進度週報 ${fmt(mon)}–${fmt(sun)}`);
+        const body = encodeURIComponent(report);
+        document.getElementById("mailto-btn").onclick = () => {
+          window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        };
+        document.getElementById("weekly-report-modal").classList.add("active");
+      }
+      function copyReport() {
+        const text = document.getElementById("report-text").value;
+        if (navigator.clipboard) {
+          navigator.clipboard
+            .writeText(text)
+            .then(() => showToast("已複製到剪貼板 ✓"))
+            .catch(() => fallbackCopy(text));
+        } else {
+          fallbackCopy(text);
+        }
+      }
+      function fallbackCopy(text) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.cssText = "position:fixed;opacity:0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showToast("已複製到剪貼板 ✓");
+      }
+      let fontSize = parseInt(localStorage.getItem("tbff3_font") || "16");
+      function applyFont() {
+        document.documentElement.style.fontSize = fontSize + "px";
+      }
+      function adjustFont(d) {
+        fontSize = Math.min(22, Math.max(12, fontSize + d));
+        localStorage.setItem("tbff3_font", fontSize);
+        applyFont();
+        showToast("字體：" + fontSize + "px");
+      }
+      applyFont();
+      const SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec";
+      let isDirty = false;
+      function syncFields() {
+        document.querySelectorAll("[contenteditable]").forEach((el) => {
+          const row = data.find((r) => r.id === parseInt(el.dataset.id));
+          if (row) row[el.dataset.field] = el.innerText.trim();
+        });
+      }
+      async function saveAll() {
+        syncFields();
+        const btn = document.querySelector(".btn-accent"),
+          orig = btn.textContent;
+        btn.textContent = "同步中…";
+        btn.disabled = true;
+        try {
+          const res = await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: "writeAll", data }),
+          });
+          const result = await res.json();
+          if (result.status !== "ok") throw new Error(result.msg || "failed");
+          isDirty = false;
+          const n = new Date(),
+            t = n.getHours().toString().padStart(2, "0") + ":" + n.getMinutes().toString().padStart(2, "0");
+          document.getElementById("last-saved").textContent = t;
+          localStorage.setItem("tbff3_data", JSON.stringify(data));
+          btn.textContent = "✓ 已同步";
+          btn.style.background = "#059669";
+          setTimeout(() => {
+            btn.textContent = orig;
+            btn.style.background = "";
+          }, 2500);
+          showToast("已同步至 Google Sheets ✓");
+        } catch (e) {
+          localStorage.setItem("tbff3_data", JSON.stringify(data));
+          btn.textContent = "⚠ 失敗";
+          btn.style.background = "#dc2626";
+          setTimeout(() => {
+            btn.textContent = orig;
+            btn.style.background = "";
+          }, 2500);
+          showToast("⚠ 同步失敗，已儲存至本機");
+        } finally {
+          btn.disabled = false;
+        }
+      }
+      function parseSheetRow(r) {
+        const clean = (v) => (typeof v === "string" && v.startsWith("'") ? v.slice(1) : String(v || ""));
+        let date = clean(r.date);
+        if (date.includes("T") || date.includes("-")) {
+          const d = new Date(date);
+          if (!isNaN(d)) date = d.getMonth() + 1 + "/" + d.getDate();
+        } else if (!isNaN(Number(r.date)) && Number(r.date) > 1000) {
+          const d = new Date((Number(r.date) - 25569) * 86400 * 1000);
+          date = d.getUTCMonth() + 1 + "/" + d.getUTCDate();
+        }
+        return {
+          id: parseInt(clean(r.id)) || Math.floor(Math.random() * 9000 + 1000),
+          cat: clean(r.cat) || "行政準備",
+          date,
+          task: clean(r.task) || "",
+          unit: clean(r.unit) || "",
+          status: clean(r.status) || "待開始",
+          note: clean(r.note) || "",
+          badge: clean(r.badge) || "",
+          comment: clean(r.comment) || "",
+        };
+      }
+      async function loadSaved() {
+        document.getElementById("table-body").innerHTML =
+          '<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text-muted)">載入中…</td></tr>';
+        try {
+          const res = await fetch(SCRIPT_URL + "?action=read");
+          const remote = await res.json();
+          if (Array.isArray(remote) && remote.length > 0) {
+            data = remote.map(parseSheetRow);
+            nextId = Math.max(...data.map((r) => (typeof r.id === "number" ? r.id : 0))) + 1;
+            document.getElementById("last-saved").textContent = "已從雲端載入";
+          } else {
+            data = JSON.parse(JSON.stringify(INITIAL_DATA));
+            nextId = 100;
+            document.getElementById("last-saved").textContent = "請按「儲存」寫入雲端";
+            showToast("⚠ 雲端資料不完整，請按「儲存」");
+          }
+        } catch {
+          const local = localStorage.getItem("tbff3_data");
+          if (local) {
+            try {
+              data = JSON.parse(local);
+            } catch {
+              data = JSON.parse(JSON.stringify(INITIAL_DATA));
+            }
+          } else {
+            data = JSON.parse(JSON.stringify(INITIAL_DATA));
+          }
+          nextId = Math.max(...data.map((r) => (typeof r.id === "number" ? r.id : 0))) + 1;
+          document.getElementById("last-saved").textContent = "離線模式（本機資料）";
+        }
+      }
+      function exportCSV() {
+        syncFields();
+        const h = ["分類", "日期", "工作內容", "執行單位", "進度狀態", "備註", "補充說明"];
+        const csv =
+          "\ufeff" +
+          [h, ...data.map((r) => [r.cat, r.date, r.task, r.unit, r.status, r.note, r.comment])]
+            .map((r) => r.map((c) => `"${(c || "").replace(/"/g, '""')}"`).join(","))
+            .join("\n");
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+        a.download = "台北有影3_進度表.csv";
+        a.click();
+        showToast("CSV 匯出成功");
+      }
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2800);
+      }
+      document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+          e.preventDefault();
+          saveAll();
+        }
+      });
+      let isEditing = false;
+      document.addEventListener("focusin", (e) => {
+        if (e.target.isContentEditable || ["SELECT", "TEXTAREA", "INPUT"].includes(e.target.tagName)) isEditing = true;
+      });
+      document.addEventListener("focusout", () => {
+        setTimeout(() => {
+          isEditing = false;
+        }, 3000);
+      });
+      async function pollUpdate() {
+        if (isEditing || isDirty) return;
+        try {
+          const res = await fetch(SCRIPT_URL + "?action=read");
+          const remote = await res.json();
+          if (!Array.isArray(remote) || remote.length === 0) return;
+          const newData = remote.map(parseSheetRow);
+          if (JSON.stringify(newData) !== JSON.stringify(data)) {
+            data = newData;
             renderTable();
             if (currentView === "calendar") renderCalendar();
             if (currentView === "dashboard") renderDashboard();
-          } else {
-            updateStats();
+            const n = new Date();
+            document.getElementById("last-saved").textContent =
+              "自動同步 " + n.getHours().toString().padStart(2, "0") + ":" + n.getMinutes().toString().padStart(2, "0");
           }
-        });
-      });
-
-      applyFilter();
-      updateStats();
-    }
-
-    function applyFilter() {
-      $$("#table-body tr:not(.month-divider)").forEach(tr => {
-        const catOk = currentFilter === "全部" || tr.dataset.cat === currentFilter;
-        const textOk = !currentSearch || tr.textContent.toLowerCase().includes(currentSearch);
-        tr.classList.toggle("hidden", !(catOk && textOk));
-      });
-
-      $$("#table-body tr.month-divider").forEach(divider => {
-        let next = divider.nextElementSibling;
-        let visible = false;
-        while (next && !next.classList.contains("month-divider")) {
-          if (!next.classList.contains("hidden")) { visible = true; break; }
-          next = next.nextElementSibling;
-        }
-        divider.classList.toggle("hidden", !visible);
-      });
-    }
-
-    function updateStats() {
-      const counts = Object.fromEntries(STATUS_KEYS.map(key => [key, 0]));
-      data.forEach(row => { counts[row.status] = (counts[row.status] || 0) + 1; });
-      $("#stat-pending").textContent = counts["待開始"];
-      $("#stat-ongoing").textContent = counts["進行中"];
-      $("#stat-done").textContent = counts["已完成"];
-      $("#stat-confirm").textContent = counts["待確認"];
-      $("#stat-late").textContent = counts["延遲"];
-
-      const overdueCount = data.filter(row => urgencyLevel(row) === "overdue").length;
-      const overdueEl = $("#stat-overdue");
-      overdueEl.textContent = overdueCount;
-      overdueEl.style.color = overdueCount > 0 ? "#dc2626" : "var(--text-muted)";
-
-      const pct = data.length ? Math.round((counts["已完成"] / data.length) * 100) : 0;
-      $("#progress-fill").style.width = `${pct}%`;
-      $("#progress-pct").textContent = `${pct}%`;
-    }
-
-    function setFilter(button) {
-      syncEditableFields();
-      $$(".filter-btn[data-cat]").forEach(btn => btn.classList.remove("active"));
-      button.classList.add("active");
-      currentFilter = button.dataset.cat;
-      applyFilter();
-      if (currentView === "calendar") renderCalendar();
-      if (currentView === "dashboard") renderDashboard();
-    }
-
-    function setSearch(value) {
-      syncEditableFields();
-      currentSearch = value.trim().toLowerCase();
-      applyFilter();
-      if (currentView === "calendar") renderCalendar();
-      if (currentView === "dashboard") renderDashboard();
-    }
-
-    function switchView(view) {
-      syncEditableFields();
-      currentView = view;
-      $$(".view-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.view === view));
-      $("#table-view").style.display = view === "list" ? "" : "none";
-      $("#dashboard-view").style.display = view === "dashboard" ? "" : "none";
-      $("#calendar-view").style.display = view === "calendar" ? "" : "none";
-      if (view === "calendar") renderCalendar();
-      if (view === "dashboard") renderDashboard();
-    }
-
-    function changeCat(select) {
-      const row = data.find(item => item.id === Number(select.dataset.id));
-      if (!row) return;
-      row.cat = select.value;
-      isDirty = true;
-      select.className = `group-tag-select tag-${select.value}`;
-      select.closest("tr").dataset.cat = select.value;
-      applyFilter();
-      if (currentView === "calendar") renderCalendar();
-      if (currentView === "dashboard") renderDashboard();
-    }
-
-    function changeStatus(select) {
-      const row = data.find(item => item.id === Number(select.dataset.id));
-      if (!row) return;
-      row.status = select.value;
-      isDirty = true;
-      select.className = `status-select status-${select.value}`;
-      renderTable();
-      if (currentView === "dashboard") renderDashboard();
-      if (currentView === "calendar") renderCalendar();
-    }
-
-    function deleteRow(id) {
-      const row = data.find(item => item.id === id);
-      if (!row) return;
-      if (!confirm(`確定刪除此任務？\n\n${row.task}`)) return;
-      data = data.filter(item => item.id !== id);
-      isDirty = true;
-      renderTable();
-      if (currentView === "dashboard") renderDashboard();
-      if (currentView === "calendar") renderCalendar();
-      showToast("已刪除任務");
-    }
-
-    function fillSelects() {
-      ["#m-cat"].forEach(sel => $(sel).innerHTML = optionsHTML(CATS, "影片徵選"));
-      ["#m-status", "#tm-status"].forEach(sel => $(sel).innerHTML = optionsHTML(STATUS_KEYS, "待開始"));
-    }
-
-    function openEditModal(id = null) {
-      editingId = id;
-      const row = id ? data.find(item => item.id === id) : null;
-      $("#edit-modal-title").textContent = row ? "編輯任務" : "新增任務";
-      $("#m-cat").value = row?.cat || "影片徵選";
-      $("#m-date").value = row?.date || "";
-      $("#m-task").value = row?.task || "";
-      $("#m-unit").value = row?.unit || "北都行銷部";
-      $("#m-status").value = row?.status || "待開始";
-      $("#m-badge").value = row?.badge || "";
-      $("#m-note").value = row?.note || "";
-      $("#m-comment").value = row?.comment || "";
-      $("[data-action='submit-edit-modal']").textContent = row ? "儲存更新" : "確認新增";
-      $("#edit-modal").classList.add("active");
-    }
-
-    function closeEditModal() {
-      editingId = null;
-      $("#edit-modal").classList.remove("active");
-    }
-
-    function submitEditModal() {
-      const payload = normalizeRow({
-        id: editingId || nextId++,
-        cat: $("#m-cat").value,
-        date: $("#m-date").value,
-        task: $("#m-task").value,
-        unit: $("#m-unit").value,
-        status: $("#m-status").value,
-        badge: $("#m-badge").value,
-        note: $("#m-note").value,
-        comment: $("#m-comment").value
-      });
-
-      if (!payload.date || !payload.task) {
-        alert("請填寫日期與工作內容");
-        return;
+        } catch {}
       }
-
-      if (editingId) {
-        const index = data.findIndex(item => item.id === editingId);
-        if (index >= 0) data[index] = payload;
-      } else {
-        data.push(payload);
-      }
-
-      isDirty = true;
-      closeEditModal();
-      renderTable();
-      if (currentView === "calendar") renderCalendar();
-      if (currentView === "dashboard") renderDashboard();
-      showToast(editingId ? "已更新，記得按「儲存」同步" : "已新增任務 ✓");
-    }
-
-    function openTaskModal(id) {
-      const row = data.find(item => item.id === id);
-      if (!row) return;
-      taskModalId = id;
-      $("#task-modal-title").textContent = row.task;
-      $("#task-modal-meta").textContent = `${row.cat} · ${row.date} · ${row.unit}`;
-      $("#tm-status").value = row.status;
-      $("#tm-comment").value = row.comment || "";
-      $("#task-modal").classList.add("active");
-    }
-
-    function closeTaskModal() {
-      taskModalId = null;
-      $("#task-modal").classList.remove("active");
-    }
-
-    function saveTaskModal() {
-      const row = data.find(item => item.id === taskModalId);
-      if (!row) return;
-      row.status = $("#tm-status").value;
-      row.comment = $("#tm-comment").value.trim();
-      isDirty = true;
-      closeTaskModal();
-      renderTable();
-      if (currentView === "calendar") renderCalendar();
-      if (currentView === "dashboard") renderDashboard();
-      showToast("已更新，記得按「儲存」同步");
-    }
-
-    function chipStyle(cat) {
-      return {
-        "行政準備":"background:#dbeafe;border:1px solid #93c5fd;color:#1e40af",
-        "影片徵選":"background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6",
-        "頒獎典禮":"background:#fef3c7;border:1px solid #fcd34d;color:#92400e",
-        "市民大聲說":"background:#d1fae5;border:1px solid #6ee7b7;color:#065f46",
-        "人才培訓":"background:#fce7f3;border:1px solid #f9a8d4;color:#9d174d"
-      }[cat] || "background:#f0f4f4;color:#3d5c57";
-    }
-
-    function renderCalendar() {
-      $("#cal-title").textContent = `${calYear} 年　${CAL_MONTH_ZH[calMonth]}月`;
-      const firstDay = new Date(calYear, calMonth, 1).getDay();
-      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-      const today = new Date();
-      const byDay = {};
-
-      data.forEach(row => {
-        if (currentFilter !== "全部" && row.cat !== currentFilter) return;
-        const searchable = `${row.task} ${row.cat} ${row.unit} ${row.note} ${row.comment}`.toLowerCase();
-        if (currentSearch && !searchable.includes(currentSearch)) return;
-        const parsed = parseDateFirst(row.date);
-        if (parsed && parsed.month === calMonth + 1) {
-          byDay[parsed.day] ||= [];
-          byDay[parsed.day].push(row);
-        }
-      });
-
-      let html = CAL_DAY.map(day => `<div class="cal-day-header">${day}</div>`).join("");
-      for (let i = 0; i < firstDay; i += 1) html += '<div class="cal-day empty"></div>';
-      for (let day = 1; day <= daysInMonth; day += 1) {
-        const isToday = today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === day;
-        const tasks = byDay[day] || [];
-        const chips = tasks.slice(0, 3).map(task => `
-          <span class="cal-task-chip" style="${chipStyle(task.cat)}" data-action="open-task-modal" data-id="${task.id}" title="${esc(task.task)}">
-            ${esc(cleanLabel(task.task).slice(0, 14))}
-          </span>`).join("");
-        const more = tasks.length > 3 ? `<div class="cal-more" data-view="list">+${tasks.length - 3} 項</div>` : "";
-        html += `<div class="cal-day${isToday ? " today" : ""}"><div class="cal-day-num">${day}</div>${chips}${more}</div>`;
-      }
-      $("#cal-grid").innerHTML = html;
-    }
-
-    function calPrev() {
-      calMonth -= 1;
-      if (calMonth < 0) { calMonth = 11; calYear -= 1; }
-      renderCalendar();
-    }
-
-    function calNext() {
-      calMonth += 1;
-      if (calMonth > 11) { calMonth = 0; calYear += 1; }
-      renderCalendar();
-    }
-
-    function renderDashboard() {
-      const overdueTasks = data.filter(row => urgencyLevel(row) === "overdue");
-      const warningTasks = data.filter(row => urgencyLevel(row) === "warning");
-      const catStats = CATS.map(cat => {
-        const tasks = data.filter(row => row.cat === cat);
-        const done = tasks.filter(row => row.status === "已完成").length;
-        return { cat, done, total: tasks.length, pct: tasks.length ? Math.round(done / tasks.length * 100) : 0 };
-      });
-      const upcoming = data.filter(row => {
-        if (row.status === "已完成" || getTaskType(row) === "ongoing") return false;
-        const days = getDaysLeft(row);
-        return days !== null && days >= -7 && days <= 14;
-      }).sort((a, b) => (getDaysLeft(a) ?? 999) - (getDaysLeft(b) ?? 999)).slice(0, 9);
-      const upcomingStart = data.filter(row => {
-        if (row.status === "已完成" || getTaskType(row) !== "ongoing") return false;
-        const days = getDaysLeft(row);
-        return days !== null && days >= 0 && days <= 14;
-      }).sort((a, b) => (getDaysLeft(a) ?? 999) - (getDaysLeft(b) ?? 999)).slice(0, 5);
-
-      const catCards = CATS.map(cat => {
-        const tasks = data.filter(row => row.cat === cat);
-        const counts = Object.fromEntries(STATUS_KEYS.map(status => [status, tasks.filter(row => row.status === status).length]));
-        const pct = tasks.length ? Math.round(counts["已完成"] / tasks.length * 100) : 0;
-        const lines = STATUS_KEYS.filter(status => counts[status] > 0).map(status => `<div class="cat-status-line"><span>${status}</span><span>${counts[status]}</span></div>`).join("");
-        return `<div class="cat-status-card"><div class="cat-status-name" style="color:${CAT_COLORS[cat]}">${cat}</div><div class="mono" style="font-size:1.1rem;font-weight:900;color:${CAT_COLORS[cat]};margin-bottom:.4rem">${pct}%</div>${lines}</div>`;
-      }).join("");
-
-      const overdueHTML = overdueTasks.length
-        ? overdueTasks.slice(0, 5).map(row => `<div class="overdue-row">逾${Math.abs(getDaysLeft(row))}天・${esc(cleanLabel(row.task).slice(0, 22))}（${esc(row.date)}）</div>`).join("") + (overdueTasks.length > 5 ? `<div style="font-size:.8rem;color:#dc2626;margin-top:.3rem">...共 ${overdueTasks.length} 項逾期</div>` : "")
-        : '<div style="color:#059669;font-size:.85rem;padding:.3rem 0">✅ 無逾期任務</div>';
-
-      const upcomingHTML = upcoming.length ? upcoming.map(row => {
-        const days = getDaysLeft(row);
-        const color = days < 0 ? "#dc2626" : days <= 3 ? "#d97706" : "#059669";
-        const bg = days < 0 ? "#fee2e2" : days <= 3 ? "#fff3e0" : "#f0fdf8";
-        const label = days < 0 ? `逾${Math.abs(days)}天` : days === 0 ? "今天" : days === 1 ? "明天" : `${days}天後`;
-        return `<div class="dl-item"><span class="dl-tag" style="background:${bg};color:${color}">${label}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">${esc(cleanLabel(row.task).slice(0, 20))}</span><span style="font-size:.76rem;color:var(--text-muted);flex-shrink:0" class="mono">${esc(row.cat.slice(0, 4))}</span></div>`;
-      }).join("") : '<div style="color:var(--text-muted);font-size:.88rem;padding:.3rem 0">近期無截止任務</div>';
-
-      const upcomingStartHTML = upcomingStart.length ? upcomingStart.map(row => {
-        const days = getDaysLeft(row);
-        const label = days === 0 ? "今天" : days === 1 ? "明天" : `${days}天後`;
-        return `<div class="dl-item"><span class="dl-tag" style="background:#f0fdf8;color:#059669">${label}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">${esc(cleanLabel(row.task).slice(0, 20))}</span><span style="font-size:.76rem;color:var(--text-muted);flex-shrink:0" class="mono">${esc(row.cat.slice(0, 4))}</span></div>`;
-      }).join("") : '<div style="color:var(--text-muted);font-size:.88rem;padding:.3rem 0">近期無即將啟動任務</div>';
-
-      $("#dashboard-view").innerHTML = `
-        <div class="dash-header">
-          <div><h2>📊 專案儀表板</h2><p>依目前任務資料自動產生進度摘要</p></div>
-          <div class="mono" style="font-size:.8rem;color:var(--text-muted)">更新時間：${new Date().toLocaleTimeString("zh-TW", {hour:"2-digit", minute:"2-digit"})}</div>
-        </div>
-        <div class="dash-grid">
-          <div class="dash-card"><div class="dash-card-title">各分類完成率</div>
-            ${catStats.map(stat => `<div class="cat-row"><div class="cat-name" style="color:${CAT_COLORS[stat.cat]}">${stat.cat}</div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:${stat.pct}%;background:${CAT_COLORS[stat.cat]}"></div></div><div class="cat-pct" style="color:${CAT_COLORS[stat.cat]}">${stat.pct}%</div></div><div style="font-size:.73rem;color:var(--text-muted);margin:-.35rem 0 .6rem 82px" class="mono">${stat.done}/${stat.total} 完成</div>`).join("")}
-          </div>
-          <div class="dash-card"><div class="dash-card-title">風險預警</div>
-            <div class="risk-block" style="background:#fef2f2;border:1px solid #fca5a5"><div class="risk-num" style="color:#dc2626">${overdueTasks.length}</div><div><div class="risk-label" style="color:#991b1b">🔴 已逾期任務</div><div class="risk-sub" style="color:#dc2626">需立即關注</div></div></div>
-            <div class="risk-block" style="background:#fffbeb;border:1px solid #fcd34d;margin-bottom:1rem"><div class="risk-num" style="color:#d97706">${warningTasks.length}</div><div><div class="risk-label" style="color:#92400e">🟠 3天內截止（待開始）</div><div class="risk-sub" style="color:#d97706">建議提前啟動</div></div></div>
-            ${overdueHTML}
-          </div>
-          <div class="dash-card"><div class="dash-card-title">近期截止（14天內）</div>${upcomingHTML}<div class="dash-card-title" style="margin-top:1rem">即將啟動（14天內）</div>${upcomingStartHTML}</div>
-        </div>
-        <div class="dash-card" style="margin-bottom:1.15rem"><div class="dash-card-title">各分類任務狀態分布</div><div class="cat-status-grid">${catCards}</div></div>`;
-    }
-
-    function openWeeklyReport() {
-      const today = new Date();
-      const monday = new Date(today);
-      monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
-      const fmt = d => `${d.getMonth() + 1}/${d.getDate()}`;
-      const totalDone = data.filter(row => row.status === "已完成").length;
-      const pct = data.length ? Math.round(totalDone / data.length * 100) : 0;
-      const catLines = CATS.map(cat => {
-        const tasks = data.filter(row => row.cat === cat);
-        const done = tasks.filter(row => row.status === "已完成").length;
-        const p = tasks.length ? Math.round(done / tasks.length * 100) : 0;
-        return `  ${cat}：${p}%（${done}/${tasks.length} 完成）`;
-      }).join("\n");
-      const overdueTasks = data.filter(row => urgencyLevel(row) === "overdue");
-      const warningTasks = data.filter(row => urgencyLevel(row) === "warning");
-      const weekStartTasks = data.filter(row => row.status !== "已完成" && getTaskType(row) !== "deadline" && (getDaysLeft(row) ?? 999) >= 0 && (getDaysLeft(row) ?? 999) <= 7);
-      const weekDeadlineTasks = data.filter(row => row.status !== "已完成" && getTaskType(row) === "deadline" && (getDaysLeft(row) ?? 999) >= 0 && (getDaysLeft(row) ?? 999) <= 7);
-
-      const overdueLines = overdueTasks.length ? overdueTasks.map((row, index) => `  ${index + 1}. 🔴 逾${Math.abs(getDaysLeft(row))}天｜${cleanLabel(row.task).slice(0, 30)}（${row.date}，${row.status}）`).join("\n") : "  ✅ 無逾期任務";
-      const warningLines = warningTasks.length ? warningTasks.map((row, index) => {
-        const days = getDaysLeft(row);
-        return `  ${index + 1}. 🟠 ${days === 0 ? "今天" : `${days}天後`}｜${cleanLabel(row.task).slice(0, 30)}（${row.date}）`;
-      }).join("\n") : "  ✅ 無即將到期任務";
-      const startLines = weekStartTasks.length ? weekStartTasks.slice(0, 6).map((row, index) => {
-        const days = getDaysLeft(row);
-        const when = days === 0 ? "今天" : days === 1 ? "明天" : `${days}天後`;
-        const type = getTaskType(row) === "ongoing" ? "持續" : "提醒";
-        return `  ${index + 1}. ${when}｜${cleanLabel(row.task).slice(0, 30)}\n      分類：${row.cat}　類型：${type}`;
-      }).join("\n") : "  暫無";
-      const deadlineLines = weekDeadlineTasks.length ? weekDeadlineTasks.slice(0, 6).map((row, index) => {
-        const days = getDaysLeft(row);
-        const when = days === 0 ? "今天截止" : days === 1 ? "明天截止" : `${days}天後截止`;
-        return `  ${index + 1}. ${when}｜${cleanLabel(row.task).slice(0, 30)}\n      分類：${row.cat}　狀態：${row.status}`;
-      }).join("\n") : "  暫無";
-      const sep = "─".repeat(38);
-      const report = `【台北有影 3｜2026】本週進度週報\n期間：${fmt(monday)} – ${fmt(sunday)}\n產出：${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}\n${sep}\n\n📊 整體進度\n  完成率：${pct}%（已完成 ${totalDone} / 共 ${data.length} 項）\n\n📋 各分類進度\n${catLines}\n\n🔴 逾期任務（共 ${overdueTasks.length} 項）\n${overdueLines}\n\n🟠 3 天內到期・尚未開始（共 ${warningTasks.length} 項）\n${warningLines}\n\n📅 本週啟動／提醒（共 ${weekStartTasks.length} 項）\n${startLines}\n\n📌 本週截止任務（共 ${weekDeadlineTasks.length} 項）\n${deadlineLines}\n\n${sep}\n此週報由台北有影 3 專案追蹤系統自動產出`;
-
-      $("#report-text").value = report;
-      $("#mailto-btn").onclick = () => {
-        window.location.href = `mailto:?subject=${encodeURIComponent(`【台北有影 3】本週進度週報 ${fmt(monday)}–${fmt(sunday)}`)}&body=${encodeURIComponent(report)}`;
-      };
-      $("#weekly-report-modal").classList.add("active");
-    }
-
-    function copyReport() {
-      const text = $("#report-text").value;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => showToast("已複製到剪貼簿 ✓")).catch(() => fallbackCopy(text));
-      } else {
-        fallbackCopy(text);
-      }
-    }
-
-    function fallbackCopy(text) {
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      textarea.style.cssText = "position:fixed;opacity:0";
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      textarea.remove();
-      showToast("已複製到剪貼簿 ✓");
-    }
-
-    function parseSheetRow(row) {
-      const clean = value => {
-        const raw = typeof value === "string" && value.startsWith("'") ? value.slice(1) : value;
-        return String(raw || "");
-      };
-      let date = clean(row.date);
-      if (date.includes("T") || /^\d{4}-\d{1,2}-\d{1,2}/.test(date)) {
-        const d = new Date(date);
-        if (!Number.isNaN(d.getTime())) date = `${d.getMonth() + 1}/${d.getDate()}`;
-      } else if (!Number.isNaN(Number(row.date)) && Number(row.date) > 1000) {
-        const d = new Date((Number(row.date) - 25569) * 86400 * 1000);
-        date = `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
-      }
-      return normalizeRow({
-        id: clean(row.id), cat: clean(row.cat), date, task: clean(row.task), unit: clean(row.unit),
-        status: clean(row.status), note: clean(row.note), badge: clean(row.badge), comment: clean(row.comment)
-      });
-    }
-
-    async function saveAll() {
-      syncEditableFields();
-      const btn = $("#save-btn");
-      const original = btn.textContent;
-      btn.textContent = "同步中…";
-      btn.disabled = true;
-      try {
-        const res = await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain" },
-          body: JSON.stringify({ action: "writeAll", data })
-        });
-        const result = await res.json();
-        if (result.status !== "ok") throw new Error(result.msg || "Google Sheets 寫入失敗");
-        isDirty = false;
-        const now = new Date();
-        $("#last-saved").textContent = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-        localStorage.setItem("tbff3_data", JSON.stringify(data));
-        btn.textContent = "✓ 已同步";
-        btn.style.background = "#059669";
-        showToast("已同步至 Google Sheets ✓");
-      } catch (error) {
-        localStorage.setItem("tbff3_data", JSON.stringify(data));
-        btn.textContent = "⚠ 失敗";
-        btn.style.background = "#dc2626";
-        showToast("⚠ 同步失敗，已儲存至本機");
-      } finally {
-        window.setTimeout(() => { btn.textContent = original; btn.style.background = ""; }, 2500);
-        btn.disabled = false;
-      }
-    }
-
-    async function loadSaved() {
-      $("#table-body").innerHTML = '<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text-muted)">載入中…</td></tr>';
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=read`);
-        const remote = await res.json();
-        if (Array.isArray(remote) && remote.length > 0) {
-          data = remote.map(parseSheetRow).filter(row => row.date && row.task);
-          $("#last-saved").textContent = "已從雲端載入";
-        } else {
-          data = structuredClone(INITIAL_DATA);
-          $("#last-saved").textContent = "請按「儲存」寫入雲端";
-          showToast("⚠ 雲端資料不完整，請按「儲存」");
-        }
-      } catch (error) {
-        const local = localStorage.getItem("tbff3_data");
-        try { data = local ? JSON.parse(local).map(normalizeRow) : structuredClone(INITIAL_DATA); }
-        catch { data = structuredClone(INITIAL_DATA); }
-        $("#last-saved").textContent = "離線模式（本機資料）";
-      }
-      nextId = Math.max(99, ...data.map(row => Number(row.id) || 0)) + 1;
-    }
-
-    async function pollUpdate() {
-      if (isEditing || isDirty) return;
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=read`);
-        const remote = await res.json();
-        if (!Array.isArray(remote) || remote.length === 0) return;
-        const newData = remote.map(parseSheetRow).filter(row => row.date && row.task);
-        if (JSON.stringify(newData) !== JSON.stringify(data)) {
-          data = newData;
-          nextId = Math.max(99, ...data.map(row => Number(row.id) || 0)) + 1;
-          renderTable();
-          if (currentView === "calendar") renderCalendar();
-          if (currentView === "dashboard") renderDashboard();
-          const now = new Date();
-          $("#last-saved").textContent = `自動同步 ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-        }
-      } catch (error) { /* 靜默處理自動輪詢失敗 */ }
-    }
-
-    function exportCSV() {
-      syncEditableFields();
-      const header = ["分類", "日期", "工作內容", "執行單位", "進度狀態", "備註", "補充說明"];
-      const rows = data.map(row => [row.cat, row.date, row.task, row.unit, row.status, row.note, row.comment]);
-      const csv = "\ufeff" + [header, ...rows]
-        .map(row => row.map(cell => `"${String(cell || "").replace(/"/g, '""')}"`).join(","))
-        .join("\n");
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
-      link.download = "台北有影3_進度表.csv";
-      link.click();
-      URL.revokeObjectURL(link.href);
-      showToast("CSV 匯出成功");
-    }
-
-    function handleAction(target) {
-      const actionEl = target.closest("[data-action]");
-      if (!actionEl) return false;
-      const action = actionEl.dataset.action;
-      const id = Number(actionEl.dataset.id);
-      if (action === "font-minus") adjustFont(-1);
-      if (action === "font-plus") adjustFont(1);
-      if (action === "export-csv") exportCSV();
-      if (action === "print") window.print();
-      if (action === "save-all") saveAll();
-      if (action === "weekly-report") openWeeklyReport();
-      if (action === "add-task") openEditModal();
-      if (action === "edit-row") openEditModal(id);
-      if (action === "delete-row") deleteRow(id);
-      if (action === "change-cat") changeCat(actionEl);
-      if (action === "change-status") changeStatus(actionEl);
-      if (action === "cal-prev") calPrev();
-      if (action === "cal-next") calNext();
-      if (action === "open-task-modal") openTaskModal(id);
-      if (action === "close-task-modal") closeTaskModal();
-      if (action === "save-task-modal") saveTaskModal();
-      if (action === "close-edit-modal") closeEditModal();
-      if (action === "submit-edit-modal") submitEditModal();
-      if (action === "copy-report") copyReport();
-      if (action === "close-report-modal") $("#weekly-report-modal").classList.remove("active");
-      return true;
-    }
-
-    document.addEventListener("click", event => {
-      if (handleAction(event.target)) return;
-      const filterBtn = event.target.closest(".filter-btn[data-cat]");
-      if (filterBtn) setFilter(filterBtn);
-      const viewBtn = event.target.closest("[data-view]");
-      if (viewBtn) switchView(viewBtn.dataset.view);
-    });
-
-    document.addEventListener("change", event => handleAction(event.target));
-    $("#search-input").addEventListener("input", event => setSearch(event.target.value));
-
-    document.addEventListener("keydown", event => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
-        event.preventDefault();
-        saveAll();
-      }
-      if (event.key === "Escape") {
-        closeTaskModal();
-        closeEditModal();
-        $("#weekly-report-modal").classList.remove("active");
-      }
-    });
-
-    document.addEventListener("focusin", event => {
-      if (event.target.isContentEditable || ["SELECT", "TEXTAREA", "INPUT"].includes(event.target.tagName)) isEditing = true;
-    });
-    document.addEventListener("focusout", () => window.setTimeout(() => { isEditing = false; }, 3000));
-
-    window.addEventListener("beforeunload", event => {
-      if (!isDirty) return;
-      event.preventDefault();
-      event.returnValue = "";
-    });
-
-    (async function init() {
-      applyFont();
-      fillSelects();
-      await loadSaved();
-      renderTable();
-      window.setInterval(pollUpdate, 30000);
-    })();
-  </script>
-</body>
+      (async () => {
+        await loadSaved();
+        renderTable();
+        setInterval(pollUpdate, 30000);
+      })();
+    </script>
+  </body>
 </html>
