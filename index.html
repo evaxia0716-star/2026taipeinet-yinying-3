@@ -946,45 +946,68 @@ function openWeeklyReport(){
   const overdueTasks=data.filter(r=>urgencyLevel(r)==='overdue');
   const warningTasks=data.filter(r=>urgencyLevel(r)==='warning');
   const pct=data.length?Math.round(totalDone/data.length*100):0;
+
+  const CATS=['行政準備','影片徵選','頒獎典禮','市民大聲說','人才培訓'];
+
   const catLines=CATS.map(cat=>{
     const tasks=data.filter(r=>r.cat===cat);
     const done=tasks.filter(r=>r.status==='已完成').length;
     const p=tasks.length?Math.round(done/tasks.length*100):0;
-    const bar='█'.repeat(Math.round(p/10))+'░'.repeat(10-Math.round(p/10));
-    return `  ${cat.padEnd(7)}  ${bar}  ${p}%（${done}/${tasks.length}）`;
+    return `  ${cat}：${p}%（${done}/${tasks.length} 完成）`;
   }).join('\n');
+
   const overdueLines=overdueTasks.length
-    ?overdueTasks.map(r=>`  🔴 逾${Math.abs(getDaysLeft(r))}天・${r.task.replace(/【.*?】/g,'').trim().slice(0,25)}（${r.date}，${r.status}）`).join('\n')
+    ?overdueTasks.map((r,i)=>{
+        const d=getDaysLeft(r);
+        return `  ${i+1}. 🔴 逾${Math.abs(d)}天｜${r.task.replace(/【.*?】/g,'').trim().slice(0,30)}（${r.date}，${r.status}）`;
+      }).join('\n')
     :'  ✅ 無逾期任務';
+
   const warningLines=warningTasks.length
-    ?warningTasks.map(r=>{const d=getDaysLeft(r);return `  🟠 ${d===0?'今天':d+'天後'}・${r.task.replace(/【.*?】/g,'').trim().slice(0,25)}（${r.date}）`;}).join('\n')
-    :'  ✅ 無即將到期（待開始）任務';
-  const weekTasks=data.filter(r=>{if(r.status==='已完成') return false;const d=getDaysLeft(r);return d!==null&&d>=0&&d<=7;});
+    ?warningTasks.map((r,i)=>{
+        const d=getDaysLeft(r);
+        const when=d===0?'今天':`${d}天後`;
+        return `  ${i+1}. 🟠 ${when}｜${r.task.replace(/【.*?】/g,'').trim().slice(0,30)}（${r.date}）`;
+      }).join('\n')
+    :'  ✅ 無即將到期任務';
+
+  const weekTasks=data.filter(r=>{
+    if(r.status==='已完成') return false;
+    const d=getDaysLeft(r); return d!==null&&d>=0&&d<=7;
+  });
   const weekLines=weekTasks.length
-    ?weekTasks.slice(0,8).map(r=>{const d=getDaysLeft(r);const when=d===0?'今天':d===1?'明天':`${d}天後`;return `  · ${when}・${r.task.replace(/【.*?】/g,'').trim().slice(0,28)}（${r.cat}，${r.status}）`;}).join('\n')
+    ?weekTasks.slice(0,8).map((r,i)=>{
+        const d=getDaysLeft(r);
+        const when=d===0?'今天':d===1?'明天':`${d}天後`;
+        return `  ${i+1}. ${when}｜${r.task.replace(/【.*?】/g,'').trim().slice(0,30)}\n      分類：${r.cat}　狀態：${r.status}`;
+      }).join('\n')
     :'  暫無本週到期任務';
+
+  const sep='─'.repeat(38);
   const report=
 `【台北有影 3｜2026】本週進度週報
-${fmt(mon)} – ${fmt(sun)}　（${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()} 產出）
-${'━'.repeat(40)}
+期間：${fmt(mon)} – ${fmt(sun)}
+產出：${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}
+${sep}
 
 📊 整體進度
-  總任務：${data.length} 項　已完成：${totalDone} 項　完成率：${pct}%
+  完成率：${pct}%（已完成 ${totalDone} / 共 ${data.length} 項）
 
 📋 各分類進度
 ${catLines}
 
-🔴 逾期任務（${overdueTasks.length} 項）
+🔴 逾期任務（共 ${overdueTasks.length} 項）
 ${overdueLines}
 
-🟠 3天內到期・尚未開始（${warningTasks.length} 項）
+🟠 3 天內到期・尚未開始（共 ${warningTasks.length} 項）
 ${warningLines}
 
-📌 本週到期任務（7天內，${weekTasks.length} 項）
+📌 本週到期任務（7 天內，共 ${weekTasks.length} 項）
 ${weekLines}
 
-${'━'.repeat(40)}
-由台北有影 3 專案追蹤系統自動產出`;
+${sep}
+此週報由台北有影 3 專案追蹤系統自動產出`;
+
   document.getElementById('report-text').value=report;
   const subject=encodeURIComponent(`【台北有影 3】本週進度週報 ${fmt(mon)}–${fmt(sun)}`);
   const body=encodeURIComponent(report);
