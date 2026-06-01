@@ -2071,7 +2071,7 @@
             else if (dDue === 0) { chip = "今天"; chipCls = "chip-today"; urgCls = "urg-danger"; action = "今天開始"; actCls = "act-danger"; }
             else if (dDue === 1) { chip = "明天"; chipCls = "chip-warn"; urgCls = "urg-warn"; action = "明天準備開始"; actCls = "act-warn"; }
             else if (dDue <= 3) { chip = `${dDue} 天後`; chipCls = "chip-warn"; urgCls = "urg-warn"; action = `${dDue} 天後事件開始`; actCls = "act-warn"; }
-            else { chip = `${dDue} 天後`; action = `${dDue} 天候事件開始`; }
+            else { chip = `${dDue} 天後`; action = `${dDue} 天後事件開始`; }
           } else if (kind === "deadline") {
             if (dDue >= -3 && dDue <= 7) {
               include = true;
