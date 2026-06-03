@@ -303,7 +303,7 @@
 // ══════════════════════════════════════════════
 //  ★ 貼上你的 Apps Script Web App 網址 ★
 // ══════════════════════════════════════════════
-const API_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
 
 // ══════════════════════════════════════════════
 //  名單定義
@@ -418,16 +418,16 @@ function loadCurrentSheet() {
   setTableLoading();
   setSyncState('loading', '連線中…');
 
-  if (API_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (false) { // API_URL 已設定
     tableData[name] = [];
     loadedSheets.add(name);
     renderTable();
     updateCount(name);
-    setSyncState('err', '⚠ 尚未設定 API_URL，目前為示範模式');
+    setSyncState('err', '示範模式（API 未連線）');
     return;
   }
 
-  fetch(`${API_URL}?action=readRoster&sheet=${encodeURIComponent(name)}`)
+  fetch(`${API_URL}?action=readRoster&sheet=${encodeURIComponent(name)}`, { redirect: 'follow' })
     .then(r => r.json())
     .then(res => {
       if (!res.ok) throw new Error(res.msg || '讀取失敗');
@@ -451,7 +451,7 @@ function saveCurrentSheet() {
   const name = currentSheet;
   const data = tableData[name] || [];
 
-  if (API_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (false) { // API_URL 已設定
     showToast('請先設定 API_URL', 'err'); return;
   }
 
@@ -460,6 +460,7 @@ function saveCurrentSheet() {
 
   fetch(API_URL, {
     method: 'POST',
+    redirect: 'follow',
     headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify({ action: 'writeRoster', sheet: name, data })
   })
