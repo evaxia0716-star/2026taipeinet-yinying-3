@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>台北有影 3｜2026 專案進度追蹤</title>
+  <title>台北有影 3｜Sheets 進度同步</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -15,7 +15,6 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { font-size: 16px; }
     body { font-family: "Noto Sans TC", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
     header { position: sticky; top: 0; z-index: 100; background: #134e4a; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 68px; box-shadow: 0 2px 12px rgba(13,74,70,0.25); }
     .header-left { display: flex; align-items: center; gap: 1.5rem; }
     .logo { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; letter-spacing: 0.2em; color: #5eead4; text-transform: uppercase; }
@@ -23,25 +22,35 @@
     .project-title .year { color: #99f6e4; font-size: 0.9rem; font-weight: 400; margin-left: 0.5rem; }
     .header-right { display: flex; align-items: center; gap: 0.6rem; }
     .font-ctrl { display: flex; gap: 0.3rem; }
-
     .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.12); color: #e0fdf4; font-family: "Noto Sans TC", sans-serif; font-size: 0.88rem; cursor: pointer; transition: all 0.15s; text-decoration: none; }
     .btn:hover { background: rgba(255,255,255,0.24); color: #fff; }
     .btn-accent { background: #0d9488; border-color: #0d9488; color: #fff; font-weight: 700; box-shadow: 0 2px 6px rgba(13,148,136,0.4); }
     .btn-accent:hover { background: #0f766e; border-color: #0f766e; }
     .font-btn { padding: 0.35rem 0.65rem; font-size: 0.82rem; font-weight: 700; }
 
+    .sync-banner { background: #fff; border-bottom: 2px solid var(--border); padding: 0.55rem 2rem; display: flex; align-items: center; gap: 1rem; font-size: 0.84rem; }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sync-dot.ok { background: #22c55e; }
+    .sync-dot.err { background: #ef4444; }
+    .sync-dot.pending { background: #f59e0b; animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .sync-text { color: var(--text-dim); }
+    .sync-url-input { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; border: 1.5px solid var(--border2); border-radius: 6px; padding: 0.28rem 0.6rem; color: var(--text); background: var(--surface2); outline: none; width: 380px; transition: border-color 0.15s; }
+    .sync-url-input:focus { border-color: var(--accent); background: #fff; }
+    .sync-url-input::placeholder { color: var(--text-muted); }
+    .sync-save-btn { padding: 0.3rem 0.75rem; border-radius: 6px; border: 1.5px solid var(--accent); background: var(--accent); color: #fff; font-family: "Noto Sans TC", sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+    .sync-save-btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
     .stats-bar { background: #fff; border-bottom: 1px solid var(--border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 2.2rem; overflow-x: auto; }
     .stat-item { display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
     .stat-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
     .stat-label { font-size: 0.9rem; color: var(--text-dim); font-weight: 500; }
     .stat-val { font-family: "IBM Plex Mono", monospace; font-size: 1.05rem; font-weight: 700; color: var(--text); }
-
     .progress-section { background: #fff; border-bottom: 1px solid var(--border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
     .progress-label { font-size: 0.9rem; color: var(--text-dim); font-weight: 600; white-space: nowrap; }
     .progress-bar-wrap { flex: 1; min-width: 180px; height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #0d9488, #059669); border-radius: 4px; transition: width 0.4s; }
     .progress-pct { font-family: "IBM Plex Mono", monospace; font-size: 1.05rem; font-weight: 700; color: var(--accent); }
-
     .toolbar { background: #fff; border-bottom: 2px solid var(--border); padding: 0.55rem 2rem; display: flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; }
     .filter-label { font-size: 0.88rem; color: var(--text-dim); font-weight: 700; margin-right: 0.1rem; }
     .filter-btn { padding: 0.3rem 0.7rem; border-radius: 20px; border: 1.5px solid var(--border2); background: #fff; color: var(--text-dim); font-family: "Noto Sans TC", sans-serif; font-size: 0.84rem; cursor: pointer; transition: all 0.15s; font-weight: 500; }
@@ -64,7 +73,6 @@
     .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,0.12); }
     .search-input::placeholder { color: var(--text-muted); }
     .search-icon { position: absolute; left: 0.6rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; pointer-events: none; }
-
     .table-wrap { overflow-x: auto; padding: 0 2rem 5rem; }
     table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 1rem; font-size: 0.97rem; }
     thead th { padding: 0.75rem 0.9rem; text-align: left; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); border-bottom: 2px solid var(--border); white-space: nowrap; position: sticky; top: 68px; background: var(--bg); z-index: 30; }
@@ -81,14 +89,12 @@
     tbody tr.row-warning:hover { background: #fef9c3; }
     .date-overdue { color: #dc2626 !important; font-weight: 800 !important; }
     .date-warning { color: #d97706 !important; font-weight: 700 !important; }
-
     .group-tag-select { appearance: none; padding: 0.28rem 0.7rem; border-radius: 5px; font-size: 0.82rem; font-weight: 700; cursor: pointer; outline: none; border: 1.5px solid; font-family: "Noto Sans TC", sans-serif; transition: all 0.15s; }
     .tag-行政準備 { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
     .tag-影片徵選 { background: #ede9fe; color: #5b21b6; border-color: #c4b5fd; }
     .tag-頒獎典禮 { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
     .tag-市民大聲說 { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
     .tag-人才培訓 { background: #fce7f3; color: #9d174d; border-color: #f9a8d4; }
-
     .date-text { font-family: "IBM Plex Mono", monospace; font-size: 0.9rem; color: var(--text-dim); font-weight: 600; }
     .task-content { line-height: 1.65; color: var(--text); }
     .task-badge { display: inline-block; font-size: 0.75rem; padding: 0.12rem 0.42rem; border-radius: 3px; margin-bottom: 0.35rem; font-weight: 700; letter-spacing: 0.04em; }
@@ -115,10 +121,8 @@
     .action-btn:hover { border-color: #fca5a5; color: #dc2626; background: #fef2f2; }
     .action-btn.edit-btn:hover { border-color: #6ee7b7; color: #059669; background: #f0fdf8; }
     .month-divider td { padding: 2.35rem 0.9rem 0.65rem; background: var(--bg) !important; }
-    #table-body tr.month-divider:first-child td,
-    #table-body tr.month-divider.first-visible-month td { padding-top: calc(24px + 2rem); }
+    #table-body tr.month-divider:first-child td, #table-body tr.month-divider.first-visible-month td { padding-top: calc(24px + 2rem); }
     .month-label { font-family: "IBM Plex Mono", monospace; font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); font-weight: 700; padding: 0.3rem 0.75rem; border: 1.5px solid var(--border2); border-radius: 5px; background: #fff; display: inline-block; }
-
     #calendar-view { padding: 0 2rem 5rem; }
     .cal-nav { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 0 1rem; }
     .cal-nav .btn { background: #fff; color: var(--text); border: 1.5px solid var(--border2); }
@@ -135,7 +139,6 @@
     .cal-more { font-size: 0.78rem; color: var(--text-muted); cursor: pointer; margin-top: 0.15rem; font-weight: 600; }
     .cal-legend { display: flex; gap: 0.85rem; margin-top: 1.1rem; flex-wrap: wrap; }
     .cal-leg-dot { display: inline-block; padding: 0.13rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
-
     #dashboard-view { padding: 0 2rem 5rem; }
     .dash-header { padding: 1.4rem 0 1.2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
     .dash-header h2 { font-size: 1.12rem; font-weight: 700; }
@@ -187,11 +190,9 @@
     .week-action { flex-shrink: 0; font-size: 0.82rem; color: var(--text-dim); font-weight: 600; text-align: right; }
     .week-action.act-danger { color: #b91c1c; }
     .week-action.act-warn   { color: #b45309; }
-
     .modal-wide { width: 660px; }
     #report-text { font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; background: #f8faf9; border: 1.5px solid var(--border); border-radius: 8px; padding: 1rem; line-height: 1.78; color: var(--text); height: 50vh; resize: none; width: 100%; outline: none; }
     .report-actions { display: flex; gap: 0.65rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
-
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,40,35,0.45); backdrop-filter: blur(3px); z-index: 1000; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; }
     .modal { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 2.1rem; width: 530px; max-width: 93vw; box-shadow: 0 20px 60px rgba(0,0,0,0.18); }
@@ -207,15 +208,9 @@
     .modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
     .btn-cancel { background: #fff; color: var(--text-dim); border: 1.5px solid var(--border2); }
     .btn-cancel:hover { border-color: var(--accent); color: var(--accent); background: #f0faf8; }
-
     .toast { position: fixed; bottom: 2rem; right: 2rem; background: #134e4a; color: #fff; border-radius: 8px; padding: 0.85rem 1.4rem; font-size: 0.92rem; z-index: 2000; transform: translateX(130%); transition: transform 0.25s; box-shadow: 0 4px 16px rgba(13,74,70,0.3); }
     .toast.show { transform: translateX(0); }
-
-    @media print {
-      header, .stats-bar, .toolbar, .progress-section, .row-actions, .modal-overlay, .toast { display: none !important; }
-      body { background: white; }
-      .table-wrap { padding: 0; }
-    }
+    @media print { header, .stats-bar, .toolbar, .progress-section, .sync-banner, .row-actions, .modal-overlay, .toast { display: none !important; } body { background: white; } .table-wrap { padding: 0; } }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
@@ -226,7 +221,7 @@
 <header>
   <div class="header-left">
     <div class="logo">PAC · 公用頻道</div>
-    <div class="project-title">台北有影 3<span class="year">2026 專案進度追蹤</span></div>
+    <div class="project-title">台北有影 3<span class="year">Sheets 進度同步</span></div>
   </div>
   <div class="header-right">
     <div class="font-ctrl">
@@ -236,9 +231,17 @@
     <button class="btn" onclick="window.open('https://docs.google.com/spreadsheets/d/1l8Sn_PRofbDl4P8Rtj0gODWS0GPbm7EFGBOxasDWKzE/edit','名單總管','width=1280,height=860,resizable=yes,scrollbars=yes')">📋 名單總管</button>
     <button class="btn" onclick="exportCSV()">⬇ 匯出</button>
     <button class="btn" onclick="window.print()">⎙ 列印</button>
-    <button class="btn btn-accent" onclick="saveAll()">✓ 儲存</button>
+    <button class="btn btn-accent" onclick="saveAll()">☁ 同步 Sheets</button>
   </div>
 </header>
+
+<div class="sync-banner">
+  <div class="sync-dot" id="sync-dot"></div>
+  <span class="sync-text" id="sync-text">輸入 Apps Script 網址後按「儲存」即可連線</span>
+  <input class="sync-url-input" id="script-url-input" type="text" placeholder="https://script.google.com/macros/s/…/exec" />
+  <button class="sync-save-btn" onclick="saveScriptUrl()">儲存連線</button>
+  <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:0.76rem;color:var(--text-muted)">最後同步：<span id="last-saved">—</span></span>
+</div>
 
 <div class="stats-bar">
   <div class="stat-item"><div class="stat-dot" style="background:#90a4ae"></div><span class="stat-label">待開始</span><span class="stat-val" id="stat-pending">—</span></div>
@@ -247,7 +250,6 @@
   <div class="stat-item"><div class="stat-dot" style="background:#ffa726"></div><span class="stat-label">待確認</span><span class="stat-val" id="stat-confirm">—</span></div>
   <div class="stat-item"><div class="stat-dot" style="background:#ef9a9a"></div><span class="stat-label">延遲</span><span class="stat-val" id="stat-late">—</span></div>
   <div class="stat-item" style="border-left:1.5px solid var(--border);padding-left:1.5rem"><div class="stat-dot" style="background:#ef4444"></div><span class="stat-label">逾期警示</span><span class="stat-val" id="stat-overdue" style="color:var(--text-muted)">0</span></div>
-  <div class="stat-item" style="margin-left:auto"><span class="stat-label">最後同步：</span><span class="stat-val" id="last-saved" style="font-size:0.88rem;color:var(--text-muted)">尚未儲存</span></div>
 </div>
 
 <div class="progress-section">
@@ -281,17 +283,7 @@
 
 <div class="table-wrap" id="table-view">
   <table>
-    <thead>
-      <tr>
-        <th class="col-group">分類</th>
-        <th class="col-date">日期</th>
-        <th class="col-task">工作內容</th>
-        <th class="col-unit">執行單位</th>
-        <th class="col-status">進度狀態</th>
-        <th class="col-note">備註 ／ 補充說明</th>
-        <th class="col-actions"></th>
-      </tr>
-    </thead>
+    <thead><tr><th class="col-group">分類</th><th class="col-date">日期</th><th class="col-task">工作內容</th><th class="col-unit">執行單位</th><th class="col-status">進度狀態</th><th class="col-note">備註 ／ 補充說明</th><th class="col-actions"></th></tr></thead>
     <tbody id="table-body"></tbody>
   </table>
 </div>
@@ -311,27 +303,15 @@
     <span><span class="cal-leg-dot" style="background:#fce7f3;color:#9d174d;border:1px solid #f9a8d4">人才培訓</span></span>
   </div>
 </div>
-
 <div id="dashboard-view" style="display:none"></div>
 
 <div class="modal-overlay" id="task-modal">
   <div class="modal">
     <h3 id="task-modal-title" style="line-height:1.5"></h3>
     <div style="font-size:0.88rem;color:var(--text-muted);margin:-0.75rem 0 1.3rem" id="task-modal-meta"></div>
-    <div class="form-group">
-      <label class="form-label">進度狀態</label>
-      <select class="form-select" id="tm-status">
-        <option>待開始</option><option>進行中</option><option>已完成</option><option>待確認</option><option>延遲</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">補充說明</label>
-      <textarea class="form-textarea" id="tm-comment" placeholder="在這裡新增說明、備忘、聯絡事項…" rows="4"></textarea>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-cancel" onclick="closeTaskModal()">取消</button>
-      <button class="btn btn-accent" onclick="saveTaskModal()">儲存更新</button>
-    </div>
+    <div class="form-group"><label class="form-label">進度狀態</label><select class="form-select" id="tm-status"><option>待開始</option><option>進行中</option><option>已完成</option><option>待確認</option><option>延遲</option></select></div>
+    <div class="form-group"><label class="form-label">補充說明</label><textarea class="form-textarea" id="tm-comment" placeholder="在這裡新增說明、備忘、聯絡事項…" rows="4"></textarea></div>
+    <div class="modal-actions"><button class="btn btn-cancel" onclick="closeTaskModal()">取消</button><button class="btn btn-accent" onclick="saveTaskModal()">儲存更新</button></div>
   </div>
 </div>
 
@@ -339,54 +319,18 @@
   <div class="modal">
     <h3 id="modal-title">新增任務</h3>
     <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">分類</label>
-        <select class="form-select" id="m-cat">
-          <option>行政準備</option><option>影片徵選</option><option>頒獎典禮</option><option>市民大聲說</option><option>人才培訓</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">日期</label>
-        <input class="form-input" type="text" id="m-date" placeholder="例：7/1 或 7/1–7/31" />
-      </div>
+      <div class="form-group"><label class="form-label">分類</label><select class="form-select" id="m-cat"><option>行政準備</option><option>影片徵選</option><option>頒獎典禮</option><option>市民大聲說</option><option>人才培訓</option></select></div>
+      <div class="form-group"><label class="form-label">日期</label><input class="form-input" type="text" id="m-date" placeholder="例：7/1 或 7/1–7/31" /></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">工作內容</label>
-      <textarea class="form-textarea" id="m-task" placeholder="任務描述…" rows="3"></textarea>
-    </div>
+    <div class="form-group"><label class="form-label">工作內容</label><textarea class="form-textarea" id="m-task" placeholder="任務描述…" rows="3"></textarea></div>
     <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">執行單位</label>
-        <input class="form-input" type="text" id="m-unit" placeholder="北都行銷部" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">進度狀態</label>
-        <select class="form-select" id="m-status">
-          <option>待開始</option><option>進行中</option><option>已完成</option><option>待確認</option><option>延遲</option>
-        </select>
-      </div>
+      <div class="form-group"><label class="form-label">執行單位</label><input class="form-input" type="text" id="m-unit" placeholder="北都行銷部" /></div>
+      <div class="form-group"><label class="form-label">進度狀態</label><select class="form-select" id="m-status"><option>待開始</option><option>進行中</option><option>已完成</option><option>待確認</option><option>延遲</option></select></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">標籤</label>
-      <select class="form-select" id="m-badge">
-        <option value="">無</option>
-        <option value="new">🔵 NEW（新增）</option>
-        <option value="warn">🔴 注意</option>
-        <option value="tip">💡 建議</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">備註說明</label>
-      <input class="form-input" type="text" id="m-note" placeholder="補充資訊…" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">補充說明（黃色備忘欄）</label>
-      <textarea class="form-textarea" id="m-comment" placeholder="備忘、聯絡事項…" rows="2"></textarea>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-cancel" onclick="closeModal()">取消</button>
-      <button class="btn btn-accent" id="modal-submit-btn" onclick="submitModal()">確認新增</button>
-    </div>
+    <div class="form-group"><label class="form-label">標籤</label><select class="form-select" id="m-badge"><option value="">無</option><option value="new">🔵 NEW（新增）</option><option value="warn">🔴 注意</option><option value="tip">💡 建議</option></select></div>
+    <div class="form-group"><label class="form-label">備註說明</label><input class="form-input" type="text" id="m-note" placeholder="補充資訊…" /></div>
+    <div class="form-group"><label class="form-label">補充說明（黃色備忘欄）</label><textarea class="form-textarea" id="m-comment" placeholder="備忘、聯絡事項…" rows="2"></textarea></div>
+    <div class="modal-actions"><button class="btn btn-cancel" onclick="closeModal()">取消</button><button class="btn btn-accent" id="modal-submit-btn" onclick="submitModal()">確認新增</button></div>
   </div>
 </div>
 
@@ -464,26 +408,140 @@ const CATS        = ["行政準備","影片徵選","頒獎典禮","市民大聲�
 const CAT_COLORS  = {行政準備:"#3b82f6",影片徵選:"#8b5cf6",頒獎典禮:"#f59e0b",市民大聲說:"#10b981",人才培訓:"#ec4899"};
 const STATUSES    = ["待開始","進行中","已完成","待確認","延遲"];
 const WINDOW_IDS  = new Set([3,15,21,48]);
+const LOCAL_KEY   = "tpf3_sheets_data";
+const URL_KEY     = "tpf3_script_url";
+let isDirty = false, isEditing = false;
 
+// ── Sheets 連線設定 ──
+function getScriptUrl(){ return localStorage.getItem(URL_KEY)||""; }
+function setSyncStatus(state, msg){ const dot=document.getElementById("sync-dot"),txt=document.getElementById("sync-text"); dot.className="sync-dot "+state; txt.textContent=msg; }
+function saveScriptUrl(){
+  const url=document.getElementById("script-url-input").value.trim();
+  if(!url||!url.startsWith("https://script.google.com/macros/s/")){ alert("請貼上正確的 Apps Script 部署網址（格式：https://script.google.com/macros/s/…/exec）"); return; }
+  localStorage.setItem(URL_KEY, url);
+  setSyncStatus("pending","連線中…");
+  loadSaved();
+}
+
+// ── Google Sheets 同步（符合原有 Apps Script 格式）──
+async function saveAll(){
+  const url=getScriptUrl();
+  if(!url){ setSyncStatus("err","尚未設定 Apps Script 網址"); showToast("請先在上方填入 Apps Script 網址"); return; }
+  const btn=document.querySelector(".btn-accent"), orig=btn.textContent;
+  btn.textContent="同步中…"; btn.disabled=true; setSyncStatus("pending","同步中…");
+  try{
+    const now=new Date().toLocaleString("zh-TW",{hour12:false});
+    // 符合 Apps Script doPost：{action:"writeAll", data:[...]}
+    const res=await fetch(url,{method:"POST",redirect:"follow",body:JSON.stringify({action:"writeAll",data:data})});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const j=await res.json();
+    if(j.ok===false) throw new Error(j.msg||"Apps Script 回傳失敗");
+    document.getElementById("last-saved").textContent=now;
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(data));
+    btn.textContent="✓ 已同步"; btn.style.background="#059669";
+    setTimeout(()=>{btn.textContent=orig;btn.style.background="";},2500);
+    setSyncStatus("ok","已連線 Google Sheets");
+    showToast(`已同步至 Google Sheets ✓（共 ${j.count??data.length} 筆）`);
+    isDirty=false;
+  }catch(e){
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(data));
+    btn.textContent="⚠ 失敗"; btn.style.background="#dc2626";
+    setTimeout(()=>{btn.textContent=orig;btn.style.background="";},2500);
+    setSyncStatus("err","同步失敗："+e.message);
+    showToast("⚠ 同步失敗："+e.message);
+    console.error(e);
+  }finally{ btn.disabled=false; }
+}
+
+function parseRow(r){
+  const c=v=>v==null?"":String(v).trim();
+  // 去除 Apps Script normalizeCellValue 的 ' 前綴
+  const cleanDate=v=>c(v).replace(/^'/,"");
+  return{
+    id:parseInt(c(r.id))||Math.floor(Math.random()*9000+1000),
+    cat:c(r.cat)||"行政準備",
+    date:cleanDate(r.date),
+    task:c(r.task),
+    unit:c(r.unit),
+    status:c(r.status)||"待開始",
+    note:c(r.note),
+    badge:c(r.badge),
+    comment:c(r.comment),
+    kind:c(r.kind)||""
+  };
+}
+
+async function loadSaved(){
+  document.getElementById("table-body").innerHTML='<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text-muted)">載入中…</td></tr>';
+  const url=getScriptUrl();
+  if(!url){
+    setSyncStatus("err","尚未設定 Apps Script 網址");
+    const local=localStorage.getItem(LOCAL_KEY);
+    data=local?JSON.parse(local):JSON.parse(JSON.stringify(INITIAL_DATA));
+    nextId=Math.max(...data.map(r=>r.id||0))+1;
+    document.getElementById("last-saved").textContent="本機資料（未連線 Sheets）";
+    return;
+  }
+  setSyncStatus("pending","連線中…");
+  try{
+    // Apps Script doGet 預設無 action 參數 → readData() → 回傳純陣列
+    const res=await fetch(url,{redirect:"follow"});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const j=await res.json();
+    if(Array.isArray(j)&&j.length){
+      data=j.map(parseRow);
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(data));
+      const n=new Date();
+      document.getElementById("last-saved").textContent="已從 Sheets 載入 "+n.toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"});
+      setSyncStatus("ok","已連線 Google Sheets");
+    } else if(Array.isArray(j)&&j.length===0){
+      data=JSON.parse(JSON.stringify(INITIAL_DATA));
+      document.getElementById("last-saved").textContent="Sheets 尚無資料，已載入預設";
+      setSyncStatus("ok","已連線 Google Sheets（空白）");
+    } else {
+      throw new Error(j.msg||"格式不符");
+    }
+  }catch(e){
+    setSyncStatus("err","連線失敗："+e.message);
+    const local=localStorage.getItem(LOCAL_KEY);
+    data=local?JSON.parse(local):JSON.parse(JSON.stringify(INITIAL_DATA));
+    document.getElementById("last-saved").textContent="離線模式（本機備份）";
+    console.warn("Sheets 載入失敗：",e);
+  }
+  nextId=Math.max(...data.map(r=>r.id||0))+1;
+}
+
+async function pollUpdate(){
+  if(isDirty||isEditing) return;
+  const url=getScriptUrl(); if(!url) return;
+  try{
+    const res=await fetch(url,{redirect:"follow"});
+    if(!res.ok) return;
+    const j=await res.json();
+    if(!Array.isArray(j)||!j.length) return;
+    const incoming=JSON.stringify(j.map(r=>String(r.id)+String(r.status)+String(r.comment)));
+    const current=JSON.stringify(data.map(r=>r.id+r.status+r.comment));
+    if(incoming===current) return;
+    data=j.map(parseRow);
+    nextId=Math.max(...data.map(r=>r.id||0))+1;
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(data));
+    renderTable(); if(currentView==="calendar") renderCalendar(); if(currentView==="dashboard") renderDashboard();
+    const n=new Date(); document.getElementById("last-saved").textContent="自動同步 "+n.getHours().toString().padStart(2,"0")+":"+n.getMinutes().toString().padStart(2,"0");
+    setSyncStatus("ok","已連線 Google Sheets");
+  }catch(e){ setSyncStatus("err","輪詢失敗"); }
+}
+
+// ── 以下與 index.html 相同 ──
 function esc(v){ return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function catCls(c){ return CATS.includes(c)?`tag-${c}`:""; }
 function stsCls(s){ return STATUSES.includes(s)?`status-${s}`:"status-待開始"; }
 function cleanTask(t){ return String(t??"").replace(/【.*?】/g,"").trim(); }
-
-function sortData(){
-  data.sort((a,b)=>{
-    const va=getStart(a), vb=getStart(b);
-    const na=va?(va.getMonth()+1)*100+va.getDate():9999;
-    const nb=vb?(vb.getMonth()+1)*100+vb.getDate():9999;
-    return na-nb||a.id-b.id;
-  });
-}
-
+function sortData(){ data.sort((a,b)=>{ const va=getStart(a),vb=getStart(b); const na=va?(va.getMonth()+1)*100+va.getDate():9999; const nb=vb?(vb.getMonth()+1)*100+vb.getDate():9999; return na-nb||a.id-b.id; }); }
 function getKind(r){ if(r&&r.kind) return r.kind; if(r&&WINDOW_IDS.has(r.id)) return "window"; return /[–\-~～]/.test(r.date)?"deadline":"point"; }
 function parseOne(s){ if(!s) return null; const f=String(s).trim().split("/"); if(f.length<2) return null; const m=parseInt(f[0]),d=parseInt(f[1]); if(isNaN(m)||isNaN(d)) return null; const dt=new Date(new Date().getFullYear(),m-1,d); dt.setHours(0,0,0,0); return dt; }
 function parseRange(s){ const parts=String(s||"").split(/[–\-~～]/); const start=parseOne(parts[0]); const end=parts[1]?parseOne(parts[1]):start; return{start,end}; }
 function getStart(r){ return parseRange(r.date).start; }
-function getDue(r)  { return parseRange(r.date).end; }
+function getDue(r){ return parseRange(r.date).end; }
 function daysLeft(r){ const today=new Date(); today.setHours(0,0,0,0); const d=getDue(r); if(!d) return null; return Math.round((d-today)/86400000); }
 function daysToStart(r){ const today=new Date(); today.setHours(0,0,0,0); const s=getStart(r); if(!s) return null; return Math.round((s-today)/86400000); }
 function parseDateFirst(s){ const d=parseOne(String(s).split(/[–\-~～]/)[0]); return d?{month:d.getMonth()+1,day:d.getDate()}:null; }
@@ -504,7 +562,6 @@ function renderTable(){
   tbody.querySelectorAll("[contenteditable]").forEach(el=>{ el.addEventListener("blur",()=>{ const row=data.find(r=>r.id===parseInt(el.dataset.id)); if(row){ row[el.dataset.field]=el.innerText.trim(); isDirty=true; if(el.dataset.field==="date"&&currentView==="calendar") renderCalendar(); } }); });
   applyFilter(); updateStats();
 }
-
 function filterCat(btn){ document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); currentFilter=btn.dataset.cat; applyFilter(); if(currentView==="calendar") renderCalendar(); if(currentView==="dashboard") renderDashboard(); }
 function searchTable(val){ currentSearch=val.toLowerCase(); applyFilter(); if(currentView==="calendar") renderCalendar(); if(currentView==="dashboard") renderDashboard(); }
 function applyFilter(){
@@ -523,16 +580,15 @@ function updateStats(){
 }
 function deleteRow(id){ if(!confirm("確定刪除此任務？")) return; data=data.filter(r=>r.id!==id); isDirty=true; renderTable(); if(currentView==="calendar") renderCalendar(); if(currentView==="dashboard") renderDashboard(); showToast("已刪除任務"); }
 function openEditModal(id){ const row=data.find(r=>r.id===id); if(!row) return; document.getElementById("modal-title").textContent="編輯任務"; document.getElementById("m-cat").value=row.cat; document.getElementById("m-date").value=row.date; document.getElementById("m-task").value=row.task; document.getElementById("m-unit").value=row.unit; document.getElementById("m-status").value=row.status; document.getElementById("m-badge").value=row.badge||""; document.getElementById("m-note").value=row.note; document.getElementById("m-comment").value=row.comment||""; document.getElementById("modal-submit-btn").onclick=()=>submitEditModal(id); document.getElementById("add-modal").classList.add("active"); }
-function submitEditModal(id){ const row=data.find(r=>r.id===id); if(!row) return; row.cat=document.getElementById("m-cat").value; row.date=document.getElementById("m-date").value.trim(); row.task=document.getElementById("m-task").value.trim(); row.unit=document.getElementById("m-unit").value.trim(); row.status=document.getElementById("m-status").value; row.badge=document.getElementById("m-badge").value; row.note=document.getElementById("m-note").value.trim(); row.comment=document.getElementById("m-comment").value.trim(); if(!row.date||!row.task){alert("請填寫日期與工作內容");return;} isDirty=true; sortData(); closeModal(); renderTable(); if(currentView==="calendar") renderCalendar(); if(currentView==="dashboard") renderDashboard(); showToast("已更新，記得按「儲存」同步"); }
+function submitEditModal(id){ const row=data.find(r=>r.id===id); if(!row) return; row.cat=document.getElementById("m-cat").value; row.date=document.getElementById("m-date").value.trim(); row.task=document.getElementById("m-task").value.trim(); row.unit=document.getElementById("m-unit").value.trim(); row.status=document.getElementById("m-status").value; row.badge=document.getElementById("m-badge").value; row.note=document.getElementById("m-note").value.trim(); row.comment=document.getElementById("m-comment").value.trim(); if(!row.date||!row.task){alert("請填寫日期與工作內容");return;} isDirty=true; sortData(); closeModal(); renderTable(); if(currentView==="calendar") renderCalendar(); if(currentView==="dashboard") renderDashboard(); showToast("已更新，記得按「☁ 同步」"); }
 function openAddModal(){ document.getElementById("modal-title").textContent="新增任務"; ["m-cat","m-date","m-task","m-unit","m-status","m-badge","m-note","m-comment"].forEach(id=>{ document.getElementById(id).value=id==="m-cat"?"影片徵選":id==="m-unit"?"北都行銷部":id==="m-status"?"待開始":""; }); document.getElementById("modal-submit-btn").onclick=submitModal; document.getElementById("add-modal").classList.add("active"); }
 function closeModal(){ document.getElementById("add-modal").classList.remove("active"); }
 function submitModal(){ const date=document.getElementById("m-date").value.trim(); const task=document.getElementById("m-task").value.trim(); if(!date||!task){alert("請填寫日期與工作內容");return;} data.push({id:nextId++,cat:document.getElementById("m-cat").value,date,task,unit:document.getElementById("m-unit").value.trim(),status:document.getElementById("m-status").value,note:document.getElementById("m-note").value.trim(),badge:document.getElementById("m-badge").value,comment:document.getElementById("m-comment").value.trim()}); isDirty=true; sortData(); closeModal(); renderTable(); if(currentView==="calendar") renderCalendar(); if(currentView==="dashboard") renderDashboard(); showToast("已新增任務 ✓"); }
 let taskModalId=null;
 function openTaskModal(id){ const row=data.find(r=>r.id===id); if(!row) return; taskModalId=id; document.getElementById("task-modal-title").textContent=row.task; document.getElementById("task-modal-meta").textContent=`${row.cat} · ${row.date} · ${row.unit}`; document.getElementById("tm-status").value=row.status; document.getElementById("tm-comment").value=row.comment||""; document.getElementById("task-modal").classList.add("active"); }
 function closeTaskModal(){ document.getElementById("task-modal").classList.remove("active"); taskModalId=null; }
-function saveTaskModal(){ if(!taskModalId) return; const row=data.find(r=>r.id===taskModalId); if(!row) return; row.status=document.getElementById("tm-status").value; row.comment=document.getElementById("tm-comment").value.trim(); isDirty=true; closeTaskModal(); renderTable(); if(currentView==="calendar") renderCalendar(); if(currentView==="dashboard") renderDashboard(); showToast("已更新，記得按「儲存」同步"); }
+function saveTaskModal(){ if(!taskModalId) return; const row=data.find(r=>r.id===taskModalId); if(!row) return; row.status=document.getElementById("tm-status").value; row.comment=document.getElementById("tm-comment").value.trim(); isDirty=true; closeTaskModal(); renderTable(); if(currentView==="calendar") renderCalendar(); if(currentView==="dashboard") renderDashboard(); showToast("已更新，記得按「☁ 同步」"); }
 function switchView(view){ currentView=view; document.getElementById("btn-list").classList.toggle("active",view==="list"); document.getElementById("btn-dash").classList.toggle("active",view==="dashboard"); document.getElementById("btn-cal").classList.toggle("active",view==="calendar"); document.getElementById("table-view").style.display=view==="list"?"":"none"; document.getElementById("dashboard-view").style.display=view==="dashboard"?"":"none"; document.getElementById("calendar-view").style.display=view==="calendar"?"":"none"; if(view==="calendar") renderCalendar(); if(view==="dashboard") renderDashboard(); }
-
 let calMonth=4, calYear=2026;
 const CAL_DAY=["日","一","二","三","四","五","六"];
 const CAL_MON_ZH=["一","二","三","四","五","六","七","八","九","十","十一","十二"];
@@ -540,63 +596,29 @@ function chipStyle(cat){ return({行政準備:"background:#dbeafe;border:1px sol
 function renderCalendar(){ document.getElementById("cal-title").textContent=`${calYear} 年　${CAL_MON_ZH[calMonth]}月`; const first=new Date(calYear,calMonth,1).getDay(); const days=new Date(calYear,calMonth+1,0).getDate(); const today=new Date(); const byDay={}; data.forEach(r=>{ if(currentFilter!=="全部"&&r.cat!==currentFilter) return; if(currentSearch&&![r.cat,r.date,r.task,r.unit,r.status,r.note,r.comment].join(" ").toLowerCase().includes(currentSearch)) return; const d=parseDateFirst(r.date); if(d&&d.month===calMonth+1){ if(!byDay[d.day]) byDay[d.day]=[]; byDay[d.day].push(r); } }); let h=CAL_DAY.map(d=>`<div class="cal-day-header">${d}</div>`).join(""); for(let i=0;i<first;i++) h+=`<div class="cal-day empty"></div>`; for(let d=1;d<=days;d++){ const isTd=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d; const tasks=byDay[d]||[],show=tasks.slice(0,3),more=tasks.length-3; const chips=show.map(t=>`<span class="cal-task-chip" style="${chipStyle(t.cat)}" onclick="openTaskModal(${t.id})" title="${esc(t.task)}">${esc(cleanTask(t.task).slice(0,14))}</span>`).join(""); const moreBtn=more>0?`<div class="cal-more" onclick="switchView('list')">+${more} 項</div>`:""; h+=`<div class="cal-day${isTd?" today":""}"><div class="cal-day-num">${d}</div>${chips}${moreBtn}</div>`; } document.getElementById("cal-grid").innerHTML=h; }
 function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
 function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
-
 function getWeeklyActions(){ const items=[]; data.forEach(row=>{ if(row.status==="已完成") return; const kind=getKind(row); const dDue=daysLeft(row),dStart=daysToStart(row); if(dDue===null) return; let include=false,chip="",action="",chipCls="",actCls="",urgCls="",sortKey=999; if(kind==="point"){ if(dDue<-3||dDue>7) return; include=true; sortKey=dDue; if(dDue<0){chip=`逾 ${-dDue} 天`;chipCls="chip-overdue";urgCls="urg-danger";action="已逾期";actCls="act-danger";}else if(dDue===0){chip="今天";chipCls="chip-today";urgCls="urg-danger";action="當天要做";actCls="act-danger";}else if(dDue===1){chip="明天";chipCls="chip-warn";urgCls="urg-warn";action="明天要做";actCls="act-warn";}else if(dDue<=3){chip=`${dDue} 天後`;chipCls="chip-warn";urgCls="urg-warn";action=`${dDue} 天後要做`;actCls="act-warn";}else{chip=`${dDue} 天後`;action=`${dDue} 天後要做`;} }else if(kind==="deadline"){ if(dDue>=-3&&dDue<=7){ include=true;sortKey=dDue-0.1; if(dDue<0){chip=`逾 ${-dDue} 天`;chipCls="chip-overdue";urgCls="urg-danger";action="已逾期";actCls="act-danger";}else if(dDue===0){chip="今天";chipCls="chip-today";urgCls="urg-danger";action="今天截止";actCls="act-danger";}else if(dDue<=3&&row.status==="待開始"){chip=`剩 ${dDue} 天`;chipCls="chip-soon";urgCls="urg-danger";action="還沒動・趕快開始";actCls="act-danger";}else if(dDue<=3){chip=`${dDue} 天後`;chipCls="chip-warn";urgCls="urg-warn";action=`${dDue} 天後截止`;actCls="act-warn";}else{chip=`${dDue} 天後`;action=`${dDue} 天後截止`;} }else if(dStart!==null&&dStart>=0&&dStart<=7){ include=true;sortKey=dStart+0.3;chip=dStart===0?"可開始":`${dStart} 天後`;action="本週可動工"; }else return; }else if(kind==="window"){ const inWindow=dStart!==null&&dStart<=0&&dDue>=0; const opensThisWeek=dStart!==null&&dStart>=0&&dStart<=7; const closesThisWeek=dDue>=0&&dDue<=7; if(dDue<0){include=true;sortKey=dDue;chip=`逾 ${-dDue} 天`;chipCls="chip-overdue";urgCls="urg-danger";action="已過期";actCls="act-danger";}else if(opensThisWeek){include=true;sortKey=dStart+0.5;chip=dStart===0?"今天開跑":dStart===1?"明天開跑":`${dStart} 天後`;if(dStart===0)chipCls="chip-today";else if(dStart===1)chipCls="chip-warn";action="本週開跑";}else if(closesThisWeek){include=true;sortKey=dDue+0.2;if(row.status==="待開始"){chip=`剩 ${dDue} 天`;chipCls="chip-soon";urgCls="urg-danger";action="還沒動・收尾警告";actCls="act-danger";}else{chip=`剩 ${dDue} 天`;chipCls="chip-warn";urgCls="urg-warn";action="本週收尾";actCls="act-warn";}}else if(inWindow&&row.status==="待開始"){include=true;sortKey=5;chip="進行中";chipCls="chip-warn";urgCls="urg-warn";action="還沒動・該開工";actCls="act-warn";}else return; } if(include) items.push({row,kind,chip,chipCls,action,actCls,urgCls,sortKey}); }); items.sort((a,b)=>a.sortKey-b.sortKey); return items; }
 function renderWeeklyActions(){ const items=getWeeklyActions(); const legend=`<div class="week-legend"><span class="week-legend-item pill-point">提醒・鬧鐘</span><span class="week-legend-item pill-window">期間・馬拉松</span><span class="week-legend-item pill-deadline">截止・暑假作業</span></div>`; if(!items.length) return `<div class="dash-card week-card"><div class="dash-card-title">⚔ 本週作戰清單</div>${legend}<div class="week-empty">✅ 本週沒有需要立即動手的任務</div></div>`; const kl={point:"提醒",window:"期間",deadline:"截止"}; const rows=items.map(({row,kind,chip,chipCls,action,actCls,urgCls})=>`<div class="week-row ${urgCls}" onclick="openTaskModal(${row.id})"><div class="week-chip ${chipCls}">${esc(chip)}</div><div class="week-content"><div class="week-title"><span class="week-pill pill-${kind}">${kl[kind]}</span>${esc(cleanTask(row.task))}</div><div class="week-meta">${esc(row.cat)}　・　${esc(row.date)}</div></div><div class="week-action ${actCls}">${esc(action)}</div></div>`).join(""); return `<div class="dash-card week-card"><div class="dash-card-title">⚔ 本週作戰清單　<span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-muted);font-size:0.78rem;margin-left:0.5rem">共 ${items.length} 項</span></div>${legend}${rows}</div>`; }
 function renderDashboard(){ const ov=data.filter(r=>urgency(r)==="overdue"); const wn=data.filter(r=>urgency(r)==="warning"); const catStats=CATS.map(cat=>{ const ts=data.filter(r=>r.cat===cat); const done=ts.filter(r=>r.status==="已完成").length; const pct=ts.length?Math.round(done/ts.length*100):0; return{cat,done,total:ts.length,pct}; }); const upcoming=data.filter(r=>{ if(r.status==="已完成"||getKind(r)==="window") return false; const d=daysLeft(r); return d!==null&&d>=-7&&d<=14; }).sort((a,b)=>(daysLeft(a)??999)-(daysLeft(b)??999)).slice(0,9); const upStart=data.filter(r=>{ if(r.status==="已完成"||getKind(r)!=="window") return false; const d=daysToStart(r); return d!==null&&d>=0&&d<=14; }).sort((a,b)=>(daysToStart(a)??999)-(daysToStart(b)??999)).slice(0,5); const catCards=CATS.map(cat=>{ const ts=data.filter(r=>r.cat===cat); const cnt={}; STATUSES.forEach(s=>{cnt[s]=ts.filter(r=>r.status===s).length;}); const pct=ts.length?Math.round(cnt["已完成"]/ts.length*100):0; const lines=STATUSES.filter(s=>cnt[s]>0).map(s=>`<div class="cat-status-line"><span>${s}</span><span>${cnt[s]}</span></div>`).join(""); return`<div class="cat-status-card"><div class="cat-status-name" style="color:${CAT_COLORS[cat]}">${cat}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:900;color:${CAT_COLORS[cat]};margin-bottom:0.4rem">${pct}%</div>${lines}</div>`; }).join(""); const ovHTML=ov.length?ov.slice(0,5).map(r=>`<div class="overdue-row">逾${Math.abs(daysLeft(r))}天・${esc(cleanTask(r.task).slice(0,22))}（${esc(r.date)}）</div>`).join("")+(ov.length>5?`<div style="font-size:0.8rem;color:#dc2626;margin-top:0.3rem">...共 ${ov.length} 項逾期</div>`:""):'<div style="color:#059669;font-size:0.85rem;padding:0.3rem 0">✅ 無逾期任務</div>'; const mkDl=(arr,dayFn)=>arr.length?arr.map(r=>{ const d=dayFn(r),clr=d<0?"#dc2626":d<=3?"#d97706":"#059669",bg=d<0?"#fee2e2":d<=3?"#fff3e0":"#f0fdf8"; const lbl=d<0?`逾${Math.abs(d)}天`:d===0?"今天":d===1?"明天":`${d}天後`; return`<div class="dl-item"><span class="dl-tag" style="background:${bg};color:${clr}">${lbl}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(cleanTask(r.task).slice(0,20))}</span><span style="font-size:0.76rem;color:var(--text-muted);flex-shrink:0;font-family:'IBM Plex Mono',monospace">${esc(r.cat.slice(0,4))}</span></div>`; }).join(""):'<div style="color:var(--text-muted);font-size:0.88rem;padding:0.3rem 0">近期無任務</div>'; document.getElementById("dashboard-view").innerHTML=`<div class="dash-header"><div><h2>📊 專案儀表板</h2><p>自動撈取進度報表</p></div><div style="font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--text-muted)">更新：${new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"})}</div></div>${renderWeeklyActions()}<div class="dash-grid"><div class="dash-card"><div class="dash-card-title">各分類完成率</div>${catStats.map(s=>`<div class="cat-row"><div class="cat-name" style="color:${CAT_COLORS[s.cat]}">${s.cat}</div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:${s.pct}%;background:${CAT_COLORS[s.cat]}"></div></div><div class="cat-pct" style="color:${CAT_COLORS[s.cat]}">${s.pct}%</div></div><div style="font-size:0.73rem;color:var(--text-muted);margin:-0.35rem 0 0.6rem 82px;font-family:'IBM Plex Mono',monospace">${s.done}/${s.total} 完成</div>`).join("")}</div><div class="dash-card"><div class="dash-card-title">風險預警</div><div class="risk-block" style="background:#fef2f2;border:1px solid #fca5a5"><div class="risk-num" style="color:#dc2626">${ov.length}</div><div><div class="risk-label" style="color:#991b1b">🔴 已逾期任務</div><div class="risk-sub" style="color:#dc2626">需立即關注</div></div></div><div class="risk-block" style="background:#fffbeb;border:1px solid #fcd34d;margin-bottom:1rem"><div class="risk-num" style="color:#d97706">${wn.length}</div><div><div class="risk-label" style="color:#92400e">🟠 3天內截止或開跑未動</div></div></div>${ovHTML}</div><div class="dash-card"><div class="dash-card-title">近期截止（14天內）</div>${mkDl(upcoming,daysLeft)}<div class="dash-card-title" style="margin-top:1rem">即將開跑（14天內）</div>${mkDl(upStart,daysToStart)}</div></div><div class="dash-card" style="margin-bottom:1.15rem"><div class="dash-card-title">各分類任務狀態分布</div><div class="cat-status-grid">${catCards}</div></div>`; }
-
 function openWeeklyReport(){ const now=new Date(),ds=`${now.getMonth()+1}/${now.getDate()}`; const total=data.length,done=data.filter(r=>r.status==="已完成").length,ongoing=data.filter(r=>r.status==="進行中").length,ov=data.filter(r=>urgency(r)==="overdue"&&r.status!=="已完成").length,pct=total?Math.round(done/total*100):0; const lines=[`【台北有影 3 ｜ ${ds} 進度週報】`,"",`◆ 整體進度：${done} / ${total}（${pct}%）`,`◆ 進行中 ${ongoing} 件 ／ 已完成 ${done} 件 ／ 需立即關注 ${ov} 件`,""]; const danger=data.filter(r=>urgency(r)==="overdue"&&r.status!=="已完成"),warning=data.filter(r=>urgency(r)==="warning"&&r.status!=="已完成"); if(danger.length||warning.length){ lines.push("【需立即關注】"); danger.forEach(r=>lines.push(`🔴 [${r.cat}] ${cleanTask(r.task)}（逾 ${Math.abs(daysLeft(r))} 天）`)); warning.forEach(r=>{ const k=getKind(r),ds2=daysToStart(r),dl=daysLeft(r); const lbl=k==="window"&&ds2>=0&&ds2<=7?"本週開跑":k==="window"?`剩 ${dl} 天結束`:dl===0?"今天截止":dl===1?"明天截止":`剩 ${dl} 天`; lines.push(`🟠 [${r.cat}] ${cleanTask(r.task)}（${lbl}）`); }); lines.push(""); } lines.push("【各分類進度】"); CATS.forEach(c=>{ const ts=data.filter(r=>r.cat===c); if(!ts.length) return; const d=ts.filter(r=>r.status==="已完成").length; lines.push(`・${c}：${d} / ${ts.length}（${Math.round(d/ts.length*100)}%）`); }); lines.push(""); const ip=data.filter(r=>r.status==="進行中"); if(ip.length){ lines.push("【進行中項目】"); ip.forEach(r=>lines.push(`・[${r.cat}] ${r.date} — ${cleanTask(r.task)}`)); } const text=lines.join("\n"); document.getElementById("report-text").value=text; document.getElementById("weekly-report-modal").classList.add("active"); document.getElementById("mailto-btn").onclick=()=>{ window.location.href=`mailto:?subject=${encodeURIComponent("【台北有影 3】"+ds+" 進度週報")}&body=${encodeURIComponent(text)}`; }; }
-function copyReport(){ const t=document.getElementById("report-text"); if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t.value).then(()=>showToast("已複製週報內容")).catch(()=>fallbackCopy(t));}else fallbackCopy(t); }
-function fallbackCopy(t){ t.select(); try{document.execCommand("copy");showToast("已複製週報內容");}catch{showToast("複製失敗，請手動選取");} }
-
+function copyReport(){ const t=document.getElementById("report-text"); if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t.value).then(()=>showToast("已複製")).catch(()=>fallbackCopy(t));}else fallbackCopy(t); }
+function fallbackCopy(t){ t.select(); try{document.execCommand("copy");showToast("已複製");}catch{showToast("複製失敗");} }
 let fontSize=parseFloat(localStorage.getItem("tpf3_font")||"1");
 function applyFont(){ document.documentElement.style.fontSize=`${fontSize*16}px`; }
 function adjustFont(d){ fontSize=Math.max(0.8,Math.min(1.4,fontSize+d*0.05)); try{localStorage.setItem("tpf3_font",fontSize);}catch{} applyFont(); }
 applyFont();
-
-const STORAGE_KEY = "tpf3_data";
-let isDirty = false;
-let isEditing = false;
-
-async function saveAll(){
-  const btn=document.querySelector(".btn-accent"), orig=btn.textContent;
-  btn.disabled=true;
-  try{
-    const now=new Date().toLocaleString("zh-TW",{hour12:false});
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    document.getElementById("last-saved").textContent=now;
-    btn.textContent="✓ 已儲存"; btn.style.background="#059669";
-    setTimeout(()=>{btn.textContent=orig;btn.style.background="";},2500);
-    showToast("已儲存至本機 ✓");
-    isDirty=false;
-  }catch(e){
-    btn.textContent="⚠ 失敗"; btn.style.background="#dc2626";
-    setTimeout(()=>{btn.textContent=orig;btn.style.background="";},2500);
-    showToast("⚠ 儲存失敗："+e.message);
-  }finally{ btn.disabled=false; }
-}
-
-function parseRow(r){ const c=v=>v==null?"":String(v).trim(); return{id:parseInt(c(r.id))||Math.floor(Math.random()*9000+1000),cat:c(r.cat)||"行政準備",date:c(r.date),task:c(r.task),unit:c(r.unit),status:c(r.status)||"待開始",note:c(r.note),badge:c(r.badge),comment:c(r.comment),kind:c(r.kind)||""}; }
-
-async function loadSaved(){
-  document.getElementById("table-body").innerHTML='<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text-muted)">載入中…</td></tr>';
-  const local=localStorage.getItem(STORAGE_KEY);
-  if(local){ try{ data=JSON.parse(local); document.getElementById("last-saved").textContent="已從本機載入"; }catch{ data=JSON.parse(JSON.stringify(INITIAL_DATA)); document.getElementById("last-saved").textContent="已載入預設資料"; } }
-  else{ data=JSON.parse(JSON.stringify(INITIAL_DATA)); document.getElementById("last-saved").textContent="已載入預設資料"; }
-  nextId=Math.max(...data.map(r=>r.id||0))+1;
-}
-
 function exportCSV(){ const h=["分類","日期","工作內容","執行單位","進度狀態","備註","補充說明"]; const csv="﻿"+[h,...data.map(r=>[r.cat,r.date,r.task,r.unit,r.status,r.note,r.comment])].map(r=>r.map(c=>`"${(c||"").replace(/"/g,'""')}"`).join(",")).join("\n"); const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8;"})); a.download="台北有影3_進度表.csv"; a.click(); showToast("CSV 匯出成功"); }
 function showToast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2800); }
-
 document.addEventListener("keydown",e=>{ if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault();saveAll();} });
 document.addEventListener("focusin",e=>{ if(e.target.isContentEditable||["SELECT","TEXTAREA","INPUT"].includes(e.target.tagName)) isEditing=true; });
 document.addEventListener("focusout",()=>{ setTimeout(()=>{isEditing=false;},3000); });
 
 (async()=>{
+  const saved=localStorage.getItem(URL_KEY);
+  if(saved) document.getElementById("script-url-input").value=saved;
   await loadSaved();
   sortData();
   renderTable();
+  setInterval(pollUpdate, 60000);
 })();
 </script>
 </body>
