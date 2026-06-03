@@ -465,7 +465,7 @@ function closeTaskModal(){document.getElementById("task-modal").classList.remove
 function saveTaskModal(){if(!taskModalId)return;const row=data.find(r=>r.id===taskModalId);if(!row)return;row.status=document.getElementById("tm-status").value;row.comment=document.getElementById("tm-comment").value.trim();isDirty=true;closeTaskModal();renderTable();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();showToast("已更新，記得按「☁ 同步」");}
 function switchView(view){currentView=view;document.getElementById("btn-list").classList.toggle("active",view==="list");document.getElementById("btn-dash").classList.toggle("active",view==="dashboard");document.getElementById("btn-cal").classList.toggle("active",view==="calendar");document.getElementById("table-view").style.display=view==="list"?"":"none";document.getElementById("dashboard-view").style.display=view==="dashboard"?"":"none";document.getElementById("calendar-view").style.display=view==="calendar"?"":"none";if(view==="calendar")renderCalendar();if(view==="dashboard")renderDashboard();}
 
-let calMonth=4,calYear=2026;
+const _now=new Date();let calMonth=_now.getMonth(),calYear=_now.getFullYear();
 const CAL_DAY=["日","一","二","三","四","五","六"];
 const CAL_MON_ZH=["一","二","三","四","五","六","七","八","九","十","十一","十二"];
 function chipStyle(cat){return({行政準備:"background:#dbeafe;border:1px solid #93c5fd;color:#1e40af",影片徵選:"background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6",頒獎典禮:"background:#fef3c7;border:1px solid #fcd34d;color:#92400e",市民大聲說:"background:#d1fae5;border:1px solid #6ee7b7;color:#065f46",人才培訓:"background:#fce7f3;border:1px solid #f9a8d4;color:#9d174d"}[cat]||"background:#f0f4f4;color:#3d5c57")}
