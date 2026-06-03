@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台北有影 3｜名單總管</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0faf8;
+    --surface: #ffffff;
+    --surface2: #e6f5f2;
+    --border: #c8e6e0;
+    --border2: #a8d5cc;
+    --accent: #0d9488;
+    --accent-hover: #0f766e;
+    --accent-light: rgba(13,148,136,0.10);
+    --text: #1a3330;
+    --text-dim: #3d5c57;
+    --text-muted: #5f8a84;
+    --danger: #dc2626;
+    --warn: #d97706;
+    --success: #059669;
+
+    /* 分頁色 */
+    --c-合作廠商: #c2410c;
+    --c-評審:     #92400e;
+    --c-得獎者:   #065f46;
+    --c-貴賓邀請: #1e40af;
+    --c-媒體邀請: #5b21b6;
+    --c-工作人員: #9d174d;
+    --c-培訓學員: #0369a1;
+
+    --bg-合作廠商: #fff7ed;
+    --bg-評審:     #fefce8;
+    --bg-得獎者:   #f0fdf4;
+    --bg-貴賓邀請: #eff6ff;
+    --bg-媒體邀請: #f5f3ff;
+    --bg-工作人員: #fdf2f8;
+    --bg-培訓學員: #f0f9ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body { font-family: "Noto Sans TC", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── Header（與 index.html 完全一致）── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: #134e4a;
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px;
+    box-shadow: 0 2px 12px rgba(13,74,70,0.25);
+  }
+  .header-left { display: flex; align-items: center; gap: 1.5rem; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; letter-spacing: 0.2em; color: #5eead4; text-transform: uppercase; }
+  .project-title { font-size: 1.1rem; font-weight: 700; color: #fff; }
+  .project-title .sub { color: #99f6e4; font-size: 0.9rem; font-weight: 400; margin-left: 0.5rem; }
+  .header-right { display: flex; align-items: center; gap: 0.6rem; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.45rem 1rem; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.12); color: #e0fdf4;
+    font-family: "Noto Sans TC", sans-serif; font-size: 0.88rem;
+    cursor: pointer; transition: all 0.15s; text-decoration: none;
+  }
+  .btn:hover { background: rgba(255,255,255,0.24); color: #fff; }
+  .btn-accent {
+    background: #0d9488; border-color: #0d9488; color: #fff;
+    font-weight: 700; box-shadow: 0 2px 6px rgba(13,148,136,0.4);
+  }
+  .btn-accent:hover { background: #0f766e; border-color: #0f766e; }
+  .btn-accent:disabled { opacity: .55; cursor: not-allowed; }
+
+  /* ── 分頁列 ── */
+  .tabs-bar {
+    background: #fff;
+    border-bottom: 2px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: flex-end;
+    gap: 0; overflow-x: auto;
+  }
+  .tab {
+    padding: 0.7rem 1.3rem 0.65rem;
+    font-size: 0.88rem; font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+    white-space: nowrap; user-select: none;
+  }
+  .tab:hover { color: var(--accent); }
+  .tab.active {
+    color: var(--text);
+    border-bottom-color: var(--tab-color, var(--accent));
+  }
+  .tab .cnt {
+    display: inline-block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem; font-weight: 700;
+    padding: 0.05rem 0.45rem;
+    border-radius: 20px;
+    margin-left: 0.4rem;
+    background: var(--surface2); color: var(--text-muted);
+  }
+  .tab.active .cnt { background: var(--tab-color, var(--accent)); color: #fff; }
+
+  /* ── 工具列 ── */
+  .toolbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0.55rem 2rem;
+    display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  }
+  .search-wrap { position: relative; }
+  .search-input {
+    background: var(--bg); border: 1.5px solid var(--border2);
+    border-radius: 8px; padding: 0.42rem 0.85rem 0.42rem 2rem;
+    color: var(--text); font-family: "Noto Sans TC", sans-serif;
+    font-size: 0.88rem; width: 200px; outline: none; transition: all 0.15s;
+  }
+  .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,0.1); }
+  .search-input::placeholder { color: var(--text-muted); }
+  .search-icon { position: absolute; left: 0.6rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.82rem; pointer-events: none; }
+  .row-count { font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; color: var(--text-muted); margin-left: auto; }
+
+  .add-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.45rem 1.1rem; border-radius: 8px;
+    background: var(--accent); border: none; color: #fff;
+    font-family: "Noto Sans TC", sans-serif; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: all 0.15s;
+    box-shadow: 0 2px 6px rgba(13,148,136,0.3);
+  }
+  .add-btn:hover { background: var(--accent-hover); }
+
+  /* ── 主要內容 ── */
+  main { padding: 1.2rem 2rem 5rem; }
+
+  /* ── 表格 ── */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+  thead th {
+    padding: 0.7rem 0.9rem;
+    text-align: left;
+    font-size: 0.76rem; font-weight: 700;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--text-dim);
+    background: var(--surface2);
+    border-bottom: 1.5px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f0fdf8; }
+  tbody tr.new-row { background: rgba(13,148,136,0.04); }
+  tbody td { padding: 0.65rem 0.9rem; vertical-align: middle; }
+
+  td input, td select {
+    background: transparent;
+    border: 1.5px solid transparent;
+    color: var(--text);
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: 0.9rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 5px;
+    width: 100%; min-width: 75px;
+    transition: border-color 0.15s, background 0.15s;
+    outline: none;
+  }
+  td input:hover, td select:hover { border-color: var(--border2); background: var(--bg); }
+  td input:focus, td select:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px rgba(13,148,136,0.12); }
+  td select option { background: #fff; }
+
+  .td-num { width: 36px; text-align: center; color: var(--text-muted); font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; }
+  .td-action { width: 44px; text-align: center; }
+
+  .del-btn {
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 5px; border: 1px solid transparent;
+    background: transparent; color: var(--text-muted);
+    cursor: pointer; font-size: 0.8rem; transition: all 0.15s;
+    margin: auto;
+  }
+  .del-btn:hover { border-color: #fca5a5; color: var(--danger); background: #fef2f2; }
+
+  tr:not(:hover) .del-btn { opacity: 0; }
+  tr:hover .del-btn { opacity: 1; }
+
+  /* ── 狀態標籤 ── */
+  .status-tag {
+    display: inline-flex; align-items: center;
+    padding: 0.22rem 0.6rem; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 700;
+    border: 1.5px solid;
+  }
+
+  /* ── 空狀態 ── */
+  .empty-state {
+    text-align: center; padding: 3.5rem 0;
+    color: var(--text-muted);
+  }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .empty-text { font-size: 0.95rem; }
+
+  /* ── 載入中 ── */
+  .loading {
+    display: flex; align-items: center; justify-content: center;
+    height: 160px; color: var(--text-muted); gap: 0.75rem; font-size: 0.9rem;
+  }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: #134e4a; color: #fff;
+    border-radius: 8px; padding: 0.85rem 1.4rem;
+    font-size: 0.92rem; z-index: 2000;
+    transform: translateX(130%); transition: transform 0.25s;
+    box-shadow: 0 4px 16px rgba(13,74,70,0.3);
+  }
+  .toast.show { transform: translateX(0); }
+  .toast.err { background: #7f1d1d; }
+
+  /* ── 同步狀態列 ── */
+  .sync-bar {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 0.4rem 2rem;
+    display: flex; align-items: center; gap: 1rem;
+    font-size: 0.82rem; color: var(--text-muted);
+  }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+  .sync-dot.ok { background: var(--success); }
+  .sync-dot.err { background: var(--danger); }
+
+  /* ── 名單色條 ── */
+  .sheet-color-bar {
+    height: 3px;
+    background: var(--tab-color, var(--accent));
+    transition: background 0.2s;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">PAC · 公用頻道</div>
+    <div class="project-title">台北有影 3<span class="sub">名單總管</span></div>
+  </div>
+  <div class="header-right">
+    <span id="syncLabel" style="font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:#5eead4">尚未同步</span>
+    <button class="btn" onclick="loadCurrentSheet()">↻ 重新整理</button>
+    <a class="btn" href="./" target="_self">☰ 進度追蹤</a>
+    <button class="btn btn-accent" id="saveBtn" onclick="saveCurrentSheet()">✓ 儲存至 Sheets</button>
+  </div>
+</header>
+
+<div class="sheet-color-bar" id="colorBar"></div>
+
+<div class="sync-bar">
+  <div class="sync-dot" id="syncDot"></div>
+  <span id="syncText">連線中…</span>
+  <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace" id="rowInfo"></span>
+</div>
+
+<div class="tabs-bar" id="tabsBar"></div>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="text" id="searchInput" placeholder="搜尋此名單…" oninput="renderTable()">
+  </div>
+  <button class="add-btn" onclick="addRow()">＋ 新增一列</button>
+  <span class="row-count" id="rowCount"></span>
+</div>
+
+<main>
+  <div id="tableArea"><div class="loading"><div class="spinner"></div>載入中…</div></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+//  ★ 貼上你的 Apps Script Web App 網址 ★
+// ══════════════════════════════════════════════
+const API_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+
+// ══════════════════════════════════════════════
+//  名單定義
+// ══════════════════════════════════════════════
+const SHEETS = {
+  '合作廠商': {
+    color: '#c2410c',
+    headers: ['編號','類別','廠商名稱','服務項目','聯絡窗口','職稱','電話','Email','報價','合作狀態','簽約日期','備註'],
+    dropdowns: {
+      '類別': ['設計','印刷','攝影','影片後製','場地','餐飲','公關','其他'],
+      '合作狀態': ['洽談中','已報價','已簽約','執行中','已結案','取消']
+    }
+  },
+  '評審': {
+    color: '#92400e',
+    headers: ['編號','姓名','專業領域','任職單位','職稱','電話','Email','邀請狀態','出席費','備註'],
+    dropdowns: { '邀請狀態': ['待邀請','已邀請','已確認','婉拒','待回覆'] }
+  },
+  '得獎者': {
+    color: '#065f46',
+    headers: ['編號','獎項','作品名稱','得獎者姓名','團隊名稱','電話','Email','通訊地址','出席確認','獎金匯款狀態','備註'],
+    dropdowns: {
+      '出席確認': ['待確認','本人出席','代理出席','無法出席'],
+      '獎金匯款狀態': ['待匯款','資料齊備','已匯款','退匯']
+    }
+  },
+  '貴賓邀請': {
+    color: '#1e40af',
+    headers: ['編號','類別','姓名／單位','職稱','代表性','電話','Email','邀請函寄送','出席確認','席次安排','備註'],
+    dropdowns: {
+      '類別': ['政府單位','合作夥伴','業界貴賓','媒體','其他'],
+      '邀請函寄送': ['未寄出','已寄出','已送達'],
+      '出席確認': ['待回覆','確認出席','確認不出席','代理出席']
+    }
+  },
+  '媒體邀請': {
+    color: '#5b21b6',
+    headers: ['編號','媒體類型','媒體名稱','記者姓名','部門','電話','Email','新聞稿寄送','出席確認','報導連結','備註'],
+    dropdowns: {
+      '媒體類型': ['電視','報紙','網路媒體','雜誌','自媒體','其他'],
+      '新聞稿寄送': ['未寄出','已寄出','已確認收到'],
+      '出席確認': ['待回覆','確認出席','不出席']
+    }
+  },
+  '工作人員': {
+    color: '#9d174d',
+    headers: ['編號','組別','姓名','職務','電話','Email','到場時間','主要任務','設備領用','備註'],
+    dropdowns: { '組別': ['總務','場控','報到','攝錄影','公關','接待','機動','其他'] }
+  },
+  '培訓學員': {
+    color: '#0369a1',
+    headers: ['編號','梯次','姓名','性別','年齡','電話','Email','報名日期','繳費狀態','出席紀錄','結業狀態','備註'],
+    dropdowns: {
+      '性別': ['女','男','不指定'],
+      '繳費狀態': ['待繳費','已繳費','退費'],
+      '出席紀錄': ['全程出席','部分出席','缺席'],
+      '結業狀態': ['在學中','已結業','未結業','中途退出']
+    }
+  }
+};
+
+const SHEET_NAMES = Object.keys(SHEETS);
+let currentSheet = SHEET_NAMES[0];
+let tableData = {};
+let loadedSheets = new Set();
+let isDirty = false;
+
+// ══════════════════════════════════════════════
+//  初始化
+// ══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  buildTabs();
+  switchTab(SHEET_NAMES[0]);
+});
+
+function buildTabs() {
+  const bar = document.getElementById('tabsBar');
+  SHEET_NAMES.forEach(name => {
+    const div = document.createElement('div');
+    div.className = 'tab';
+    div.id = 'tab-' + name;
+    div.style.setProperty('--tab-color', SHEETS[name].color);
+    div.innerHTML = `${name}<span class="cnt" id="cnt-${name}">0</span>`;
+    div.onclick = () => switchTab(name);
+    bar.appendChild(div);
+  });
+}
+
+function switchTab(name) {
+  currentSheet = name;
+  // 更新分頁樣式
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const tab = document.getElementById('tab-' + name);
+  tab.classList.add('active');
+  tab.style.setProperty('--tab-color', SHEETS[name].color);
+  // 更新色條
+  document.getElementById('colorBar').style.background = SHEETS[name].color;
+  // 清搜尋
+  document.getElementById('searchInput').value = '';
+  if (!loadedSheets.has(name)) {
+    loadCurrentSheet();
+  } else {
+    renderTable();
+  }
+}
+
+// ══════════════════════════════════════════════
+//  API：讀取
+// ══════════════════════════════════════════════
+function loadCurrentSheet() {
+  const name = currentSheet;
+  setTableLoading();
+  setSyncState('loading', '連線中…');
+
+  if (API_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    tableData[name] = [];
+    loadedSheets.add(name);
+    renderTable();
+    updateCount(name);
+    setSyncState('err', '⚠ 尚未設定 API_URL，目前為示範模式');
+    return;
+  }
+
+  fetch(`${API_URL}?action=readRoster&sheet=${encodeURIComponent(name)}`)
+    .then(r => r.json())
+    .then(res => {
+      if (!res.ok) throw new Error(res.msg || '讀取失敗');
+      tableData[name] = res.data || [];
+      loadedSheets.add(name);
+      renderTable();
+      updateCount(name);
+      setSyncState('ok', `最後同步：${fmtTime()}`);
+    })
+    .catch(err => {
+      document.getElementById('tableArea').innerHTML = `<div class="loading" style="color:var(--danger)">讀取失敗：${err.message}</div>`;
+      setSyncState('err', '連線失敗：' + err.message);
+      showToast('讀取失敗：' + err.message, 'err');
+    });
+}
+
+// ══════════════════════════════════════════════
+//  API：儲存
+// ══════════════════════════════════════════════
+function saveCurrentSheet() {
+  const name = currentSheet;
+  const data = tableData[name] || [];
+
+  if (API_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    showToast('請先設定 API_URL', 'err'); return;
+  }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = '儲存中…';
+
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action: 'writeRoster', sheet: name, data })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (!res.ok) throw new Error(res.msg || '儲存失敗');
+    showToast(`✓「${name}」${res.count} 筆資料已儲存至 Google Sheets`);
+    setSyncState('ok', `最後儲存：${fmtTime()}`);
+    isDirty = false;
+  })
+  .catch(err => showToast('儲存失敗：' + err.message, 'err'))
+  .finally(() => { btn.disabled = false; btn.textContent = '✓ 儲存至 Sheets'; });
+}
+
+// ══════════════════════════════════════════════
+//  渲染表格
+// ══════════════════════════════════════════════
+function renderTable() {
+  const name    = currentSheet;
+  const config  = SHEETS[name];
+  const allData = tableData[name] || [];
+  const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+
+  const filtered = keyword
+    ? allData.filter(row => config.headers.some(h => String(row[h] ?? '').toLowerCase().includes(keyword)))
+    : allData;
+
+  document.getElementById('rowCount').textContent = keyword
+    ? `找到 ${filtered.length} / ${allData.length} 筆`
+    : `共 ${allData.length} 筆`;
+
+  if (allData.length === 0) {
+    document.getElementById('tableArea').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <div class="empty-text">此名單尚無資料<br><span style="font-size:0.84rem;color:var(--text-muted)">點上方「＋ 新增一列」開始填寫</span></div>
+      </div>`;
+    return;
+  }
+
+  if (filtered.length === 0) {
+    document.getElementById('tableArea').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-text">找不到「${keyword}」相關資料</div>
+      </div>`;
+    return;
+  }
+
+  let html = `<div class="table-wrap"><table><thead><tr>
+    <th class="td-num">#</th>
+    ${config.headers.map(h => `<th>${h}</th>`).join('')}
+    <th class="td-action"></th>
+  </tr></thead><tbody>`;
+
+  filtered.forEach((row, fi) => {
+    const ri = allData.indexOf(row);
+    html += `<tr data-index="${ri}">
+      <td class="td-num">${fi + 1}</td>
+      ${config.headers.map(h => `<td>${renderCell(h, row[h] ?? '', ri, config)}</td>`).join('')}
+      <td class="td-action"><button class="del-btn" onclick="deleteRow(${ri})" title="刪除此列">✕</button></td>
+    </tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+  document.getElementById('tableArea').innerHTML = html;
+}
+
+function renderCell(header, value, rowIndex, config) {
+  const dd = config.dropdowns?.[header];
+  const safe = String(value ?? '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  if (dd) {
+    const opts = dd.map(o => `<option value="${o}"${o === value ? ' selected' : ''}>${o}</option>`).join('');
+    return `<select onchange="updateCell(${rowIndex},'${header}',this.value)"><option value=""></option>${opts}</select>`;
+  }
+  return `<input type="text" value="${safe}" oninput="updateCell(${rowIndex},'${header}',this.value)" placeholder="${header}">`;
+}
+
+// ══════════════════════════════════════════════
+//  資料操作
+// ══════════════════════════════════════════════
+function updateCell(rowIndex, header, value) {
+  if (!tableData[currentSheet]) return;
+  tableData[currentSheet][rowIndex][header] = value;
+  isDirty = true;
+  updateCount(currentSheet);
+}
+
+function addRow() {
+  if (!tableData[currentSheet]) tableData[currentSheet] = [];
+  const newRow = {};
+  SHEETS[currentSheet].headers.forEach(h => { newRow[h] = ''; });
+  tableData[currentSheet].push(newRow);
+  isDirty = true;
+  updateCount(currentSheet);
+  renderTable();
+  // 捲到最後一列並 focus 第一欄
+  setTimeout(() => {
+    const rows = document.querySelectorAll('#tableArea tbody tr');
+    if (rows.length) {
+      const lastRow = rows[rows.length - 1];
+      lastRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const firstInput = lastRow.querySelector('input, select');
+      if (firstInput) firstInput.focus();
+    }
+  }, 60);
+}
+
+function deleteRow(rowIndex) {
+  if (!confirm('確定刪除這一列？')) return;
+  tableData[currentSheet].splice(rowIndex, 1);
+  isDirty = true;
+  updateCount(currentSheet);
+  renderTable();
+}
+
+function updateCount(name) {
+  const el = document.getElementById('cnt-' + name);
+  if (el) el.textContent = (tableData[name] || []).length;
+  const info = document.getElementById('rowInfo');
+  if (info && name === currentSheet) {
+    info.textContent = `${(tableData[name] || []).length} 筆`;
+  }
+}
+
+// ══════════════════════════════════════════════
+//  UI 工具
+// ══════════════════════════════════════════════
+function setTableLoading() {
+  document.getElementById('tableArea').innerHTML = '<div class="loading"><div class="spinner"></div>從 Google Sheets 讀取中…</div>';
+}
+
+function setSyncState(state, text) {
+  const dot  = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  const info  = document.getElementById('syncText');
+  dot.className = 'sync-dot' + (state === 'ok' ? ' ok' : state === 'err' ? ' err' : '');
+  if (info) info.textContent = text;
+  if (label) label.textContent = state === 'ok' ? fmtTime() + ' 已同步' : state === 'err' ? '連線異常' : '…';
+}
+
+let toastTimer;
+function showToast(msg, type = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type === 'err' ? ' err' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, 3500);
+}
+
+function fmtTime() {
+  const n = new Date();
+  return `${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;
+}
+
+window.addEventListener('beforeunload', e => {
+  if (isDirty) { e.preventDefault(); e.returnValue = ''; }
+});
+</script>
+</body>
+</html>
