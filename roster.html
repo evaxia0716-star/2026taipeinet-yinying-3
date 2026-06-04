@@ -12,30 +12,35 @@
     --accent: #0d9488; --accent-hover: #0f766e;
     --text: #1a3330; --text-dim: #3d5c57; --text-muted: #5f8a84;
     --danger: #dc2626; --warn: #d97706; --success: #059669;
+    --row-h: 36px; /* ① 列高收緊：從隱性的 ~52px 降到 36px */
   }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 16px; }
+  html { font-size: 15px; } /* ② 整體字級縮 1px，密度更好 */
   body { font-family: "Noto Sans TC", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
+  /* ─── Header ─── */
   header {
     position: sticky; top: 0; z-index: 100;
-    background: #134e4a; padding: 0 2rem;
+    background: #134e4a; padding: 0 1.5rem;
     display: flex; align-items: center; justify-content: space-between;
-    height: 68px; box-shadow: 0 2px 12px rgba(13,74,70,0.25);
+    height: 56px; /* ③ header 從 68px 縮到 56px */
+    box-shadow: 0 2px 12px rgba(13,74,70,0.25);
   }
-  .header-left { display: flex; align-items: center; gap: 1.5rem; }
-  .logo { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; letter-spacing: 0.2em; color: #5eead4; text-transform: uppercase; }
-  .project-title { font-size: 1.1rem; font-weight: 700; color: #fff; }
-  .project-title .sub { color: #99f6e4; font-size: 0.9rem; font-weight: 400; margin-left: 0.5rem; }
-  .header-right { display: flex; align-items: center; gap: 0.6rem; }
+  .header-left { display: flex; align-items: center; gap: 1rem; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.18em; color: #5eead4; text-transform: uppercase; }
+  .project-title { font-size: 1rem; font-weight: 700; color: #fff; }
+  .project-title .sub { color: #99f6e4; font-size: 0.85rem; font-weight: 400; margin-left: 0.4rem; }
+  .header-right { display: flex; align-items: center; gap: 0.4rem; } /* ④ 按鈕間距從 0.6 → 0.4 */
 
   .btn {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    padding: 0.45rem 1rem; border-radius: 8px;
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.38rem 0.85rem; border-radius: 7px;
     border: 1px solid rgba(255,255,255,0.22);
     background: rgba(255,255,255,0.12); color: #e0fdf4;
-    font-family: "Noto Sans TC", sans-serif; font-size: 0.88rem;
+    font-family: "Noto Sans TC", sans-serif; font-size: 0.82rem;
     cursor: pointer; transition: all 0.15s; text-decoration: none;
+    white-space: nowrap;
   }
   .btn:hover { background: rgba(255,255,255,0.24); color: #fff; }
   .btn-accent {
@@ -45,12 +50,15 @@
   .btn-accent:hover { background: #0f766e; }
   .btn-accent:disabled { opacity: .55; cursor: not-allowed; }
 
+  /* ─── Tabs ─── */
   .tabs-bar {
     background: #fff; border-bottom: 2px solid var(--border);
-    padding: 0 2rem; display: flex; align-items: flex-end; gap: 0; overflow-x: auto;
+    padding: 0 1.5rem; display: flex; align-items: flex-end; gap: 0; overflow-x: auto;
+    scrollbar-width: none; /* ⑤ tabs 捲動條隱藏 */
   }
+  .tabs-bar::-webkit-scrollbar { display: none; }
   .tab {
-    padding: 0.7rem 1.2rem 0.65rem; font-size: 0.86rem; font-weight: 600;
+    padding: 0.55rem 1rem 0.5rem; font-size: 0.82rem; font-weight: 600;
     color: var(--text-muted); cursor: pointer;
     border-bottom: 3px solid transparent; margin-bottom: -2px;
     transition: all 0.15s; white-space: nowrap; user-select: none;
@@ -59,110 +67,131 @@
   .tab.active { color: var(--text); border-bottom-color: var(--tab-color, var(--accent)); }
   .tab .cnt {
     display: inline-block; font-family: "IBM Plex Mono", monospace;
-    font-size: 0.72rem; font-weight: 700; padding: 0.05rem 0.45rem;
-    border-radius: 20px; margin-left: 0.4rem;
+    font-size: 0.68rem; font-weight: 700; padding: 0.04rem 0.38rem;
+    border-radius: 20px; margin-left: 0.35rem;
     background: var(--surface2); color: var(--text-muted);
   }
   .tab.active .cnt { background: var(--tab-color, var(--accent)); color: #fff; }
 
+  /* ─── Toolbar ─── */
   .toolbar {
     background: #fff; border-bottom: 1px solid var(--border);
-    padding: 0.55rem 2rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    padding: 0.45rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
   }
   .search-wrap { position: relative; }
   .search-input {
     background: var(--bg); border: 1.5px solid var(--border2);
-    border-radius: 8px; padding: 0.42rem 0.85rem 0.42rem 2rem;
+    border-radius: 7px; padding: 0.36rem 0.75rem 0.36rem 1.9rem;
     color: var(--text); font-family: "Noto Sans TC", sans-serif;
-    font-size: 0.88rem; width: 200px; outline: none; transition: all 0.15s;
+    font-size: 0.84rem; width: 180px; outline: none; transition: all 0.15s;
   }
   .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,0.1); }
   .search-input::placeholder { color: var(--text-muted); }
-  .search-icon { position: absolute; left: 0.6rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.82rem; pointer-events: none; }
-  .row-count { font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; color: var(--text-muted); margin-left: auto; }
+  .search-icon { position: absolute; left: 0.55rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem; pointer-events: none; }
+  .row-count { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; color: var(--text-muted); margin-left: auto; }
 
   .add-btn {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    padding: 0.45rem 1.1rem; border-radius: 8px;
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.38rem 0.95rem; border-radius: 7px;
     background: var(--accent); border: none; color: #fff;
-    font-family: "Noto Sans TC", sans-serif; font-size: 0.9rem; font-weight: 700;
+    font-family: "Noto Sans TC", sans-serif; font-size: 0.84rem; font-weight: 700;
     cursor: pointer; transition: all 0.15s; box-shadow: 0 2px 6px rgba(13,148,136,0.3);
+    white-space: nowrap;
   }
   .add-btn:hover { background: var(--accent-hover); }
 
+  /* ⑥ school-hint 改為 icon-only tooltip，節省工具列空間 */
   .school-hint {
-    display: inline-flex; align-items: center; gap: 0.35rem;
-    padding: 0.38rem 0.85rem; border-radius: 8px;
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.3rem 0.7rem; border-radius: 7px;
     border: 1.5px solid #a8d5cc; background: #e6f5f2;
-    color: var(--text-muted); font-size: 0.8rem;
+    color: var(--text-muted); font-size: 0.76rem;
+    white-space: nowrap;
   }
 
-  main { padding: 1.2rem 2rem 5rem; }
+  main { padding: 0.8rem 1.5rem 5rem; } /* ⑦ main padding 收緊 */
 
-  /* ── 表格：水平捲動，每欄固定足夠寬度 ── */
+  /* ─── Table ─── */
   .table-wrap {
     overflow-x: auto; border: 1.5px solid var(--border);
     border-radius: 10px; background: #fff;
-    /* 讓捲動條在 Mac 上也常駐顯示 */
     -webkit-overflow-scrolling: touch;
+    /* ⑧ 讓橫向捲動條在任何系統都可見 */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
   }
+  .table-wrap::-webkit-scrollbar { height: 6px; }
+  .table-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
   table {
-    border-collapse: collapse; font-size: 0.9rem;
-    /* 不 auto 撐滿，讓每欄照設定寬度 */
+    border-collapse: collapse; font-size: 0.84rem; /* ⑨ 表格字級再縮小 */
     table-layout: fixed;
     width: max-content; min-width: 100%;
   }
+
   thead th {
-    padding: 0.75rem 1rem; text-align: left;
-    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.55rem 0.75rem; text-align: left; /* ⑩ th padding 壓縮 */
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
     color: var(--text-dim); background: var(--surface2);
     border-bottom: 1.5px solid var(--border);
     white-space: nowrap; position: sticky; top: 0; z-index: 2;
   }
+
   tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: #f0fdf8; }
-  tbody td { padding: 0.7rem 1rem; vertical-align: middle; }
 
-  /* 每欄寬度設定 */
-  col.col-num      { width: 42px; }
-  col.col-id       { width: 60px; }
-  col.col-edu      { width: 100px; }
-  col.col-name     { width: 260px; }
-  col.col-ownership{ width: 100px; }
-  col.col-district { width: 90px; }
-  col.col-zip      { width: 80px; }
-  col.col-addr     { width: 260px; }
-  col.col-tel      { width: 130px; }
-  col.col-contact  { width: 170px; }
-  col.col-status   { width: 110px; }
-  col.col-track    { width: 110px; }
-  col.col-note     { width: 200px; }
-  col.col-action   { width: 44px; }
-  /* 其他名單通用欄寬 */
-  col.col-default  { width: 140px; }
-  col.col-wide     { width: 200px; }
-  col.col-narrow   { width: 90px; }
+  tbody td {
+    padding: 0; /* ⑪ td 本身不加 padding，改由 input/select 自行填滿 */
+    vertical-align: middle;
+    height: var(--row-h);
+  }
 
+  /* ─── 欄寬：學校名單專用，精確分配 ─── */
+  /* 總可視寬度假設 ~1440px，去掉 # 和 action 後共 ~1370px */
+  col.col-num       { width: 36px; }   /* # */
+  col.col-id        { width: 50px; }   /* 編號 */
+  col.col-edu       { width: 88px; }   /* 學制 */
+  col.col-name      { width: 220px; }  /* ⑫ 學校名稱縮短：原 260 → 220 */
+  col.col-ownership { width: 82px; }   /* 公私立 */
+  col.col-district  { width: 78px; }   /* 行政區 */
+  col.col-zip       { width: 72px; }   /* 郵遞區號 */
+  col.col-addr      { width: 220px; }  /* ⑬ 地址：配合自動換行，寬度實際可縮 */
+  col.col-tel       { width: 118px; }  /* 電話 */
+  col.col-contact   { width: 120px; }  /* 聯絡窗口 */
+  col.col-status    { width: 96px; }   /* 寄送狀態 */
+  col.col-track     { width: 100px; }  /* 追蹤日期 */
+  col.col-note      { width: 160px; }  /* 備註：原 200 → 160 */
+  col.col-action    { width: 36px; }   /* 刪除 */
+  /* 其他名單通用 */
+  col.col-default   { width: 130px; }
+  col.col-wide      { width: 190px; }
+  col.col-narrow    { width: 80px; }
+
+  /* ⑭ input/select 撐滿格子，padding 内縮，且允許換行 */
   td input, td select {
     background: transparent; border: 1.5px solid transparent;
     color: var(--text); font-family: "Noto Sans TC", sans-serif;
-    font-size: 0.88rem; padding: 0.3rem 0.5rem;
-    border-radius: 5px; width: 100%;
+    font-size: 0.82rem; padding: 0.28rem 0.55rem;
+    border-radius: 4px; width: 100%; height: 100%; min-height: var(--row-h);
     transition: border-color 0.15s, background 0.15s; outline: none;
-    /* 文字不截斷，欄位自然換行 */
-    white-space: normal; word-break: break-all;
+    white-space: normal; word-break: break-all; /* ⑮ 地址自動換行 */
+    line-height: 1.45;
   }
   td input:hover, td select:hover { border-color: var(--border2); background: var(--bg); }
   td input:focus, td select:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px rgba(13,148,136,0.12); }
 
-  .td-num { width: 42px; text-align: center; color: var(--text-muted); font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; }
-  .td-action { width: 44px; text-align: center; }
+  /* ⑯ 地址欄：允許 td 高度自然撐開 */
+  td.addr-cell { height: auto; padding: 0; }
+  td.addr-cell input { min-height: var(--row-h); height: auto; }
+
+  .td-num { width: 36px; text-align: center; color: var(--text-muted); font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; padding: 0 4px; }
+  .td-action { width: 36px; text-align: center; }
   .del-btn {
-    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
-    border-radius: 5px; border: 1px solid transparent;
+    width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+    border-radius: 4px; border: 1px solid transparent;
     background: transparent; color: var(--text-muted);
-    cursor: pointer; font-size: 0.8rem; transition: all 0.15s; margin: auto;
+    cursor: pointer; font-size: 0.75rem; transition: all 0.15s; margin: auto;
   }
   .del-btn:hover { border-color: #fca5a5; color: var(--danger); background: #fef2f2; }
   tr:not(:hover) .del-btn { opacity: 0; }
@@ -173,29 +202,29 @@
 
   .sum-bar {
     background: #f0fdf8; border-top: 2px solid var(--border);
-    padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 1.5rem;
-    font-size: 0.88rem; flex-wrap: wrap; border-radius: 0 0 10px 10px;
+    padding: 0.5rem 1rem; display: flex; align-items: center; gap: 1.2rem;
+    font-size: 0.84rem; flex-wrap: wrap; border-radius: 0 0 10px 10px;
   }
-  .sum-item { display: flex; align-items: center; gap: 0.4rem; }
+  .sum-item { display: flex; align-items: center; gap: 0.35rem; }
   .sum-label { color: var(--text-muted); font-weight: 600; }
   .sum-val { font-family: "IBM Plex Mono", monospace; font-weight: 700; color: var(--text); }
-  .sum-val.total { color: var(--accent); font-size: 1.05rem; }
+  .sum-val.total { color: var(--accent); font-size: 1rem; }
 
   .source-bar {
     background: #f0fdf8; border-top: 1px solid var(--border);
-    padding: 0.45rem 1.2rem; font-size: 0.8rem; color: var(--text-muted);
+    padding: 0.4rem 1rem; font-size: 0.76rem; color: var(--text-muted);
     border-radius: 0 0 10px 10px;
   }
 
-  .empty-state { text-align: center; padding: 3.5rem 0; color: var(--text-muted); }
-  .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .empty-state { text-align: center; padding: 3rem 0; color: var(--text-muted); }
+  .empty-icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
 
   .loading {
     display: flex; align-items: center; justify-content: center;
-    height: 160px; color: var(--text-muted); gap: 0.75rem; font-size: 0.9rem;
+    height: 140px; color: var(--text-muted); gap: 0.7rem; font-size: 0.86rem;
   }
   .spinner {
-    width: 18px; height: 18px; border: 2px solid var(--border2);
+    width: 16px; height: 16px; border: 2px solid var(--border2);
     border-top-color: var(--accent); border-radius: 50%;
     animation: spin 0.7s linear infinite;
   }
@@ -203,23 +232,29 @@
 
   .sync-bar {
     background: var(--surface2); border-bottom: 1px solid var(--border);
-    padding: 0.4rem 2rem; display: flex; align-items: center; gap: 1rem;
-    font-size: 0.82rem; color: var(--text-muted);
+    padding: 0.32rem 1.5rem; display: flex; align-items: center; gap: 0.8rem;
+    font-size: 0.78rem; color: var(--text-muted);
   }
-  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
   .sync-dot.ok  { background: var(--success); }
   .sync-dot.err { background: var(--danger); }
   .sheet-color-bar { height: 3px; background: var(--tab-color, var(--accent)); transition: background 0.2s; }
 
   .toast {
-    position: fixed; bottom: 2rem; right: 2rem;
+    position: fixed; bottom: 1.5rem; right: 1.5rem;
     background: #134e4a; color: #fff; border-radius: 8px;
-    padding: 0.85rem 1.4rem; font-size: 0.92rem; z-index: 2000;
+    padding: 0.75rem 1.2rem; font-size: 0.88rem; z-index: 2000;
     transform: translateX(130%); transition: transform 0.25s;
     box-shadow: 0 4px 16px rgba(13,74,70,0.3);
   }
   .toast.show { transform: translateX(0); }
   .toast.err  { background: #7f1d1d; }
+
+  /* ─── 響應式：1200px 以下縮小 padding ─── */
+  @media (max-width: 1200px) {
+    main { padding: 0.6rem 1rem 4rem; }
+    header, .tabs-bar, .toolbar, .sync-bar { padding-left: 1rem; padding-right: 1rem; }
+  }
 </style>
 </head>
 <body>
@@ -230,10 +265,10 @@
     <div class="project-title">台北有影 3<span class="sub">名單總管</span></div>
   </div>
   <div class="header-right">
-    <span id="syncLabel" style="font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:#5eead4">尚未同步</span>
-    <button class="btn" onclick="loadCurrentSheet()">↻ 重新整理</button>
-    <a class="btn" href="./" target="_self">☰ 進度追蹤</a>
-    <button class="btn btn-accent" id="saveBtn" onclick="saveCurrentSheet()">✓ 儲存至 Sheets</button>
+    <span id="syncLabel" style="font-family:'IBM Plex Mono',monospace;font-size:0.73rem;color:#5eead4">尚未同步</span>
+    <button class="btn" onclick="loadCurrentSheet()">↻ 重整</button>
+    <a class="btn" href="./" target="_self">☰ 進度</a>
+    <button class="btn btn-accent" id="saveBtn" onclick="saveCurrentSheet()">✓ 儲存</button>
   </div>
 </header>
 
@@ -252,7 +287,7 @@
     <span class="search-icon">🔍</span>
     <input class="search-input" type="text" id="searchInput" placeholder="搜尋此名單…" oninput="renderTable()">
   </div>
-  <button class="add-btn" id="addRowBtn" onclick="addRow()">＋ 新增一列</button>
+  <button class="add-btn" id="addRowBtn" onclick="addRow()">＋ 新增</button>
   <span class="row-count" id="rowCount"></span>
 </div>
 
@@ -330,8 +365,6 @@ const SHEETS = {
     },
     amountCol: '金額'
   },
-
-  // ── 學校名單：全欄可編輯，讀寫皆接外部 Sheets ──
   '學校名單': {
     color: '#059669',
     sourceAction: 'readSchoolRoster',
@@ -379,18 +412,15 @@ function switchTab(name) {
   document.getElementById('searchInput').value = '';
 
   const isSchool = !!SHEETS[name].saveAction;
-
-  // 學校名單不支援新增列（資料來自外部）
   document.getElementById('addRowBtn').style.display = isSchool ? 'none' : '';
 
-  // 工具列提示
   const existingHint = document.getElementById('schoolHint');
   if (existingHint) existingHint.remove();
   if (isSchool) {
     const hint = document.createElement('span');
     hint.id = 'schoolHint';
     hint.className = 'school-hint';
-    hint.innerHTML = '✏️ 所有欄位可直接編輯・儲存後同步回學校派報名單 Sheets';
+    hint.innerHTML = '✏️ 欄位可直接編輯，儲存後同步回 Sheets';
     document.getElementById('toolbar').appendChild(hint);
   }
 
@@ -401,7 +431,6 @@ function switchTab(name) {
   }
 }
 
-// ── 讀取 ──
 function loadCurrentSheet() {
   const name   = currentSheet;
   const config = SHEETS[name];
@@ -430,7 +459,6 @@ function loadCurrentSheet() {
     });
 }
 
-// ── 儲存 ──
 function saveCurrentSheet() {
   const name   = currentSheet;
   const config = SHEETS[name];
@@ -456,10 +484,9 @@ function saveCurrentSheet() {
     isDirty = false;
   })
   .catch(err => showToast('儲存失敗：' + err.message, 'err'))
-  .finally(() => { btn.disabled = false; btn.textContent = '✓ 儲存至 Sheets'; });
+  .finally(() => { btn.disabled = false; btn.textContent = '✓ 儲存'; });
 }
 
-// ── 渲染表格 ──
 function renderTable() {
   const name    = currentSheet;
   const config  = SHEETS[name];
@@ -479,8 +506,8 @@ function renderTable() {
     document.getElementById('tableArea').innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">📋</div>
-        <div style="font-size:0.95rem">此名單尚無資料<br>
-        <span style="font-size:0.84rem;color:var(--text-muted)">點「＋ 新增一列」開始填寫</span></div>
+        <div style="font-size:0.9rem">此名單尚無資料<br>
+        <span style="font-size:0.8rem;color:var(--text-muted)">點「＋ 新增」開始填寫</span></div>
       </div>`;
     return;
   }
@@ -490,7 +517,6 @@ function renderTable() {
     return;
   }
 
-  // 學校名單欄寬對照
   const schoolColClass = {
     '編號':'col-id','學制':'col-edu','學校名稱':'col-name',
     '公私立':'col-ownership','行政區':'col-district','郵遞區號':'col-zip',
@@ -517,9 +543,10 @@ function renderTable() {
     const ri = allData.indexOf(row);
     html += `<tr data-index="${ri}">
       <td class="td-num">${fi + 1}</td>
-      ${config.headers.map(h =>
-        `<td${h === config.amountCol ? ' class="amount-cell"' : ''}>${renderCell(h, row[h] ?? '', ri, config)}</td>`
-      ).join('')}
+      ${config.headers.map(h => {
+        const isAddr = (h === '地址' || h === '通訊地址');
+        return `<td${h === config.amountCol ? ' class="amount-cell"' : isAddr ? ' class="addr-cell"' : ''}>${renderCell(h, row[h] ?? '', ri, config)}</td>`;
+      }).join('')}
       ${isSchool ? '' : `<td class="td-action"><button class="del-btn" onclick="deleteRow(${ri})" title="刪除">✕</button></td>`}
     </tr>`;
   });
@@ -539,7 +566,7 @@ function renderTable() {
   }
 
   if (isSchool) {
-    html += `<div class="source-bar">📊 資料來源：臺北市學校海報徵選寄送名單・編輯後按「✓ 儲存至 Sheets」同步回原始 Sheets</div>`;
+    html += `<div class="source-bar">📊 資料來源：臺北市學校海報徵選寄送名單 · 編輯後按「✓ 儲存」同步回 Sheets</div>`;
   }
 
   html += `</div>`;
