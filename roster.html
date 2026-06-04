@@ -90,20 +90,17 @@
   }
   .add-btn:hover { background: var(--accent-hover); }
 
-  .readonly-badge {
+  /* 學校名單：部分欄位唯讀標示 */
+  .school-hint {
     display: inline-flex; align-items: center; gap: 0.35rem;
     padding: 0.38rem 0.85rem; border-radius: 8px;
     border: 1.5px solid #a8d5cc; background: #e6f5f2;
-    color: var(--text-muted); font-size: 0.82rem; font-weight: 600;
-    cursor: default; user-select: none;
+    color: var(--text-muted); font-size: 0.8rem;
   }
 
   main { padding: 1.2rem 2rem 5rem; }
 
-  .table-wrap {
-    overflow-x: auto; border: 1.5px solid var(--border);
-    border-radius: 10px; background: #fff;
-  }
+  .table-wrap { overflow-x: auto; border: 1.5px solid var(--border); border-radius: 10px; background: #fff; }
   table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
   thead th {
     padding: 0.7rem 0.9rem; text-align: left;
@@ -111,6 +108,9 @@
     color: var(--text-dim); background: var(--surface2);
     border-bottom: 1.5px solid var(--border); white-space: nowrap;
   }
+  /* 可編輯欄位的表頭底線提示 */
+  thead th.editable { border-bottom: 2.5px solid var(--accent); }
+
   tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: #f0fdf8; }
@@ -126,7 +126,8 @@
   td input:hover, td select:hover { border-color: var(--border2); background: var(--bg); }
   td input:focus, td select:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px rgba(13,148,136,0.12); }
 
-  td.cell-readonly { color: var(--text); font-size: 0.9rem; white-space: nowrap; }
+  /* 唯讀欄位純文字 */
+  td.cell-fixed { color: var(--text); font-size: 0.9rem; }
 
   .td-num { width: 36px; text-align: center; color: var(--text-muted); font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; }
   .td-action { width: 44px; text-align: center; }
@@ -156,7 +157,7 @@
   .source-bar {
     background: #f0fdf8; border-top: 1px solid var(--border);
     padding: 0.45rem 1.2rem; font-size: 0.8rem; color: var(--text-muted);
-    border-radius: 0 0 10px 10px; display: flex; align-items: center; gap: 0.5rem;
+    border-radius: 0 0 10px 10px;
   }
 
   .empty-state { text-align: center; padding: 3.5rem 0; color: var(--text-muted); }
@@ -179,7 +180,7 @@
     font-size: 0.82rem; color: var(--text-muted);
   }
   .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
-  .sync-dot.ok { background: var(--success); }
+  .sync-dot.ok  { background: var(--success); }
   .sync-dot.err { background: var(--danger); }
   .sheet-color-bar { height: 3px; background: var(--tab-color, var(--accent)); transition: background 0.2s; }
 
@@ -191,7 +192,7 @@
     box-shadow: 0 4px 16px rgba(13,74,70,0.3);
   }
   .toast.show { transform: translateX(0); }
-  .toast.err { background: #7f1d1d; }
+  .toast.err  { background: #7f1d1d; }
 </style>
 </head>
 <body>
@@ -236,6 +237,9 @@
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
+
+// 學校名單：可編輯欄位（其餘唯讀）
+const SCHOOL_EDITABLE = new Set(['寄送狀態', '追蹤日期', '備註']);
 
 const SHEETS = {
   '合作廠商': {
@@ -302,16 +306,16 @@ const SHEETS = {
     },
     amountCol: '金額'
   },
+
+  // ── 學校名單：讀寫皆接外部 Sheets ──
   '學校名單': {
     color: '#059669',
-    sourceAction: 'readSchoolRoster',
-    readonly: true,
-    headers: [
-      '編號','學制','學校名稱','公私立','行政區','郵遞區號',
-      '地址','電話','聯絡窗口','Email',
-      '寄送方式','寄送狀態','追蹤日期','回覆狀態','備註'
-    ],
-    dropdowns: {}
+    sourceAction:  'readSchoolRoster',
+    saveAction:    'writeSchoolRoster',   // 儲存用獨立 action
+    headers: ['編號','學制','學校名稱','公私立','行政區','郵遞區號','地址','電話','聯絡窗口','寄送狀態','追蹤日期','備註'],
+    dropdowns: {
+      '寄送狀態':['未寄送','已寄送','退信']
+    }
   }
 };
 
@@ -348,18 +352,20 @@ function switchTab(name) {
   document.getElementById('colorBar').style.background = SHEETS[name].color;
   document.getElementById('searchInput').value = '';
 
-  const isReadonly = !!SHEETS[name].readonly;
-  document.getElementById('addRowBtn').style.display = isReadonly ? 'none' : '';
-  document.getElementById('saveBtn').style.display   = isReadonly ? 'none' : '';
+  const isSchool = !!SHEETS[name].saveAction;
 
-  const existingBadge = document.getElementById('readonlyBadge');
-  if (existingBadge) existingBadge.remove();
-  if (isReadonly) {
-    const badge = document.createElement('span');
-    badge.id = 'readonlyBadge';
-    badge.className = 'readonly-badge';
-    badge.innerHTML = '📖 唯讀・資料來自學校派報名單 Sheets';
-    document.getElementById('toolbar').appendChild(badge);
+  // 學校名單：隱藏「新增一列」（不支援新增）
+  document.getElementById('addRowBtn').style.display = isSchool ? 'none' : '';
+
+  // 工具列提示
+  const existingHint = document.getElementById('schoolHint');
+  if (existingHint) existingHint.remove();
+  if (isSchool) {
+    const hint = document.createElement('span');
+    hint.id = 'schoolHint';
+    hint.className = 'school-hint';
+    hint.innerHTML = '✏️ 可編輯：寄送狀態、追蹤日期、備註・儲存後同步回 Sheets';
+    document.getElementById('toolbar').appendChild(hint);
   }
 
   if (!loadedSheets.has(name)) {
@@ -369,6 +375,7 @@ function switchTab(name) {
   }
 }
 
+// ── 讀取 ──
 function loadCurrentSheet() {
   const name   = currentSheet;
   const config = SHEETS[name];
@@ -397,24 +404,29 @@ function loadCurrentSheet() {
     });
 }
 
+// ── 儲存 ──
 function saveCurrentSheet() {
   const name   = currentSheet;
   const config = SHEETS[name];
-  if (config.readonly) { showToast('學校名單為唯讀，請直接在 Sheets 修改', 'err'); return; }
-
-  const data = tableData[name] || [];
-  const btn  = document.getElementById('saveBtn');
+  const data   = tableData[name] || [];
+  const btn    = document.getElementById('saveBtn');
   btn.disabled = true; btn.textContent = '儲存中…';
+
+  // 學校名單用專屬 action，其餘用 writeRoster
+  const action = config.saveAction || 'writeRoster';
+  const body   = config.saveAction
+    ? JSON.stringify({ action, data })
+    : JSON.stringify({ action, sheet: name, data });
 
   fetch(API_URL, {
     method: 'POST', redirect: 'follow',
     headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({ action: 'writeRoster', sheet: name, data })
+    body
   })
   .then(r => r.json())
   .then(res => {
     if (!res.ok) throw new Error(res.msg || '儲存失敗');
-    showToast(`✓「${name}」${res.count} 筆資料已儲存`);
+    showToast(`✓「${name}」${res.count} 筆已同步回 Sheets`);
     setSyncState('ok', `最後儲存：${fmtTime()}`);
     isDirty = false;
   })
@@ -422,12 +434,13 @@ function saveCurrentSheet() {
   .finally(() => { btn.disabled = false; btn.textContent = '✓ 儲存至 Sheets'; });
 }
 
+// ── 渲染表格 ──
 function renderTable() {
-  const name       = currentSheet;
-  const config     = SHEETS[name];
-  const allData    = tableData[name] || [];
-  const keyword    = document.getElementById('searchInput').value.trim().toLowerCase();
-  const isReadonly = !!config.readonly;
+  const name     = currentSheet;
+  const config   = SHEETS[name];
+  const allData  = tableData[name] || [];
+  const keyword  = document.getElementById('searchInput').value.trim().toLowerCase();
+  const isSchool = !!config.saveAction;
 
   const filtered = keyword
     ? allData.filter(row => config.headers.some(h => String(row[h] ?? '').toLowerCase().includes(keyword)))
@@ -441,11 +454,8 @@ function renderTable() {
     document.getElementById('tableArea').innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">📋</div>
-        <div style="font-size:0.95rem">此名單尚無資料${
-          isReadonly
-            ? '<br><span style="font-size:0.84rem;color:var(--text-muted)">請確認 Apps Script 已重新部署，再按「↻ 重新整理」</span>'
-            : '<br><span style="font-size:0.84rem;color:var(--text-muted)">點「＋ 新增一列」開始填寫</span>'
-        }</div>
+        <div style="font-size:0.95rem">此名單尚無資料<br>
+        <span style="font-size:0.84rem;color:var(--text-muted)">點「＋ 新增一列」開始填寫</span></div>
       </div>`;
     return;
   }
@@ -457,8 +467,11 @@ function renderTable() {
 
   let html = `<div class="table-wrap"><table><thead><tr>
     <th class="td-num">#</th>
-    ${config.headers.map(h => `<th>${h}</th>`).join('')}
-    ${isReadonly ? '' : '<th class="td-action"></th>'}
+    ${config.headers.map(h => {
+      const isEditable = !isSchool || SCHOOL_EDITABLE.has(h);
+      return `<th${isEditable && isSchool ? ' class="editable"' : ''}>${h}</th>`;
+    }).join('')}
+    <th class="td-action"></th>
   </tr></thead><tbody>`;
 
   filtered.forEach((row, fi) => {
@@ -466,21 +479,22 @@ function renderTable() {
     html += `<tr data-index="${ri}">
       <td class="td-num">${fi + 1}</td>
       ${config.headers.map(h => {
-        if (isReadonly) {
-          return `<td class="cell-readonly">${String(row[h] ?? '').replace(/</g,'&lt;')}</td>`;
+        const isEditable = !isSchool || SCHOOL_EDITABLE.has(h);
+        if (!isEditable) {
+          return `<td class="cell-fixed">${String(row[h] ?? '').replace(/</g,'&lt;')}</td>`;
         }
         return `<td${h === config.amountCol ? ' class="amount-cell"' : ''}>${renderCell(h, row[h] ?? '', ri, config)}</td>`;
       }).join('')}
-      ${isReadonly ? '' : `<td class="td-action"><button class="del-btn" onclick="deleteRow(${ri})" title="刪除">✕</button></td>`}
+      <td class="td-action">${isSchool ? '' : `<button class="del-btn" onclick="deleteRow(${ri})" title="刪除">✕</button>`}</td>
     </tr>`;
   });
 
   html += `</tbody></table>`;
 
   if (config.amountCol && allData.length > 0) {
-    const total   = allData.reduce((s, r) => s + (parseFloat(String(r[config.amountCol]||'0').replace(/,/g,''))||0), 0);
-    const paid    = allData.filter(r => r['付款狀態']==='已核銷').reduce((s,r) => s+(parseFloat(String(r[config.amountCol]||'0').replace(/,/g,''))||0),0);
-    const pending = allData.filter(r => r['付款狀態']==='待申請'||r['付款狀態']==='已申請').reduce((s,r) => s+(parseFloat(String(r[config.amountCol]||'0').replace(/,/g,''))||0),0);
+    const total   = allData.reduce((s,r)=>s+(parseFloat(String(r[config.amountCol]||'0').replace(/,/g,''))||0),0);
+    const paid    = allData.filter(r=>r['付款狀態']==='已核銷').reduce((s,r)=>s+(parseFloat(String(r[config.amountCol]||'0').replace(/,/g,''))||0),0);
+    const pending = allData.filter(r=>r['付款狀態']==='待申請'||r['付款狀態']==='已申請').reduce((s,r)=>s+(parseFloat(String(r[config.amountCol]||'0').replace(/,/g,''))||0),0);
     const fmt = n => 'NT$ ' + n.toLocaleString('zh-TW');
     html += `<div class="sum-bar">
       <div class="sum-item"><span class="sum-label">總金額</span><span class="sum-val total">${fmt(total)}</span></div>
@@ -489,8 +503,8 @@ function renderTable() {
     </div>`;
   }
 
-  if (isReadonly) {
-    html += `<div class="source-bar">📊 資料來源：臺北市學校海報徵選寄送名單・如需修改請至 Google Sheets 直接編輯</div>`;
+  if (isSchool) {
+    html += `<div class="source-bar">📊 資料來源：臺北市學校海報徵選寄送名單・底線欄位可編輯，儲存後同步回 Sheets</div>`;
   }
 
   html += `</div>`;
@@ -516,7 +530,6 @@ function updateCell(rowIndex, header, value) {
 }
 
 function addRow() {
-  if (SHEETS[currentSheet].readonly) return;
   if (!tableData[currentSheet]) tableData[currentSheet] = [];
   const newRow = {};
   SHEETS[currentSheet].headers.forEach(h => { newRow[h] = ''; });
@@ -536,7 +549,6 @@ function addRow() {
 }
 
 function deleteRow(rowIndex) {
-  if (SHEETS[currentSheet].readonly) return;
   if (!confirm('確定刪除這一列？')) return;
   tableData[currentSheet].splice(rowIndex, 1);
   isDirty = true;
@@ -544,6 +556,7 @@ function deleteRow(rowIndex) {
   renderTable();
 }
 
+// ── 工具函式 ──
 function updateCount(name) {
   const el = document.getElementById('cnt-' + name);
   if (el) el.textContent = (tableData[name] || []).length;
