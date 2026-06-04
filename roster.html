@@ -147,26 +147,25 @@
     height: var(--row-h);
   }
 
-  /* ─── 欄寬：學校名單專用，精確分配 ─── */
-  /* 總可視寬度假設 ~1440px，去掉 # 和 action 後共 ~1370px */
-  col.col-num       { width: 36px; }   /* # */
-  col.col-id        { width: 50px; }   /* 編號 */
-  col.col-edu       { width: 88px; }   /* 學制 */
-  col.col-name      { width: 220px; }  /* ⑫ 學校名稱縮短：原 260 → 220 */
-  col.col-ownership { width: 82px; }   /* 公私立 */
-  col.col-district  { width: 78px; }   /* 行政區 */
-  col.col-zip       { width: 72px; }   /* 郵遞區號 */
-  col.col-addr      { width: 220px; }  /* ⑬ 地址：配合自動換行，寬度實際可縮 */
-  col.col-tel       { width: 118px; }  /* 電話 */
-  col.col-contact   { width: 120px; }  /* 聯絡窗口 */
-  col.col-status    { width: 96px; }   /* 寄送狀態 */
-  col.col-track     { width: 100px; }  /* 追蹤日期 */
-  col.col-note      { width: 160px; }  /* 備註：原 200 → 160 */
-  col.col-action    { width: 36px; }   /* 刪除 */
+  /* ─── 欄寬：學校名單專用 ─── */
+  col.col-num       { width: 32px; }   /* # */
+  col.col-id        { width: 38px; }   /* 編號：數字只需最小寬 */
+  col.col-edu       { width: 82px; }   /* 學制 */
+  col.col-name      { width: 200px; }  /* 學校名稱 */
+  col.col-ownership { width: 72px; }   /* 公私立 */
+  col.col-district  { width: 70px; }   /* 行政區 */
+  col.col-zip       { width: 68px; }   /* 郵遞區號 */
+  col.col-addr      { width: 240px; }  /* 地址：稍寬讓換行更自然 */
+  col.col-tel       { width: 112px; }  /* 電話 */
+  col.col-contact   { width: 110px; }  /* 聯絡窗口 */
+  col.col-status    { width: 88px; }   /* 寄送狀態 */
+  col.col-track     { width: 90px; }   /* 追蹤日期 */
+  col.col-note      { width: 150px; }  /* 備註 */
+  col.col-action    { width: 32px; }   /* 刪除 */
   /* 其他名單通用 */
-  col.col-default   { width: 130px; }
-  col.col-wide      { width: 190px; }
-  col.col-narrow    { width: 80px; }
+  col.col-default   { width: 120px; }
+  col.col-wide      { width: 180px; }
+  col.col-narrow    { width: 75px; }
 
   /* ⑭ input/select 撐滿格子，padding 内縮，且允許換行 */
   td input, td select {
@@ -181,12 +180,29 @@
   td input:hover, td select:hover { border-color: var(--border2); background: var(--bg); }
   td input:focus, td select:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px rgba(13,148,136,0.12); }
 
-  /* ⑯ 地址欄：允許 td 高度自然撐開 */
-  td.addr-cell { height: auto; padding: 0; }
-  td.addr-cell input { min-height: var(--row-h); height: auto; }
+  /* ── 地址欄：用 div[contenteditable] 取代 input，才能真正多行顯示 ── */
+  td.addr-cell {
+    height: auto;      /* 高度隨內容撐開 */
+    padding: 0;
+    vertical-align: top;
+  }
+  td.addr-cell .addr-edit {
+    display: block;
+    width: 100%; min-height: var(--row-h);
+    padding: 0.28rem 0.55rem;
+    font-family: "Noto Sans TC", sans-serif; font-size: 0.82rem;
+    line-height: 1.55; color: var(--text);
+    white-space: pre-wrap; word-break: break-all;
+    border: 1.5px solid transparent; border-radius: 4px;
+    outline: none; cursor: text;
+    transition: border-color 0.15s, background 0.15s;
+    box-sizing: border-box;
+  }
+  td.addr-cell .addr-edit:hover { border-color: var(--border2); background: var(--bg); }
+  td.addr-cell .addr-edit:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px rgba(13,148,136,0.12); }
 
-  .td-num { width: 36px; text-align: center; color: var(--text-muted); font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; padding: 0 4px; }
-  .td-action { width: 36px; text-align: center; }
+  .td-num { width: 32px; text-align: center; color: var(--text-muted); font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; padding: 0 4px; }
+  .td-action { width: 32px; text-align: center; }
   .del-btn {
     width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
     border-radius: 4px; border: 1px solid transparent;
@@ -575,12 +591,21 @@ function renderTable() {
 
 function renderCell(header, value, rowIndex, config) {
   const dd   = config.dropdowns?.[header];
-  const safe = String(value ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  const safe = String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   if (dd) {
     const opts = dd.map(o => `<option value="${o}"${o===value?' selected':''}>${o}</option>`).join('');
     return `<select onchange="updateCell(${rowIndex},'${header}',this.value)"><option value=""></option>${opts}</select>`;
   }
-  return `<input type="text" value="${safe}" oninput="updateCell(${rowIndex},'${header}',this.value)" placeholder="${header}">`;
+  // 地址欄：contenteditable div 才能真正多行顯示
+  const isAddr = (header === '地址' || header === '通訊地址');
+  if (isAddr) {
+    return `<div class="addr-edit" contenteditable="true"
+      onblur="updateCell(${rowIndex},'${header}',this.innerText.trim())"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur()}"
+      >${safe}</div>`;
+  }
+  const inputSafe = String(value ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  return `<input type="text" value="${inputSafe}" oninput="updateCell(${rowIndex},'${header}',this.value)" placeholder="${header}">`;
 }
 
 function updateCell(rowIndex, header, value) {
