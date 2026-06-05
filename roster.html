@@ -12,11 +12,11 @@
     --accent: #0d9488; --accent-hover: #0f766e;
     --text: #1a3330; --text-dim: #3d5c57; --text-muted: #5f8a84;
     --danger: #dc2626; --warn: #d97706; --success: #059669;
-    --row-h: 36px; /* ① 列高收緊：從隱性的 ~52px 降到 36px */
+    --row-h: 36px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 15px; } /* ② 整體字級縮 1px，密度更好 */
+  html { font-size: 15px; }
   body { font-family: "Noto Sans TC", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
   /* ─── Header ─── */
@@ -24,14 +24,14 @@
     position: sticky; top: 0; z-index: 100;
     background: #134e4a; padding: 0 1.5rem;
     display: flex; align-items: center; justify-content: space-between;
-    height: 56px; /* ③ header 從 68px 縮到 56px */
+    height: 56px;
     box-shadow: 0 2px 12px rgba(13,74,70,0.25);
   }
   .header-left { display: flex; align-items: center; gap: 1rem; }
   .logo { font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.18em; color: #5eead4; text-transform: uppercase; }
   .project-title { font-size: 1rem; font-weight: 700; color: #fff; }
   .project-title .sub { color: #99f6e4; font-size: 0.85rem; font-weight: 400; margin-left: 0.4rem; }
-  .header-right { display: flex; align-items: center; gap: 0.4rem; } /* ④ 按鈕間距從 0.6 → 0.4 */
+  .header-right { display: flex; align-items: center; gap: 0.4rem; }
 
   .btn {
     display: inline-flex; align-items: center; gap: 0.3rem;
@@ -54,7 +54,7 @@
   .tabs-bar {
     background: #fff; border-bottom: 2px solid var(--border);
     padding: 0 1.5rem; display: flex; align-items: flex-end; gap: 0; overflow-x: auto;
-    scrollbar-width: none; /* ⑤ tabs 捲動條隱藏 */
+    scrollbar-width: none;
   }
   .tabs-bar::-webkit-scrollbar { display: none; }
   .tab {
@@ -100,7 +100,6 @@
   }
   .add-btn:hover { background: var(--accent-hover); }
 
-  /* ⑥ school-hint 改為 icon-only tooltip，節省工具列空間 */
   .school-hint {
     display: inline-flex; align-items: center; gap: 0.3rem;
     padding: 0.3rem 0.7rem; border-radius: 7px;
@@ -109,14 +108,13 @@
     white-space: nowrap;
   }
 
-  main { padding: 0.8rem 1.5rem 5rem; } /* ⑦ main padding 收緊 */
+  main { padding: 0.8rem 1.5rem 5rem; }
 
   /* ─── Table ─── */
   .table-wrap {
     overflow-x: auto; border: 1.5px solid var(--border);
     border-radius: 10px; background: #fff;
     -webkit-overflow-scrolling: touch;
-    /* ⑧ 讓橫向捲動條在任何系統都可見 */
     scrollbar-width: thin;
     scrollbar-color: var(--border2) transparent;
   }
@@ -124,13 +122,13 @@
   .table-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
   table {
-    border-collapse: collapse; font-size: 0.84rem; /* ⑨ 表格字級再縮小 */
+    border-collapse: collapse; font-size: 0.84rem;
     table-layout: fixed;
     width: max-content; min-width: 100%;
   }
 
   thead th {
-    padding: 0.55rem 0.75rem; text-align: left; /* ⑩ th padding 壓縮 */
+    padding: 0.55rem 0.75rem; text-align: left;
     font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
     color: var(--text-dim); background: var(--surface2);
     border-bottom: 1.5px solid var(--border);
@@ -142,47 +140,44 @@
   tbody tr:hover { background: #f0fdf8; }
 
   tbody td {
-    padding: 0; /* ⑪ td 本身不加 padding，改由 input/select 自行填滿 */
+    padding: 0;
     vertical-align: middle;
     height: var(--row-h);
   }
 
   /* ─── 欄寬：學校名單專用 ─── */
-  col.col-num       { width: 32px; }   /* # */
-  col.col-id        { width: 38px; }   /* 編號：數字只需最小寬 */
-  col.col-edu       { width: 82px; }   /* 學制 */
-  col.col-name      { width: 200px; }  /* 學校名稱 */
-  col.col-ownership { width: 72px; }   /* 公私立 */
-  col.col-district  { width: 70px; }   /* 行政區 */
-  col.col-zip       { width: 68px; }   /* 郵遞區號 */
-  col.col-addr      { width: 240px; }  /* 地址：稍寬讓換行更自然 */
-  col.col-tel       { width: 112px; }  /* 電話 */
-  col.col-contact   { width: 110px; }  /* 聯絡窗口 */
-  col.col-status    { width: 88px; }   /* 寄送狀態 */
-  col.col-track     { width: 90px; }   /* 追蹤日期 */
-  col.col-note      { width: 150px; }  /* 備註 */
-  col.col-action    { width: 32px; }   /* 刪除 */
+  col.col-num       { width: 32px; }
+  col.col-id        { width: 38px; }
+  col.col-edu       { width: 82px; }
+  col.col-name      { width: 200px; }
+  col.col-district  { width: 70px; }
+  col.col-zip       { width: 68px; }
+  col.col-addr      { width: 240px; }
+  col.col-tel       { width: 112px; }
+  col.col-contact   { width: 110px; }
+  col.col-status    { width: 88px; }
+  col.col-track     { width: 90px; }
+  col.col-note      { width: 150px; }
+  col.col-action    { width: 32px; }
   /* 其他名單通用 */
   col.col-default   { width: 120px; }
   col.col-wide      { width: 180px; }
   col.col-narrow    { width: 75px; }
 
-  /* ⑭ input/select 撐滿格子，padding 内縮，且允許換行 */
   td input, td select {
     background: transparent; border: 1.5px solid transparent;
     color: var(--text); font-family: "Noto Sans TC", sans-serif;
     font-size: 0.82rem; padding: 0.28rem 0.55rem;
     border-radius: 4px; width: 100%; height: 100%; min-height: var(--row-h);
     transition: border-color 0.15s, background 0.15s; outline: none;
-    white-space: normal; word-break: break-all; /* ⑮ 地址自動換行 */
+    white-space: normal; word-break: break-all;
     line-height: 1.45;
   }
   td input:hover, td select:hover { border-color: var(--border2); background: var(--bg); }
   td input:focus, td select:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px rgba(13,148,136,0.12); }
 
-  /* ── 地址欄：用 div[contenteditable] 取代 input，才能真正多行顯示 ── */
   td.addr-cell {
-    height: auto;      /* 高度隨內容撐開 */
+    height: auto;
     padding: 0;
     vertical-align: top;
   }
@@ -266,7 +261,6 @@
   .toast.show { transform: translateX(0); }
   .toast.err  { background: #7f1d1d; }
 
-  /* ─── 響應式：1200px 以下縮小 padding ─── */
   @media (max-width: 1200px) {
     main { padding: 0.6rem 1rem 4rem; }
     header, .tabs-bar, .toolbar, .sync-bar { padding-left: 1rem; padding-right: 1rem; }
@@ -385,10 +379,9 @@ const SHEETS = {
     color: '#059669',
     sourceAction: 'readSchoolRoster',
     saveAction:   'writeSchoolRoster',
-    headers: ['編號','學制','學校名稱','公私立','行政區','郵遞區號','地址','電話','聯絡窗口','寄送狀態','追蹤日期','備註'],
+    headers: ['編號','學制','學校名稱','行政區','郵遞區號','地址','電話','聯絡窗口','寄送狀態','追蹤日期','備註'],
     dropdowns: {
       '學制':    ['國小','國中','高中職','大學／技專'],
-      '公私立':  ['國立','公立','私立','待確認'],
       '寄送狀態':['未寄送','已寄送','退信']
     }
   }
@@ -535,7 +528,7 @@ function renderTable() {
 
   const schoolColClass = {
     '編號':'col-id','學制':'col-edu','學校名稱':'col-name',
-    '公私立':'col-ownership','行政區':'col-district','郵遞區號':'col-zip',
+    '行政區':'col-district','郵遞區號':'col-zip',
     '地址':'col-addr','電話':'col-tel','聯絡窗口':'col-contact',
     '寄送狀態':'col-status','追蹤日期':'col-track','備註':'col-note'
   };
@@ -596,7 +589,6 @@ function renderCell(header, value, rowIndex, config) {
     const opts = dd.map(o => `<option value="${o}"${o===value?' selected':''}>${o}</option>`).join('');
     return `<select onchange="updateCell(${rowIndex},'${header}',this.value)"><option value=""></option>${opts}</select>`;
   }
-  // 地址欄：contenteditable div 才能真正多行顯示
   const isAddr = (header === '地址' || header === '通訊地址');
   if (isAddr) {
     return `<div class="addr-edit" contenteditable="true"
