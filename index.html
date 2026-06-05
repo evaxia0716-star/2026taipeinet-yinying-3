@@ -48,6 +48,10 @@
     .filter-btn[data-cat="頒獎典禮"].active { background: #b45309; border-color: #b45309; }
     .filter-btn[data-cat="市民大聲說"].active { background: #059669; border-color: #059669; }
     .filter-btn[data-cat="人才培訓"].active { background: #be185d; border-color: #be185d; }
+    /* ── 已完成頁籤專屬色 ── */
+    .filter-btn[data-cat="已完成"].active { background: #475569; border-color: #475569; }
+    /* ── 收折按鈕 active 狀態 ── */
+    .filter-btn#toggle-done-btn.active { background: #475569; border-color: #475569; color: #fff; }
     .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 0.35rem; }
     .add-task-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.48rem 1.15rem; border-radius: 8px; background: var(--accent); border: none; color: #fff; font-family: "Noto Sans TC", sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: all 0.15s; box-shadow: 0 2px 6px rgba(13,148,136,0.3); }
     .add-task-btn:hover { background: var(--accent-hover); }
@@ -74,6 +78,17 @@
     tbody tr.row-overdue:hover { background: #fee8e8; }
     tbody tr.row-warning { background: #fffdf0; }
     tbody tr.row-warning:hover { background: #fef9c3; }
+
+    /* ── 已完成任務淡化 ── */
+    tbody tr.row-done { opacity: 0.42; transition: opacity 0.2s; }
+    tbody tr.row-done:hover { opacity: 0.75; background: #f0fdf8; }
+    tbody tr.row-done td { text-decoration: line-through; color: var(--text-muted); }
+    tbody tr.row-done .status-select,
+    tbody tr.row-done .group-tag-select,
+    tbody tr.row-done .row-actions { text-decoration: none; }
+    /* 收折時完全隱藏 */
+    tbody tr.row-done.done-collapsed { display: none; }
+
     .date-overdue{color:#dc2626!important;font-weight:800!important}.date-warning{color:#d97706!important;font-weight:700!important}
     .group-tag-select{appearance:none;padding:0.28rem 0.7rem;border-radius:5px;font-size:0.82rem;font-weight:700;cursor:pointer;outline:none;border:1.5px solid;font-family:"Noto Sans TC",sans-serif;transition:all 0.15s}
     .tag-行政準備{background:#dbeafe;color:#1e40af;border-color:#93c5fd}.tag-影片徵選{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd}.tag-頒獎典禮{background:#fef3c7;color:#92400e;border-color:#fcd34d}.tag-市民大聲說{background:#d1fae5;color:#065f46;border-color:#6ee7b7}.tag-人才培訓{background:#fce7f3;color:#9d174d;border-color:#f9a8d4}
@@ -223,7 +238,9 @@
   <button class="filter-btn" data-cat="頒獎典禮" onclick="filterCat(this)">頒獎典禮</button>
   <button class="filter-btn" data-cat="市民大聲說" onclick="filterCat(this)">市民大聲說</button>
   <button class="filter-btn" data-cat="人才培訓" onclick="filterCat(this)">人才培訓</button>
+  <button class="filter-btn" data-cat="已完成" onclick="filterCat(this)">✓ 已完成</button>
   <div class="toolbar-right">
+    <button class="filter-btn" id="toggle-done-btn" onclick="toggleDoneRows()" style="white-space:nowrap;padding:0.42rem 1rem">⊖ 收折完成</button>
     <button class="filter-btn" onclick="openWeeklyReport()" style="white-space:nowrap;padding:0.42rem 1rem">📋 週報</button>
     <button class="add-task-btn" onclick="openAddModal()">＋ 新增任務</button>
     <div class="view-toggle">
@@ -315,6 +332,8 @@ const LOCAL_KEY = 'tpf3_data';
 
 let data = [], nextId = 100, currentFilter = "全部", currentSearch = "", currentView = "list";
 let isDirty = false, isEditing = false;
+// ── 已完成收折狀態 ──
+let doneCollapsed = false;
 
 const MONTHS_ZH = ["","一","二","三","四","五","六","七","八","九","十","十一","十二"];
 const CATS      = ["行政準備","影片徵選","頒獎典禮","市民大聲說","人才培訓"];
@@ -356,7 +375,6 @@ async function loadFromSheets(){
       localStorage.setItem(LOCAL_KEY,JSON.stringify(data));
       document.getElementById("last-saved").textContent="已從 Sheets 載入 "+fmtTime();
     }else if(Array.isArray(j)&&j.length===0){
-      // Sheets 空白，嘗試從本機取備份
       const local=localStorage.getItem(LOCAL_KEY);
       data=local?JSON.parse(local):[];
       document.getElementById("last-saved").textContent=local?"本機備份":"Sheets 尚無資料";
@@ -364,7 +382,6 @@ async function loadFromSheets(){
       throw new Error(j.msg||"格式不符");
     }
   }catch(e){
-    // 連線失敗，降級到本機
     const local=localStorage.getItem(LOCAL_KEY);
     data=local?JSON.parse(local):[];
     document.getElementById("last-saved").textContent="離線（本機備份）";
@@ -437,13 +454,89 @@ function renderTable(){
   applyFilter();updateStats();
 }
 
-function filterCat(btn){document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));btn.classList.add("active");currentFilter=btn.dataset.cat;applyFilter();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();}
+// ── 篩選 ──
+function filterCat(btn){
+  document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  currentFilter=btn.dataset.cat;
+  // 切到「已完成」頁籤時，自動展開收折（讓完成任務可見）
+  if(currentFilter==="已完成"&&doneCollapsed){
+    doneCollapsed=false;
+    const tb=document.getElementById("toggle-done-btn");
+    tb.textContent="⊖ 收折完成";tb.classList.remove("active");
+  }
+  applyFilter();
+  if(currentView==="calendar")renderCalendar();
+  if(currentView==="dashboard")renderDashboard();
+}
+
 function searchTable(val){currentSearch=val.toLowerCase();applyFilter();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();}
+
 function applyFilter(){
-  document.querySelectorAll("#table-body tr:not(.month-divider)").forEach(tr=>{const ok=(currentFilter==="全部"||tr.dataset.cat===currentFilter)&&(!currentSearch||tr.textContent.toLowerCase().includes(currentSearch));tr.classList.toggle("hidden",!ok);});
-  document.querySelectorAll("#table-body tr.month-divider").forEach(div=>{let nxt=div.nextElementSibling,vis=false;while(nxt&&!nxt.classList.contains("month-divider")){if(!nxt.classList.contains("hidden")){vis=true;break;}nxt=nxt.nextElementSibling;}div.classList.toggle("hidden",!vis);});
+  document.querySelectorAll("#table-body tr:not(.month-divider)").forEach(tr=>{
+    const rowId=parseInt(tr.dataset.id);
+    const row=data.find(r=>r.id===rowId);
+    const isDone=row?.status==="已完成";
+
+    // 淡化樣式
+    tr.classList.toggle("row-done",!!isDone);
+
+    // 收折：不是「已完成」篩選頁籤時才套用收折
+    if(currentFilter!=="已完成"){
+      tr.classList.toggle("done-collapsed",isDone&&doneCollapsed);
+    } else {
+      tr.classList.remove("done-collapsed");
+    }
+
+    // 顯示邏輯
+    let show;
+    if(currentFilter==="已完成"){
+      show=isDone&&(!currentSearch||tr.textContent.toLowerCase().includes(currentSearch));
+    } else {
+      show=(currentFilter==="全部"||tr.dataset.cat===currentFilter)
+          &&(!currentSearch||tr.textContent.toLowerCase().includes(currentSearch));
+    }
+    tr.classList.toggle("hidden",!show);
+  });
+
+  // 月份標題：只要底下有任何可見（未 hidden 且未 done-collapsed）的列就顯示
+  document.querySelectorAll("#table-body tr.month-divider").forEach(div=>{
+    let nxt=div.nextElementSibling,vis=false;
+    while(nxt&&!nxt.classList.contains("month-divider")){
+      if(!nxt.classList.contains("hidden")&&!nxt.classList.contains("done-collapsed")){vis=true;break;}
+      nxt=nxt.nextElementSibling;
+    }
+    div.classList.toggle("hidden",!vis);
+  });
   markFirstDivider();
 }
+
+// ── 收折 / 展開已完成 ──
+function toggleDoneRows(){
+  // 若目前在「已完成」篩選頁籤，不允許收折（沒有意義）
+  if(currentFilter==="已完成"){
+    showToast("已完成篩選模式下無需收折");return;
+  }
+  doneCollapsed=!doneCollapsed;
+  document.querySelectorAll("#table-body tr.row-done").forEach(tr=>{
+    tr.classList.toggle("done-collapsed",doneCollapsed);
+  });
+  // 月份標題同步
+  document.querySelectorAll("#table-body tr.month-divider").forEach(div=>{
+    let nxt=div.nextElementSibling,vis=false;
+    while(nxt&&!nxt.classList.contains("month-divider")){
+      if(!nxt.classList.contains("hidden")&&!nxt.classList.contains("done-collapsed")){vis=true;break;}
+      nxt=nxt.nextElementSibling;
+    }
+    div.classList.toggle("hidden",!vis);
+  });
+  markFirstDivider();
+  const btn=document.getElementById("toggle-done-btn");
+  btn.textContent=doneCollapsed?"⊕ 展開完成":"⊖ 收折完成";
+  btn.classList.toggle("active",doneCollapsed);
+  showToast(doneCollapsed?"已隱藏完成任務":"已展開完成任務");
+}
+
 function markFirstDivider(){const divs=Array.from(document.querySelectorAll("#table-body tr.month-divider"));divs.forEach(d=>d.classList.remove("first-visible-month"));const f=divs.find(d=>!d.classList.contains("hidden"));if(f)f.classList.add("first-visible-month");}
 function changeCat(sel,id){const row=data.find(r=>r.id===id);if(row){row.cat=sel.value;isDirty=true;sel.className=`group-tag-select ${catCls(sel.value)}`;sel.closest("tr").dataset.cat=sel.value;applyFilter();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();}}
 function changeStatus(sel,id){const row=data.find(r=>r.id===id);if(row){row.status=sel.value;isDirty=true;renderTable();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();}}
@@ -469,7 +562,7 @@ const _now=new Date();let calMonth=_now.getMonth(),calYear=_now.getFullYear();
 const CAL_DAY=["日","一","二","三","四","五","六"];
 const CAL_MON_ZH=["一","二","三","四","五","六","七","八","九","十","十一","十二"];
 function chipStyle(cat){return({行政準備:"background:#dbeafe;border:1px solid #93c5fd;color:#1e40af",影片徵選:"background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6",頒獎典禮:"background:#fef3c7;border:1px solid #fcd34d;color:#92400e",市民大聲說:"background:#d1fae5;border:1px solid #6ee7b7;color:#065f46",人才培訓:"background:#fce7f3;border:1px solid #f9a8d4;color:#9d174d"}[cat]||"background:#f0f4f4;color:#3d5c57")}
-function renderCalendar(){document.getElementById("cal-title").textContent=`${calYear} 年　${CAL_MON_ZH[calMonth]}月`;const first=new Date(calYear,calMonth,1).getDay();const days=new Date(calYear,calMonth+1,0).getDate();const today=new Date();const byDay={};data.forEach(r=>{if(currentFilter!=="全部"&&r.cat!==currentFilter)return;if(currentSearch&&![r.cat,r.date,r.task,r.unit,r.status,r.note,r.comment].join(" ").toLowerCase().includes(currentSearch))return;const d=parseDateFirst(r.date);if(d&&d.month===calMonth+1){if(!byDay[d.day])byDay[d.day]=[];byDay[d.day].push(r);}});let h=CAL_DAY.map(d=>`<div class="cal-day-header">${d}</div>`).join("");for(let i=0;i<first;i++)h+=`<div class="cal-day empty"></div>`;for(let d=1;d<=days;d++){const isTd=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;const tasks=byDay[d]||[],show=tasks.slice(0,3),more=tasks.length-3;const chips=show.map(t=>`<span class="cal-task-chip" style="${chipStyle(t.cat)}" onclick="openTaskModal(${t.id})" title="${esc(t.task)}">${esc(cleanTask(t.task).slice(0,14))}</span>`).join("");const moreBtn=more>0?`<div class="cal-more" onclick="switchView('list')">+${more} 項</div>`:"";h+=`<div class="cal-day${isTd?" today":""}"><div class="cal-day-num">${d}</div>${chips}${moreBtn}</div>`;}document.getElementById("cal-grid").innerHTML=h;}
+function renderCalendar(){document.getElementById("cal-title").textContent=`${calYear} 年　${CAL_MON_ZH[calMonth]}月`;const first=new Date(calYear,calMonth,1).getDay();const days=new Date(calYear,calMonth+1,0).getDate();const today=new Date();const byDay={};data.forEach(r=>{if(currentFilter!=="全部"&&currentFilter!=="已完成"&&r.cat!==currentFilter)return;if(currentFilter==="已完成"&&r.status!=="已完成")return;if(currentSearch&&![r.cat,r.date,r.task,r.unit,r.status,r.note,r.comment].join(" ").toLowerCase().includes(currentSearch))return;const d=parseDateFirst(r.date);if(d&&d.month===calMonth+1){if(!byDay[d.day])byDay[d.day]=[];byDay[d.day].push(r);}});let h=CAL_DAY.map(d=>`<div class="cal-day-header">${d}</div>`).join("");for(let i=0;i<first;i++)h+=`<div class="cal-day empty"></div>`;for(let d=1;d<=days;d++){const isTd=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;const tasks=byDay[d]||[],show=tasks.slice(0,3),more=tasks.length-3;const chips=show.map(t=>`<span class="cal-task-chip" style="${chipStyle(t.cat)};${t.status==='已完成'?'opacity:0.45;text-decoration:line-through':''}" onclick="openTaskModal(${t.id})" title="${esc(t.task)}">${esc(cleanTask(t.task).slice(0,14))}</span>`).join("");const moreBtn=more>0?`<div class="cal-more" onclick="switchView('list')">+${more} 項</div>`:"";h+=`<div class="cal-day${isTd?" today":""}"><div class="cal-day-num">${d}</div>${chips}${moreBtn}</div>`;}document.getElementById("cal-grid").innerHTML=h;}
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
 function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
 
