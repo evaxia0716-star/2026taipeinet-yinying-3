@@ -150,18 +150,18 @@
   /* ─── 欄寬：語意分類，全名單共用 ─── */
   col.col-num      { width: 32px; }   /* # 序號 */
   col.col-id       { width: 38px; }   /* 編號 */
-  col.col-tiny     { width: 52px; }   /* 性別、年齡 */
-  col.col-tag      { width: 78px; }   /* 類別、組別、梯次、媒體類型 */
+  col.col-tiny     { width: 52px; }   /* 性別、年齡、數量 */
+  col.col-tag      { width: 78px; }   /* 類別、組別、梯次、媒體類型、採購類別 */
   col.col-role     { width: 80px; }   /* 職稱、職務、部門、代表性 */
   col.col-code     { width: 90px; }   /* 發票號碼 */
   col.col-status   { width: 90px; }   /* 各種狀態欄 */
-  col.col-amount   { width: 90px; }   /* 金額、報價 */
+  col.col-amount   { width: 90px; }   /* 金額、報價、單價、預估總額 */
   col.col-date     { width: 92px; }   /* 日期 */
   col.col-tel      { width: 110px; }  /* 電話 */
   col.col-contact  { width: 100px; }  /* 聯絡窗口 */
   col.col-name-s   { width: 80px; }   /* 姓名（短） */
   col.col-email    { width: 150px; }  /* Email */
-  col.col-desc     { width: 140px; }  /* 服務項目、作品名稱、說明類 */
+  col.col-desc     { width: 140px; }  /* 服務項目、作品名稱、品項名稱、說明類 */
   col.col-org      { width: 160px; }  /* 單位、廠商名稱 */
   col.col-note     { width: 150px; }  /* 備註 */
   /* 學校名單專用 */
@@ -415,6 +415,16 @@ const SHEETS = {
       '結業狀態':['在學中','已結業','未結業','中途退出']
     }
   },
+  '採購造冊': {
+    color: '#ca8a04',
+    headers: ['編號','採購類別','品項名稱','用途／對應名單','數量','單價','預估總額','廠商','採購狀態','預計到貨日','實際到貨日','已分發數','負責人','備註'],
+    compactHeaders: ['編號','採購類別','品項名稱','數量','採購狀態','負責人','備註'],
+    stickyCol: '品項名稱',
+    dropdowns: {
+      '採購類別': ['獎品類','公關禮品','典禮物資','印刷品','設備耗材','其他'],
+      '採購狀態': ['規劃中','比價中','已下訂','已到貨','已分發完畢','取消']
+    }
+  },
   '開銷記錄': {
     color: '#b45309',
     headers: ['編號','日期','類別','項目說明','廠商','金額','付款方式','付款狀態','發票號碼','負責人','備註'],
@@ -598,7 +608,9 @@ function renderTable() {
   const COL_CLASS = {
     // 通用短欄
     '編號':'col-id', '類別':'col-tag', '組別':'col-tag', '梯次':'col-tag',
+    '採購類別':'col-tag',
     '性別':'col-tiny', '年齡':'col-tiny',
+    '數量':'col-tiny', '已分發數':'col-tiny',
     // 姓名類
     '姓名':'col-name-s', '得獎者姓名':'col-name-s', '記者姓名':'col-name-s',
     '聯絡窗口':'col-contact', '負責人':'col-name-s',
@@ -607,6 +619,7 @@ function renderTable() {
     '姓名／單位':'col-org', '團隊名稱':'col-org',
     '服務項目':'col-desc', '項目說明':'col-desc', '主要任務':'col-desc',
     '作品名稱':'col-desc', '獎項':'col-desc', '報導連結':'col-desc',
+    '品項名稱':'col-desc', '用途／對應名單':'col-desc',
     '廠商':'col-org',
     // 職稱 / 部門
     '職稱':'col-role', '職務':'col-role', '部門':'col-role',
@@ -620,12 +633,14 @@ function renderTable() {
     '邀請函寄送':'col-status', '新聞稿寄送':'col-status',
     '繳費狀態':'col-status', '出席紀錄':'col-status', '結業狀態':'col-status',
     '付款狀態':'col-status', '付款方式':'col-status', '獎金匯款狀態':'col-status',
-    '寄送狀態':'col-status', '代表性':'col-role',
+    '寄送狀態':'col-status', '採購狀態':'col-status', '代表性':'col-role',
     // 金額 / 數字
     '報價':'col-amount', '出席費':'col-amount', '金額':'col-amount',
+    '單價':'col-amount', '預估總額':'col-amount',
     '憑證號碼':'col-code',
     // 日期
     '簽約日期':'col-date', '報名日期':'col-date', '追蹤日期':'col-date',
+    '預計到貨日':'col-date', '實際到貨日':'col-date',
     '到場時間':'col-date',
     // 席次 / 設備
     '席次安排':'col-desc', '設備領用':'col-desc',
