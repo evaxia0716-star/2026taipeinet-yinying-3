@@ -275,6 +275,34 @@
   .toast.show { transform: translateX(0); }
   .toast.err  { background: #7f1d1d; }
 
+  /* ─── 視圖切換按鈕 ─── */
+  .view-toggle {
+    display: inline-flex; border: 1.5px solid var(--border2);
+    border-radius: 7px; overflow: hidden; background: var(--bg);
+  }
+  .view-toggle button {
+    padding: 0.3rem 0.7rem; font-size: 0.78rem; font-weight: 600;
+    border: none; background: transparent; color: var(--text-muted);
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    font-family: "Noto Sans TC", sans-serif;
+  }
+  .view-toggle button.active {
+    background: var(--accent); color: #fff;
+  }
+  .view-toggle button:not(.active):hover { background: var(--surface2); color: var(--text); }
+
+  /* ─── 完整視圖：廠商名稱欄凍結 ─── */
+  .table-wrap.full-view th.sticky-col,
+  .table-wrap.full-view td.sticky-col {
+    position: sticky; left: 0; z-index: 1;
+    background: #fff;
+    box-shadow: 2px 0 6px rgba(13,74,70,0.08);
+  }
+  .table-wrap.full-view thead th.sticky-col {
+    background: var(--surface2); z-index: 3;
+  }
+  .table-wrap.full-view tbody tr:hover td.sticky-col { background: #f0fdf8; }
+
   /* ─── 響應式：1200px 以下縮小 padding ─── */
   @media (max-width: 1200px) {
     main { padding: 0.6rem 1rem 4rem; }
@@ -313,6 +341,10 @@
     <input class="search-input" type="text" id="searchInput" placeholder="搜尋此名單…" oninput="renderTable()">
   </div>
   <button class="add-btn" id="addRowBtn" onclick="addRow()">＋ 新增</button>
+  <div class="view-toggle" id="viewToggle" style="display:none">
+    <button id="btnCompact" class="active" onclick="setViewMode('compact')">精簡</button>
+    <button id="btnFull"             onclick="setViewMode('full')">完整</button>
+  </div>
   <span class="row-count" id="rowCount"></span>
 </div>
 
@@ -329,6 +361,9 @@ const SHEETS = {
   '合作廠商': {
     color: '#c2410c',
     headers: ['編號','類別','廠商名稱','服務項目','聯絡窗口','職稱','電話','Email','報價','合作狀態','簽約日期','備註'],
+    // 精簡視圖只顯示這幾欄，其餘收進「完整視圖」
+    compactHeaders: ['編號','類別','廠商名稱','聯絡窗口','電話','合作狀態','備註'],
+    stickyCol: '廠商名稱',   // 完整視圖時凍結此欄
     dropdowns: {
       '類別':    ['設計','印刷','攝影','影片後製','場地','餐飲','公關','其他'],
       '合作狀態':['洽談中','已報價','已簽約','執行中','已結案','取消']
@@ -408,6 +443,14 @@ let currentSheet = SHEET_NAMES[0];
 let tableData    = {};
 let loadedSheets = new Set();
 let isDirty      = false;
+let viewMode     = 'compact'; // 'compact' | 'full'
+
+function setViewMode(mode) {
+  viewMode = mode;
+  document.getElementById('btnCompact').classList.toggle('active', mode === 'compact');
+  document.getElementById('btnFull').classList.toggle('active', mode === 'full');
+  renderTable();
+}
 
 window.addEventListener('DOMContentLoaded', () => {
   buildTabs();
@@ -435,6 +478,10 @@ function switchTab(name) {
   tab.style.setProperty('--tab-color', SHEETS[name].color);
   document.getElementById('colorBar').style.background = SHEETS[name].color;
   document.getElementById('searchInput').value = '';
+
+  const hasCompact = !!SHEETS[name].compactHeaders;
+  document.getElementById('viewToggle').style.display = hasCompact ? '' : 'none';
+  if (!hasCompact) viewMode = 'compact'; // 重設，避免切換其他 tab 殘留
 
   const isSchool = !!SHEETS[name].saveAction;
   document.getElementById('addRowBtn').style.display = isSchool ? 'none' : '';
@@ -519,6 +566,11 @@ function renderTable() {
   const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
   const isSchool = !!config.saveAction;
 
+  // 決定本次要渲染的欄位清單
+  const isCompact = viewMode === 'compact' && !!config.compactHeaders;
+  const headers   = isCompact ? config.compactHeaders : config.headers;
+  const stickyCol = !isCompact && config.stickyCol ? config.stickyCol : null;
+
   const filtered = keyword
     ? allData.filter(row => config.headers.some(h => String(row[h] ?? '').toLowerCase().includes(keyword)))
     : allData;
@@ -588,13 +640,15 @@ function renderTable() {
 
   const colGroup = `<colgroup>
     <col class="col-num">
-    ${config.headers.map(h => `<col class="${COL_CLASS[h] || 'col-default'}">`).join('')}
+    ${headers.map(h => `<col class="${COL_CLASS[h] || 'col-default'}">`).join('')}
     ${isSchool ? '' : '<col class="col-action">'}
   </colgroup>`;
 
-  let html = `<div class="table-wrap"><table>${colGroup}<thead><tr>
+  const wrapClass = stickyCol ? 'table-wrap full-view' : 'table-wrap';
+
+  let html = `<div class="${wrapClass}"><table>${colGroup}<thead><tr>
     <th class="td-num">#</th>
-    ${config.headers.map(h => `<th>${h}</th>`).join('')}
+    ${headers.map(h => `<th${h === stickyCol ? ' class="sticky-col"' : ''}>${h}</th>`).join('')}
     ${isSchool ? '' : '<th class="td-action"></th>'}
   </tr></thead><tbody>`;
 
@@ -602,9 +656,15 @@ function renderTable() {
     const ri = allData.indexOf(row);
     html += `<tr data-index="${ri}">
       <td class="td-num">${fi + 1}</td>
-      ${config.headers.map(h => {
-        const isAddr = (h === '地址' || h === '通訊地址');
-        return `<td${h === config.amountCol ? ' class="amount-cell"' : isAddr ? ' class="addr-cell"' : ''}>${renderCell(h, row[h] ?? '', ri, config)}</td>`;
+      ${headers.map(h => {
+        const isAddr  = (h === '地址' || h === '通訊地址');
+        const isAmt   = h === config.amountCol;
+        const isSticky = h === stickyCol;
+        let cls = '';
+        if (isAmt)    cls = 'amount-cell';
+        if (isAddr)   cls = 'addr-cell';
+        if (isSticky) cls = cls ? cls + ' sticky-col' : 'sticky-col';
+        return `<td${cls ? ` class="${cls}"` : ''}>${renderCell(h, row[h] ?? '', ri, config)}</td>`;
       }).join('')}
       ${isSchool ? '' : `<td class="td-action"><button class="del-btn" onclick="deleteRow(${ri})" title="刪除">✕</button></td>`}
     </tr>`;
