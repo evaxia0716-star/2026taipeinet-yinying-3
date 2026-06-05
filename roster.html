@@ -439,10 +439,9 @@ const SHEETS = {
     color: '#059669',
     sourceAction: 'readSchoolRoster',
     saveAction:   'writeSchoolRoster',
-    headers: ['編號','學制','學校名稱','公私立','行政區','郵遞區號','地址','電話','聯絡窗口','寄送狀態','追蹤日期','備註'],
+    headers: ['編號','學制','學校名稱','行政區','郵遞區號','地址','電話','聯絡窗口','寄送狀態','追蹤日期','備註'],
     dropdowns: {
       '學制':    ['國小','國中','高中職','大學／技專'],
-      '公私立':  ['國立','公立','私立','待確認'],
       '寄送狀態':['未寄送','已寄送','退信']
     }
   }
@@ -647,7 +646,7 @@ function renderTable() {
     // 媒體類型 / 學制
     '媒體類型':'col-tag', '學制':'col-edu',
     // 學校名單
-    '學校名稱':'col-name', '公私立':'col-ownership', '行政區':'col-district',
+    '學校名稱':'col-name', '行政區':'col-district',
     '郵遞區號':'col-zip',
     // 備註（通用）
     '備註':'col-note'
