@@ -412,10 +412,9 @@ const SHEETS = {
     saveAction:     'writeTrainingRoster',
     dynamicHeaders: true,                    // 欄位由 API 動態提供
     sourceName:     '人才培訓報名表（Google 表單）',
-    editable:       ['繳費狀態','出席紀錄','結業狀態','備註'],  // 與後端 TRAINING_EDITABLE_FIELDS 一致
+    editable:       ['出席紀錄','結業狀態','備註'],  // 與後端 TRAINING_EDITABLE_FIELDS 一致
     headers: [],                             // 載入後從 API 填入
     dropdowns: {
-      '繳費狀態': ['待繳費','已繳費','退費'],
       '出席紀錄': ['全程出席','部分出席','缺席'],
       '結業狀態': ['在學中','已結業','未結業','中途退出']
     }
