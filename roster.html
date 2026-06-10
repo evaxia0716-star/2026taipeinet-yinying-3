@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
 <title>台北有影 3｜名單總管</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -13,26 +13,25 @@
     --accent: #0d9488; --accent-hover: #0f766e;
     --text: #1a3330; --text-dim: #3d5c57; --text-muted: #5f8a84;
     --danger: #dc2626; --warn: #d97706; --success: #059669;
-    --row-h: 36px; /* ① 列高收緊：從隱性的 ~52px 降到 36px */
+    --row-h: 36px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 15px; } /* ② 整體字級縮 1px，密度更好 */
+  html { font-size: 15px; }
   body { font-family: "Noto Sans TC", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  /* ─── Header ─── */
   header {
     position: sticky; top: 0; z-index: 100;
     background: #134e4a; padding: 0 1.5rem;
     display: flex; align-items: center; justify-content: space-between;
-    height: 56px; /* ③ header 從 68px 縮到 56px */
+    height: 56px;
     box-shadow: 0 2px 12px rgba(13,74,70,0.25);
   }
   .header-left { display: flex; align-items: center; gap: 1rem; }
   .logo { font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.18em; color: #5eead4; text-transform: uppercase; }
   .project-title { font-size: 1rem; font-weight: 700; color: #fff; }
   .project-title .sub { color: #99f6e4; font-size: 0.85rem; font-weight: 400; margin-left: 0.4rem; }
-  .header-right { display: flex; align-items: center; gap: 0.4rem; } /* ④ 按鈕間距從 0.6 → 0.4 */
+  .header-right { display: flex; align-items: center; gap: 0.4rem; }
 
   .btn {
     display: inline-flex; align-items: center; gap: 0.3rem;
@@ -51,11 +50,10 @@
   .btn-accent:hover { background: #0f766e; }
   .btn-accent:disabled { opacity: .55; cursor: not-allowed; }
 
-  /* ─── Tabs ─── */
   .tabs-bar {
     background: #fff; border-bottom: 2px solid var(--border);
     padding: 0 1.5rem; display: flex; align-items: flex-end; gap: 0; overflow-x: auto;
-    scrollbar-width: none; /* ⑤ tabs 捲動條隱藏 */
+    scrollbar-width: none;
   }
   .tabs-bar::-webkit-scrollbar { display: none; }
   .tab {
@@ -74,7 +72,6 @@
   }
   .tab.active .cnt { background: var(--tab-color, var(--accent)); color: #fff; }
 
-  /* ─── Toolbar ─── */
   .toolbar {
     background: #fff; border-bottom: 1px solid var(--border);
     padding: 0.45rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
@@ -101,7 +98,6 @@
   }
   .add-btn:hover { background: var(--accent-hover); }
 
-  /* ⑥ school-hint 改為 icon-only tooltip，節省工具列空間 */
   .school-hint {
     display: inline-flex; align-items: center; gap: 0.3rem;
     padding: 0.3rem 0.7rem; border-radius: 7px;
@@ -110,14 +106,12 @@
     white-space: nowrap;
   }
 
-  main { padding: 0.8rem 1.5rem 5rem; } /* ⑦ main padding 收緊 */
+  main { padding: 0.8rem 1.5rem 5rem; }
 
-  /* ─── Table ─── */
   .table-wrap {
     overflow-x: auto; border: 1.5px solid var(--border);
     border-radius: 10px; background: #fff;
     -webkit-overflow-scrolling: touch;
-    /* ⑧ 讓橫向捲動條在任何系統都可見 */
     scrollbar-width: thin;
     scrollbar-color: var(--border2) transparent;
   }
@@ -125,13 +119,13 @@
   .table-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
   table {
-    border-collapse: collapse; font-size: 0.84rem; /* ⑨ 表格字級再縮小 */
+    border-collapse: collapse; font-size: 0.84rem;
     table-layout: fixed;
     width: max-content; min-width: 100%;
   }
 
   thead th {
-    padding: 0.55rem 0.75rem; text-align: left; /* ⑩ th padding 壓縮 */
+    padding: 0.55rem 0.75rem; text-align: left;
     font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
     color: var(--text-dim); background: var(--surface2);
     border-bottom: 1.5px solid var(--border);
@@ -143,59 +137,53 @@
   tbody tr:hover { background: #f0fdf8; }
 
   tbody td {
-    padding: 0; /* ⑪ td 本身不加 padding，改由 input/select 自行填滿 */
+    padding: 0;
     vertical-align: middle;
     height: var(--row-h);
   }
 
-  /* ─── 欄寬：語意分類，全名單共用 ─── */
-  col.col-num      { width: 32px; }   /* # 序號 */
-  col.col-id       { width: 38px; }   /* 編號 */
-  col.col-tiny     { width: 52px; }   /* 性別、年齡、數量 */
-  col.col-tag      { width: 78px; }   /* 類別、組別、梯次、媒體類型、採購類別 */
-  col.col-role     { width: 80px; }   /* 職稱、職務、部門、代表性 */
-  col.col-code     { width: 90px; }   /* 發票號碼 */
-  col.col-status   { width: 90px; }   /* 各種狀態欄 */
-  col.col-amount   { width: 90px; }   /* 金額、報價、單價、預估總額 */
-  col.col-date     { width: 92px; }   /* 日期 */
-  col.col-tel      { width: 110px; }  /* 電話 */
-  col.col-contact  { width: 100px; }  /* 聯絡窗口 */
-  col.col-name-s   { width: 80px; }   /* 姓名（短） */
-  col.col-email    { width: 150px; }  /* Email */
-  col.col-desc     { width: 140px; }  /* 服務項目、作品名稱、品項名稱、說明類 */
-  col.col-org      { width: 160px; }  /* 單位、廠商名稱 */
-  col.col-note     { width: 150px; }  /* 備註 */
-  /* 學校名單專用 */
+  /* 欄寬類別 */
+  col.col-num      { width: 32px; }
+  col.col-id       { width: 38px; }
+  col.col-tiny     { width: 52px; }
+  col.col-tag      { width: 78px; }
+  col.col-role     { width: 80px; }
+  col.col-code     { width: 90px; }
+  col.col-status   { width: 90px; }
+  col.col-amount   { width: 90px; }
+  col.col-date     { width: 92px; }
+  col.col-datetime { width: 130px; }
+  col.col-tel      { width: 110px; }
+  col.col-contact  { width: 100px; }
+  col.col-name-s   { width: 80px; }
+  col.col-email    { width: 150px; }
+  col.col-desc     { width: 140px; }
+  col.col-org      { width: 160px; }
+  col.col-note     { width: 150px; }
   col.col-edu      { width: 80px; }
   col.col-name     { width: 200px; }
   col.col-ownership{ width: 68px; }
   col.col-district { width: 68px; }
   col.col-zip      { width: 66px; }
-  col.col-addr     { width: 230px; }  /* 地址（允許換行） */
+  col.col-addr     { width: 230px; }
   col.col-track    { width: 88px; }
   col.col-action   { width: 32px; }
-  /* 萬用後備 */
   col.col-default  { width: 110px; }
+  col.col-long     { width: 200px; }
 
-  /* ⑭ input/select 撐滿格子，padding 内縮，且允許換行 */
   td input, td select {
     background: transparent; border: 1.5px solid transparent;
     color: var(--text); font-family: "Noto Sans TC", sans-serif;
     font-size: 0.82rem; padding: 0.28rem 0.55rem;
     border-radius: 4px; width: 100%; height: 100%; min-height: var(--row-h);
     transition: border-color 0.15s, background 0.15s; outline: none;
-    white-space: normal; word-break: break-all; /* ⑮ 地址自動換行 */
+    white-space: normal; word-break: break-all;
     line-height: 1.45;
   }
   td input:hover, td select:hover { border-color: var(--border2); background: var(--bg); }
   td input:focus, td select:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px rgba(13,148,136,0.12); }
 
-  /* ── 地址欄：用 div[contenteditable] 取代 input，才能真正多行顯示 ── */
-  td.addr-cell {
-    height: auto;      /* 高度隨內容撐開 */
-    padding: 0;
-    vertical-align: top;
-  }
+  td.addr-cell { height: auto; padding: 0; vertical-align: top; }
   td.addr-cell .addr-edit {
     display: block;
     width: 100%; min-height: var(--row-h);
@@ -210,6 +198,22 @@
   }
   td.addr-cell .addr-edit:hover { border-color: var(--border2); background: var(--bg); }
   td.addr-cell .addr-edit:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px rgba(13,148,136,0.12); }
+
+  /* 唯讀欄位（培訓學員的表單原始資料） */
+  td.readonly-cell { height: auto; vertical-align: top; padding: 0; background: #fafcfb; }
+  td.readonly-cell .ro-display {
+    display: block;
+    width: 100%; min-height: var(--row-h);
+    padding: 0.32rem 0.55rem;
+    font-family: "Noto Sans TC", sans-serif; font-size: 0.82rem;
+    line-height: 1.5; color: var(--text-dim);
+    white-space: pre-wrap; word-break: break-all;
+    border: 1.5px solid transparent; border-radius: 4px;
+    cursor: default; box-sizing: border-box;
+  }
+  td.readonly-cell .ro-display.empty {
+    color: var(--text-muted); font-style: italic; font-size: 0.76rem;
+  }
 
   .td-num { width: 32px; text-align: center; color: var(--text-muted); font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; padding: 0 4px; }
   .td-action { width: 32px; text-align: center; }
@@ -276,7 +280,6 @@
   .toast.show { transform: translateX(0); }
   .toast.err  { background: #7f1d1d; }
 
-  /* ─── 視圖切換按鈕 ─── */
   .view-toggle {
     display: inline-flex; border: 1.5px solid var(--border2);
     border-radius: 7px; overflow: hidden; background: var(--bg);
@@ -292,7 +295,6 @@
   }
   .view-toggle button:not(.active):hover { background: var(--surface2); color: var(--text); }
 
-  /* ─── 完整視圖：廠商名稱欄凍結 ─── */
   .table-wrap.full-view th.sticky-col,
   .table-wrap.full-view td.sticky-col {
     position: sticky; left: 0; z-index: 1;
@@ -304,7 +306,6 @@
   }
   .table-wrap.full-view tbody tr:hover td.sticky-col { background: #f0fdf8; }
 
-  /* ─── 響應式：1200px 以下縮小 padding ─── */
   @media (max-width: 1200px) {
     main { padding: 0.6rem 1rem 4rem; }
     header, .tabs-bar, .toolbar, .sync-bar { padding-left: 1rem; padding-right: 1rem; }
@@ -362,9 +363,8 @@ const SHEETS = {
   '合作廠商': {
     color: '#c2410c',
     headers: ['編號','類別','廠商名稱','服務項目','聯絡窗口','職稱','電話','Email','報價','合作狀態','簽約日期','備註'],
-    // 精簡視圖只顯示這幾欄，其餘收進「完整視圖」
     compactHeaders: ['編號','類別','廠商名稱','聯絡窗口','電話','合作狀態','備註'],
-    stickyCol: '廠商名稱',   // 完整視圖時凍結此欄
+    stickyCol: '廠商名稱',
     dropdowns: {
       '類別':    ['設計','印刷','攝影','影片後製','場地','餐飲','公關','其他'],
       '合作狀態':['洽談中','已報價','已簽約','執行中','已結案','取消']
@@ -408,13 +408,16 @@ const SHEETS = {
   },
   '培訓學員': {
     color: '#0369a1',
-    sourceAction: 'readTrainingForm',
-    headers: ['編號','梯次','姓名','性別','年齡','電話','Email','報名日期','繳費狀態','出席紀錄','結業狀態','備註'],
+    sourceAction:   'readTrainingForm',
+    saveAction:     'writeTrainingRoster',
+    dynamicHeaders: true,                    // 欄位由 API 動態提供
+    sourceName:     '人才培訓報名表（Google 表單）',
+    editable:       ['繳費狀態','出席紀錄','結業狀態','備註'],  // 與後端 TRAINING_EDITABLE_FIELDS 一致
+    headers: [],                             // 載入後從 API 填入
     dropdowns: {
-      '性別':    ['女','男','不指定'],
-      '報名課程':    ['課程1','課程2'],      
-      '出席紀錄':['全程出席','部分出席','缺席'],
-      '結業狀態':['在學中','已結業','未結業','中途退出']
+      '繳費狀態': ['待繳費','已繳費','退費'],
+      '出席紀錄': ['全程出席','部分出席','缺席'],
+      '結業狀態': ['在學中','已結業','未結業','中途退出']
     }
   },
   '採購造冊': {
@@ -441,6 +444,7 @@ const SHEETS = {
     color: '#059669',
     sourceAction: 'readSchoolRoster',
     saveAction:   'writeSchoolRoster',
+    sourceName:   '臺北市學校海報徵選寄送名單',
     headers: ['編號','學制','學校名稱','行政區','郵遞區號','地址','電話','聯絡窗口','寄送狀態','追蹤日期','備註'],
     dropdowns: {
       '學制':    ['國小','國中','高中職','大學／技專'],
@@ -454,7 +458,7 @@ let currentSheet = SHEET_NAMES[0];
 let tableData    = {};
 let loadedSheets = new Set();
 let isDirty      = false;
-let viewMode     = 'compact'; // 'compact' | 'full'
+let viewMode     = 'compact';
 
 function setViewMode(mode) {
   viewMode = mode;
@@ -490,20 +494,28 @@ function switchTab(name) {
   document.getElementById('colorBar').style.background = SHEETS[name].color;
   document.getElementById('searchInput').value = '';
 
-  const hasCompact = !!SHEETS[name].compactHeaders;
+  const config = SHEETS[name];
+  const hasCompact = !!config.compactHeaders;
   document.getElementById('viewToggle').style.display = hasCompact ? '' : 'none';
-  if (!hasCompact) viewMode = 'compact'; // 重設，避免切換其他 tab 殘留
+  if (!hasCompact) viewMode = 'compact';
 
-  const isSchool = !!SHEETS[name].saveAction;
-  document.getElementById('addRowBtn').style.display = isSchool ? 'none' : '';
+  // 外部 Sheet（學校名單、培訓學員）：禁用「新增」、不允許刪列
+  const isExternalSheet = !!config.saveAction;
+  document.getElementById('addRowBtn').style.display = isExternalSheet ? 'none' : '';
 
+  // 提示語：根據 sheet 種類顯示不同訊息
   const existingHint = document.getElementById('schoolHint');
   if (existingHint) existingHint.remove();
-  if (isSchool) {
+  if (isExternalSheet) {
     const hint = document.createElement('span');
     hint.id = 'schoolHint';
     hint.className = 'school-hint';
-    hint.innerHTML = '✏️ 欄位可直接編輯，儲存後同步回 Sheets';
+    if (config.dynamicHeaders) {
+      const editable = config.editable || [];
+      hint.innerHTML = `✏️ 僅以下欄位可編輯：${editable.join('、')}`;
+    } else {
+      hint.innerHTML = '✏️ 欄位可直接編輯，儲存後同步回 Sheets';
+    }
     document.getElementById('toolbar').appendChild(hint);
   }
 
@@ -529,6 +541,13 @@ function loadCurrentSheet() {
     .then(res => {
       if (!res.ok) throw new Error(res.msg || '讀取失敗');
       tableData[name] = res.data || [];
+
+      // 動態欄位：從 API 回傳填入 headers 與 editable
+      if (config.dynamicHeaders) {
+        if (res.headers) config.headers = res.headers;
+        if (res.editable) config.editable = res.editable;
+      }
+
       loadedSheets.add(name);
       renderTable();
       updateCount(name);
@@ -545,9 +564,18 @@ function loadCurrentSheet() {
 function saveCurrentSheet() {
   const name   = currentSheet;
   const config = SHEETS[name];
-  const data   = tableData[name] || [];
+  let   data   = tableData[name] || [];
   const btn    = document.getElementById('saveBtn');
   btn.disabled = true; btn.textContent = '儲存中…';
+
+  // 動態欄位：只送 _rowIndex + 可編輯欄位，減少傳輸量並避免誤寫
+  if (config.dynamicHeaders && config.editable) {
+    data = data.map(row => {
+      const out = { _rowIndex: row._rowIndex };
+      config.editable.forEach(f => { out[f] = row[f] !== undefined ? row[f] : ''; });
+      return out;
+    });
+  }
 
   const action = config.saveAction || 'writeRoster';
   const body   = config.saveAction
@@ -575,15 +603,15 @@ function renderTable() {
   const config  = SHEETS[name];
   const allData = tableData[name] || [];
   const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
-  const isSchool = !!config.saveAction;
+  const isExternalSheet = !!config.saveAction;
 
-  // 決定本次要渲染的欄位清單
+  // 決定要渲染的欄位清單
   const isCompact = viewMode === 'compact' && !!config.compactHeaders;
-  const headers   = isCompact ? config.compactHeaders : config.headers;
+  const headers   = isCompact ? config.compactHeaders : (config.headers || []);
   const stickyCol = !isCompact && config.stickyCol ? config.stickyCol : null;
 
   const filtered = keyword
-    ? allData.filter(row => config.headers.some(h => String(row[h] ?? '').toLowerCase().includes(keyword)))
+    ? allData.filter(row => (config.headers || []).some(h => String(row[h] ?? '').toLowerCase().includes(keyword)))
     : allData;
 
   document.getElementById('rowCount').textContent = keyword
@@ -591,11 +619,13 @@ function renderTable() {
     : `共 ${allData.length} 筆`;
 
   if (allData.length === 0) {
+    const emptyMsg = config.dynamicHeaders
+      ? '尚無報名資料<br><span style="font-size:0.8rem;color:var(--text-muted)">表單收到新報名後會自動出現於此</span>'
+      : '此名單尚無資料<br><span style="font-size:0.8rem;color:var(--text-muted)">點「＋ 新增」開始填寫</span>';
     document.getElementById('tableArea').innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">📋</div>
-        <div style="font-size:0.9rem">此名單尚無資料<br>
-        <span style="font-size:0.8rem;color:var(--text-muted)">點「＋ 新增」開始填寫</span></div>
+        <div style="font-size:0.9rem">${emptyMsg}</div>
       </div>`;
     return;
   }
@@ -605,59 +635,51 @@ function renderTable() {
     return;
   }
 
-  // 各名單欄寬對照表（共用語意欄名集中定義）
+  // 欄寬語意對照表
   const COL_CLASS = {
-    // 通用短欄
     '編號':'col-id', '類別':'col-tag', '組別':'col-tag', '梯次':'col-tag',
-    '採購類別':'col-tag',
+    '採購類別':'col-tag', '得知管道':'col-tag',
     '性別':'col-tiny', '年齡':'col-tiny',
     '數量':'col-tiny', '已分發數':'col-tiny',
-    // 姓名類
     '姓名':'col-name-s', '得獎者姓名':'col-name-s', '記者姓名':'col-name-s',
     '聯絡窗口':'col-contact', '負責人':'col-name-s',
-    // 單位 / 項目
     '廠商名稱':'col-org', '媒體名稱':'col-org', '任職單位':'col-org',
     '姓名／單位':'col-org', '團隊名稱':'col-org',
     '服務項目':'col-desc', '項目說明':'col-desc', '主要任務':'col-desc',
     '作品名稱':'col-desc', '獎項':'col-desc', '報導連結':'col-desc',
     '品項名稱':'col-desc', '用途／對應名單':'col-desc',
+    '您的職業或身份':'col-desc', '職業或身份':'col-desc',
     '廠商':'col-org',
-    // 職稱 / 部門
     '職稱':'col-role', '職務':'col-role', '部門':'col-role',
     '專業領域':'col-desc',
-    // 聯絡
-    '電話':'col-tel', 'Email':'col-email',
-    // 地址
+    '電話':'col-tel', '聯絡電話':'col-tel',
+    'Email':'col-email', '聯絡信箱':'col-email',
     '地址':'col-addr', '通訊地址':'col-addr',
-    // 狀態
     '合作狀態':'col-status', '邀請狀態':'col-status', '出席確認':'col-status',
     '邀請函寄送':'col-status', '新聞稿寄送':'col-status',
     '繳費狀態':'col-status', '出席紀錄':'col-status', '結業狀態':'col-status',
     '付款狀態':'col-status', '付款方式':'col-status', '獎金匯款狀態':'col-status',
     '寄送狀態':'col-status', '採購狀態':'col-status', '代表性':'col-role',
-    // 金額 / 數字
     '報價':'col-amount', '出席費':'col-amount', '金額':'col-amount',
     '單價':'col-amount', '預估總額':'col-amount',
-    '憑證號碼':'col-code',
-    // 日期
+    '憑證號碼':'col-code', '發票號碼':'col-code',
     '簽約日期':'col-date', '報名日期':'col-date', '追蹤日期':'col-date',
     '預計到貨日':'col-date', '實際到貨日':'col-date',
-    '到場時間':'col-date',
-    // 席次 / 設備
+    '到場時間':'col-date', '出生年月日':'col-date',
+    '時間戳記':'col-datetime',
+    '參加梯次':'col-tag',
+    '期待與目標':'col-long',
     '席次安排':'col-desc', '設備領用':'col-desc',
-    // 媒體類型 / 學制
     '媒體類型':'col-tag', '學制':'col-edu',
-    // 學校名單
     '學校名稱':'col-name', '行政區':'col-district',
     '郵遞區號':'col-zip',
-    // 備註（通用）
     '備註':'col-note'
   };
 
   const colGroup = `<colgroup>
     <col class="col-num">
     ${headers.map(h => `<col class="${COL_CLASS[h] || 'col-default'}">`).join('')}
-    ${isSchool ? '' : '<col class="col-action">'}
+    ${isExternalSheet ? '' : '<col class="col-action">'}
   </colgroup>`;
 
   const wrapClass = stickyCol ? 'table-wrap full-view' : 'table-wrap';
@@ -665,7 +687,7 @@ function renderTable() {
   let html = `<div class="${wrapClass}"><table>${colGroup}<thead><tr>
     <th class="td-num">#</th>
     ${headers.map(h => `<th${h === stickyCol ? ' class="sticky-col"' : ''}>${h}</th>`).join('')}
-    ${isSchool ? '' : '<th class="td-action"></th>'}
+    ${isExternalSheet ? '' : '<th class="td-action"></th>'}
   </tr></thead><tbody>`;
 
   filtered.forEach((row, fi) => {
@@ -673,16 +695,19 @@ function renderTable() {
     html += `<tr data-index="${ri}">
       <td class="td-num">${fi + 1}</td>
       ${headers.map(h => {
-        const isAddr  = (h === '地址' || h === '通訊地址');
-        const isAmt   = h === config.amountCol;
+        const isAddr   = (h === '地址' || h === '通訊地址');
+        const isAmt    = h === config.amountCol;
         const isSticky = h === stickyCol;
+        const isReadOnly = !!(config.editable && !config.editable.includes(h));
+
         let cls = '';
-        if (isAmt)    cls = 'amount-cell';
-        if (isAddr)   cls = 'addr-cell';
-        if (isSticky) cls = cls ? cls + ' sticky-col' : 'sticky-col';
-        return `<td${cls ? ` class="${cls}"` : ''}>${renderCell(h, row[h] ?? '', ri, config)}</td>`;
+        if (isAmt)      cls = 'amount-cell';
+        if (isAddr)     cls = 'addr-cell';
+        if (isReadOnly) cls = cls ? cls + ' readonly-cell' : 'readonly-cell';
+        if (isSticky)   cls = cls ? cls + ' sticky-col' : 'sticky-col';
+        return `<td${cls ? ` class="${cls}"` : ''}>${renderCell(h, row[h] ?? '', ri, config, isReadOnly)}</td>`;
       }).join('')}
-      ${isSchool ? '' : `<td class="td-action"><button class="del-btn" onclick="deleteRow(${ri})" title="刪除">✕</button></td>`}
+      ${isExternalSheet ? '' : `<td class="td-action"><button class="del-btn" onclick="deleteRow(${ri})" title="刪除">✕</button></td>`}
     </tr>`;
   });
 
@@ -700,22 +725,29 @@ function renderTable() {
     </div>`;
   }
 
-  if (isSchool) {
-    html += `<div class="source-bar">📊 資料來源：臺北市學校海報徵選寄送名單 · 編輯後按「✓ 儲存」同步回 Sheets</div>`;
+  if (isExternalSheet) {
+    const sourceName = config.sourceName || '外部 Sheet';
+    html += `<div class="source-bar">📊 資料來源：${sourceName} · 編輯後按「✓ 儲存」同步回 Sheets</div>`;
   }
 
   html += `</div>`;
   document.getElementById('tableArea').innerHTML = html;
 }
 
-function renderCell(header, value, rowIndex, config) {
-  const dd   = config.dropdowns?.[header];
+function renderCell(header, value, rowIndex, config, isReadOnly) {
   const safe = String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // 唯讀欄位（培訓學員的表單原始資料）
+  if (isReadOnly) {
+    if (!safe) return `<div class="ro-display empty">（空白）</div>`;
+    return `<div class="ro-display">${safe}</div>`;
+  }
+
+  const dd = config.dropdowns?.[header];
   if (dd) {
     const opts = dd.map(o => `<option value="${o}"${o===value?' selected':''}>${o}</option>`).join('');
     return `<select onchange="updateCell(${rowIndex},'${header}',this.value)"><option value=""></option>${opts}</select>`;
   }
-  // 地址欄：contenteditable div 才能真正多行顯示
   const isAddr = (header === '地址' || header === '通訊地址');
   if (isAddr) {
     return `<div class="addr-edit" contenteditable="true"
@@ -738,7 +770,7 @@ function updateCell(rowIndex, header, value) {
 function addRow() {
   if (!tableData[currentSheet]) tableData[currentSheet] = [];
   const newRow = {};
-  SHEETS[currentSheet].headers.forEach(h => { newRow[h] = ''; });
+  (SHEETS[currentSheet].headers || []).forEach(h => { newRow[h] = ''; });
   tableData[currentSheet].push(newRow);
   isDirty = true;
   updateCount(currentSheet);
