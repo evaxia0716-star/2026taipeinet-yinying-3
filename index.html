@@ -332,6 +332,11 @@ const LOCAL_KEY = 'tpf3_data';
 
 let data = [], nextId = 100, currentFilter = "全部", currentSearch = "", currentView = "list";
 let isDirty = false, isEditing = false;
+// ── 多人協作：只送「改過的列」回 Sheets ──
+let dirtyIds = new Set();      // 被改動過的任務 id
+let deletedIds = new Set();    // 被刪除的任務 id
+function markDirty(id){ if(id!=null) dirtyIds.add(id); isDirty=true; }
+function genId(){ return Date.now()*100 + Math.floor(Math.random()*100); }  // 新列用，避免多人撞號
 // ── 已完成收折狀態 ──
 let doneCollapsed = false;
 
@@ -395,17 +400,21 @@ async function loadFromSheets(){
 async function saveAll(){
   const btn=document.getElementById("saveBtn"),orig=btn.textContent;
   btn.disabled=true;btn.textContent="同步中…";
+  const updates=data.filter(r=>dirtyIds.has(r.id));
+  const deletes=Array.from(deletedIds);
   try{
-    const res=await fetch(API_URL,{method:"POST",redirect:"follow",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"writeProgress",data:data})});
+    const res=await fetch(API_URL,{method:"POST",redirect:"follow",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"writeProgress",data:{updates,deletes}})});
     if(!res.ok)throw new Error("HTTP "+res.status);
     const j=await res.json();
     if(j.ok===false)throw new Error(j.msg||"回傳失敗");
-    localStorage.setItem(LOCAL_KEY,JSON.stringify(data));
-    document.getElementById("last-saved").textContent="已同步 "+fmtTime();
+    dirtyIds.clear();deletedIds.clear();isDirty=false;
+    // 重新抓取合併後的最新狀態（包含同事剛才的更新）
+    await loadFromSheets();sortData();renderTable();
+    if(currentView==="calendar")renderCalendar();
+    if(currentView==="dashboard")renderDashboard();
     btn.textContent="✓ 已同步";btn.style.background="#059669";
     setTimeout(()=>{btn.textContent=orig;btn.style.background="";},2500);
-    showToast(`已同步至 Sheets ✓（共 ${data.length} 筆）`);
-    isDirty=false;
+    showToast(`已同步至 Sheets ✓（送出 ${updates.length} 筆變更${deletes.length?`、刪除 ${deletes.length} 筆`:""}）`);
   }catch(e){
     localStorage.setItem(LOCAL_KEY,JSON.stringify(data));
     btn.textContent="⚠ 失敗";btn.style.background="#dc2626";
@@ -426,6 +435,7 @@ async function pollUpdate(){
     const incoming=j.map(parseRow);
     if(JSON.stringify(incoming.map(sig))===JSON.stringify(data.map(sig)))return;
     data=incoming;
+    dirtyIds.clear();deletedIds.clear();
     nextId=Math.max(...data.map(r=>r.id||0))+1;
     localStorage.setItem(LOCAL_KEY,JSON.stringify(data));
     sortData();renderTable();
@@ -450,7 +460,7 @@ function renderTable(){
     tr.innerHTML=`<td><select class="group-tag-select ${catCls(row.cat)}" data-id="${row.id}" onchange="changeCat(this,${row.id})">${CATS.map(c=>`<option value="${c}"${row.cat===c?" selected":""}>${c}</option>`).join("")}</select></td><td><div class="date-text task-editable${dCls}" contenteditable="true" data-field="date" data-id="${row.id}">${esc(row.date)}</div></td><td><div class="task-content">${badge}<span class="task-editable" contenteditable="true" data-field="task" data-id="${row.id}">${esc(row.task)}</span></div></td><td><span class="task-editable unit-text" contenteditable="true" data-field="unit" data-id="${row.id}">${esc(row.unit)}</span></td><td><select class="status-select ${stsCls(row.status)}" data-id="${row.id}" onchange="changeStatus(this,${row.id})">${STATUSES.map(s=>`<option${row.status===s?" selected":""}>${s}</option>`).join("")}</select></td><td><div class="note-cell">${row.note?`<div class="note-original">${esc(row.note)}</div>`:""}<div class="note-comment" contenteditable="true" data-field="comment" data-id="${row.id}" data-placeholder="點此新增說明、備忘…">${esc(row.comment||"")}</div></div></td><td><div class="row-actions"><div class="action-btn edit-btn" onclick="openEditModal(${row.id})" title="編輯">✎</div><div class="action-btn" onclick="deleteRow(${row.id})" title="刪除">✕</div></div></td>`;
     tbody.appendChild(tr);
   });
-  tbody.querySelectorAll("[contenteditable]").forEach(el=>{el.addEventListener("blur",()=>{const row=data.find(r=>r.id===parseInt(el.dataset.id));if(row){row[el.dataset.field]=el.innerText.trim();isDirty=true;if(el.dataset.field==="date"&&currentView==="calendar")renderCalendar();}});});
+  tbody.querySelectorAll("[contenteditable]").forEach(el=>{el.addEventListener("blur",()=>{const row=data.find(r=>r.id===parseInt(el.dataset.id));if(row){row[el.dataset.field]=el.innerText.trim();markDirty(row.id);if(el.dataset.field==="date"&&currentView==="calendar")renderCalendar();}});});
   applyFilter();updateStats();
 }
 
@@ -538,24 +548,24 @@ function toggleDoneRows(){
 }
 
 function markFirstDivider(){const divs=Array.from(document.querySelectorAll("#table-body tr.month-divider"));divs.forEach(d=>d.classList.remove("first-visible-month"));const f=divs.find(d=>!d.classList.contains("hidden"));if(f)f.classList.add("first-visible-month");}
-function changeCat(sel,id){const row=data.find(r=>r.id===id);if(row){row.cat=sel.value;isDirty=true;sel.className=`group-tag-select ${catCls(sel.value)}`;sel.closest("tr").dataset.cat=sel.value;applyFilter();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();}}
-function changeStatus(sel,id){const row=data.find(r=>r.id===id);if(row){row.status=sel.value;isDirty=true;renderTable();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();}}
+function changeCat(sel,id){const row=data.find(r=>r.id===id);if(row){row.cat=sel.value;markDirty(id);sel.className=`group-tag-select ${catCls(sel.value)}`;sel.closest("tr").dataset.cat=sel.value;applyFilter();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();}}
+function changeStatus(sel,id){const row=data.find(r=>r.id===id);if(row){row.status=sel.value;markDirty(id);renderTable();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();}}
 function updateStats(){
   const c={待開始:0,進行中:0,已完成:0,待確認:0,延遲:0};data.forEach(r=>{if(c[r.status]!==undefined)c[r.status]++;});
   ["pending","ongoing","done","confirm","late"].forEach((k,i)=>{document.getElementById("stat-"+k).textContent=Object.values(c)[i];});
   const ov=data.filter(r=>urgency(r)==="overdue").length;const el=document.getElementById("stat-overdue");el.textContent=ov;el.style.color=ov>0?"#dc2626":"var(--text-muted)";
   const pct=data.length?Math.round(c["已完成"]/data.length*100):0;document.getElementById("progress-fill").style.width=pct+"%";document.getElementById("progress-pct").textContent=pct+"%";
 }
-function deleteRow(id){if(!confirm("確定刪除此任務？"))return;data=data.filter(r=>r.id!==id);isDirty=true;renderTable();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();showToast("已刪除任務");}
+function deleteRow(id){if(!confirm("確定刪除此任務？"))return;deletedIds.add(id);dirtyIds.delete(id);data=data.filter(r=>r.id!==id);isDirty=true;renderTable();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();showToast("已刪除任務");}
 function openEditModal(id){const row=data.find(r=>r.id===id);if(!row)return;document.getElementById("modal-title").textContent="編輯任務";document.getElementById("m-cat").value=row.cat;document.getElementById("m-date").value=row.date;document.getElementById("m-task").value=row.task;document.getElementById("m-unit").value=row.unit;document.getElementById("m-status").value=row.status;document.getElementById("m-badge").value=row.badge||"";document.getElementById("m-note").value=row.note;document.getElementById("m-comment").value=row.comment||"";document.getElementById("modal-submit-btn").onclick=()=>submitEditModal(id);document.getElementById("add-modal").classList.add("active");}
-function submitEditModal(id){const row=data.find(r=>r.id===id);if(!row)return;row.cat=document.getElementById("m-cat").value;row.date=document.getElementById("m-date").value.trim();row.task=document.getElementById("m-task").value.trim();row.unit=document.getElementById("m-unit").value.trim();row.status=document.getElementById("m-status").value;row.badge=document.getElementById("m-badge").value;row.note=document.getElementById("m-note").value.trim();row.comment=document.getElementById("m-comment").value.trim();if(!row.date||!row.task){alert("請填寫日期與工作內容");return;}isDirty=true;sortData();closeModal();renderTable();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();showToast("已更新，記得按「☁ 同步」");}
+function submitEditModal(id){const row=data.find(r=>r.id===id);if(!row)return;row.cat=document.getElementById("m-cat").value;row.date=document.getElementById("m-date").value.trim();row.task=document.getElementById("m-task").value.trim();row.unit=document.getElementById("m-unit").value.trim();row.status=document.getElementById("m-status").value;row.badge=document.getElementById("m-badge").value;row.note=document.getElementById("m-note").value.trim();row.comment=document.getElementById("m-comment").value.trim();if(!row.date||!row.task){alert("請填寫日期與工作內容");return;}markDirty(id);sortData();closeModal();renderTable();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();showToast("已更新，記得按「☁ 同步」");}
 function openAddModal(){document.getElementById("modal-title").textContent="新增任務";["m-cat","m-date","m-task","m-unit","m-status","m-badge","m-note","m-comment"].forEach(id=>{document.getElementById(id).value=id==="m-cat"?"影片徵選":id==="m-unit"?"北都行銷部":id==="m-status"?"待開始":"";});document.getElementById("modal-submit-btn").onclick=submitModal;document.getElementById("add-modal").classList.add("active");}
 function closeModal(){document.getElementById("add-modal").classList.remove("active");}
-function submitModal(){const date=document.getElementById("m-date").value.trim();const task=document.getElementById("m-task").value.trim();if(!date||!task){alert("請填寫日期與工作內容");return;}data.push({id:nextId++,cat:document.getElementById("m-cat").value,date,task,unit:document.getElementById("m-unit").value.trim(),status:document.getElementById("m-status").value,note:document.getElementById("m-note").value.trim(),badge:document.getElementById("m-badge").value,comment:document.getElementById("m-comment").value.trim()});isDirty=true;sortData();closeModal();renderTable();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();showToast("已新增任務 ✓");}
+function submitModal(){const date=document.getElementById("m-date").value.trim();const task=document.getElementById("m-task").value.trim();if(!date||!task){alert("請填寫日期與工作內容");return;}const _nid=genId();data.push({id:_nid,cat:document.getElementById("m-cat").value,date,task,unit:document.getElementById("m-unit").value.trim(),status:document.getElementById("m-status").value,note:document.getElementById("m-note").value.trim(),badge:document.getElementById("m-badge").value,comment:document.getElementById("m-comment").value.trim()});markDirty(_nid);sortData();closeModal();renderTable();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();showToast("已新增任務 ✓");}
 let taskModalId=null;
 function openTaskModal(id){const row=data.find(r=>r.id===id);if(!row)return;taskModalId=id;document.getElementById("task-modal-title").textContent=row.task;document.getElementById("task-modal-meta").textContent=`${row.cat} · ${row.date} · ${row.unit}`;document.getElementById("tm-status").value=row.status;document.getElementById("tm-comment").value=row.comment||"";document.getElementById("task-modal").classList.add("active");}
 function closeTaskModal(){document.getElementById("task-modal").classList.remove("active");taskModalId=null;}
-function saveTaskModal(){if(!taskModalId)return;const row=data.find(r=>r.id===taskModalId);if(!row)return;row.status=document.getElementById("tm-status").value;row.comment=document.getElementById("tm-comment").value.trim();isDirty=true;closeTaskModal();renderTable();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();showToast("已更新，記得按「☁ 同步」");}
+function saveTaskModal(){if(!taskModalId)return;const row=data.find(r=>r.id===taskModalId);if(!row)return;row.status=document.getElementById("tm-status").value;row.comment=document.getElementById("tm-comment").value.trim();markDirty(taskModalId);closeTaskModal();renderTable();if(currentView==="calendar")renderCalendar();if(currentView==="dashboard")renderDashboard();showToast("已更新，記得按「☁ 同步」");}
 function switchView(view){currentView=view;document.getElementById("btn-list").classList.toggle("active",view==="list");document.getElementById("btn-dash").classList.toggle("active",view==="dashboard");document.getElementById("btn-cal").classList.toggle("active",view==="calendar");document.getElementById("table-view").style.display=view==="list"?"":"none";document.getElementById("dashboard-view").style.display=view==="dashboard"?"":"none";document.getElementById("calendar-view").style.display=view==="calendar"?"":"none";if(view==="calendar")renderCalendar();if(view==="dashboard")renderDashboard();}
 
 const _now=new Date();let calMonth=_now.getMonth(),calYear=_now.getFullYear();
