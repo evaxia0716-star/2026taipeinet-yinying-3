@@ -458,6 +458,19 @@ let tableData    = {};
 let loadedSheets = new Set();
 let isDirty      = false;
 let viewMode     = 'compact';
+// ── 多人協作：每個分頁各自記錄「改過的列」與「刪除的列」 ──
+let dirtyKeys    = {};   // { 分頁名稱: Set(列的鍵) }
+let deletedKeys  = {};   // { 分頁名稱: Set(被刪除列的編號) }
+function rowKeyOf(sheetName, row) {
+  const cfg = SHEETS[sheetName];
+  if (cfg.dynamicHeaders) return String(row._key || row._rowIndex || '');  // 培訓：時間戳記
+  return String(row['編號'] || '').trim();                                  // 內部名單：編號
+}
+function markRowDirty(sheetName, key) {
+  if (!key) return;
+  (dirtyKeys[sheetName] = dirtyKeys[sheetName] || new Set()).add(String(key));
+  isDirty = true;
+}
 
 function setViewMode(mode) {
   viewMode = mode;
@@ -563,23 +576,31 @@ function loadCurrentSheet() {
 function saveCurrentSheet() {
   const name   = currentSheet;
   const config = SHEETS[name];
-  let   data   = tableData[name] || [];
+  const all    = tableData[name] || [];
   const btn    = document.getElementById('saveBtn');
   btn.disabled = true; btn.textContent = '儲存中…';
 
-  // 動態欄位：只送 _rowIndex + 可編輯欄位，減少傳輸量並避免誤寫
-  if (config.dynamicHeaders && config.editable) {
-    data = data.map(row => {
-      const out = { _rowIndex: row._rowIndex };
-      config.editable.forEach(f => { out[f] = row[f] !== undefined ? row[f] : ''; });
-      return out;
-    });
-  }
+  // 只挑出「改過的列」與「刪除清單」，不整批覆蓋 → 不會洗掉同事其他列
+  const dset      = dirtyKeys[name] || new Set();
+  const dirtyRows = all.filter(r => dset.has(rowKeyOf(name, r)));
+  const deletes   = Array.from(deletedKeys[name] || new Set());
 
-  const action = config.saveAction || 'writeRoster';
-  const body   = config.saveAction
-    ? JSON.stringify({ action, data })
-    : JSON.stringify({ action, sheet: name, data });
+  let body;
+  if (config.saveAction) {
+    // 外部 Sheet（學校／培訓）：只送改過的列，後端依鍵就地更新（非破壞性）
+    let payload = dirtyRows;
+    if (config.dynamicHeaders && config.editable) {
+      payload = dirtyRows.map(row => {
+        const out = { _rowIndex: row._rowIndex, _key: row._key };  // 帶上穩定鍵
+        config.editable.forEach(f => { out[f] = row[f] !== undefined ? row[f] : ''; });
+        return out;
+      });
+    }
+    body = JSON.stringify({ action: config.saveAction, data: payload });
+  } else {
+    // 內部名單：逐列合併（只送改過的列 + 刪除清單）
+    body = JSON.stringify({ action: 'writeRoster', sheet: name, data: { updates: dirtyRows, deletes } });
+  }
 
   fetch(API_URL, {
     method: 'POST', redirect: 'follow',
@@ -589,9 +610,14 @@ function saveCurrentSheet() {
   .then(r => r.json())
   .then(res => {
     if (!res.ok) throw new Error(res.msg || '儲存失敗');
-    showToast(`✓「${name}」${res.count} 筆已同步回 Sheets`);
+    showToast(`✓「${name}」已同步（送出 ${dirtyRows.length} 筆變更${deletes.length?`、刪除 ${deletes.length} 筆`:''}）`);
     setSyncState('ok', `最後儲存：${fmtTime()}`);
+    dirtyKeys[name]   = new Set();
+    deletedKeys[name] = new Set();
     isDirty = false;
+    // 重新讀取，顯示合併後（含同事更新）的最新內容
+    loadedSheets.delete(name);
+    loadCurrentSheet();
   })
   .catch(err => showToast('儲存失敗：' + err.message, 'err'))
   .finally(() => { btn.disabled = false; btn.textContent = '✓ 儲存'; });
@@ -760,18 +786,25 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
 
 function updateCell(rowIndex, header, value) {
   if (!tableData[currentSheet]) return;
-  tableData[currentSheet][rowIndex][header] = value;
-  isDirty = true;
+  const row = tableData[currentSheet][rowIndex];
+  row[header] = value;
+  markRowDirty(currentSheet, rowKeyOf(currentSheet, row));
   updateCount(currentSheet);
   if (SHEETS[currentSheet].amountCol === header || header === '付款狀態') renderTable();
 }
 
 function addRow() {
   if (!tableData[currentSheet]) tableData[currentSheet] = [];
+  const cfg = SHEETS[currentSheet];
   const newRow = {};
-  (SHEETS[currentSheet].headers || []).forEach(h => { newRow[h] = ''; });
+  (cfg.headers || []).forEach(h => { newRow[h] = ''; });
+  // 自動給「編號」當作對位鍵（多人合併寫回靠它，避免空鍵相撞）
+  if ((cfg.headers || []).includes('編號')) {
+    const maxNo = (tableData[currentSheet] || []).reduce((m, r) => Math.max(m, parseInt(r['編號']) || 0), 0);
+    newRow['編號'] = String(maxNo + 1);
+  }
   tableData[currentSheet].push(newRow);
-  isDirty = true;
+  markRowDirty(currentSheet, rowKeyOf(currentSheet, newRow));
   updateCount(currentSheet);
   renderTable();
   setTimeout(() => {
@@ -787,6 +820,12 @@ function addRow() {
 
 function deleteRow(rowIndex) {
   if (!confirm('確定刪除這一列？')) return;
+  const row = tableData[currentSheet][rowIndex];
+  const key = String(row['編號'] || '').trim();
+  if (key) {
+    (deletedKeys[currentSheet] = deletedKeys[currentSheet] || new Set()).add(key);
+    if (dirtyKeys[currentSheet]) dirtyKeys[currentSheet].delete(key);
+  }
   tableData[currentSheet].splice(rowIndex, 1);
   isDirty = true;
   updateCount(currentSheet);
