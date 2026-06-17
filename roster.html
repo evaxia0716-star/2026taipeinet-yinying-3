@@ -151,7 +151,7 @@
   col.col-code     { width: 90px; }
   col.col-status   { width: 90px; }
   col.col-amount   { width: 90px; }
-  col.col-date     { width: 92px; }
+  col.col-date     { width: 132px; }
   col.col-datetime { width: 130px; }
   col.col-tel      { width: 110px; }
   col.col-contact  { width: 100px; }
@@ -359,7 +359,7 @@
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v13（金額連續輸入修正 + 民國日期）');
+console.log('roster.html · v14（日期選擇器 + 時區還原 + 兩段式請款）');
 
 const SHEETS = {
   '合作廠商': {
@@ -437,7 +437,7 @@ const SHEETS = {
     dropdowns: {
       '類別':    ['場地','設備','印刷設計','影片製作','餐飲','公關','人事','其他'],
       '付款方式':['匯款','現金','開票'],
-      '付款狀態':['待申請','已申請','已核銷','暫緩']
+      '付款狀態':['待申請','已申請']
     },
     amountCol: '金額'
   },
@@ -758,19 +758,19 @@ function renderTable() {
 function computeSums(allData, config) {
   const num = v => parseFloat(String(v ?? '0').replace(/,/g, '')) || 0;
   const total   = allData.reduce((s, r) => s + num(r[config.amountCol]), 0);
-  const paid    = allData.filter(r => r['付款狀態'] === '已核銷')
+  const pending = allData.filter(r => r['付款狀態'] === '待申請')
                          .reduce((s, r) => s + num(r[config.amountCol]), 0);
-  const pending = allData.filter(r => r['付款狀態'] === '待申請' || r['付款狀態'] === '已申請')
+  const applied = allData.filter(r => r['付款狀態'] === '已申請')
                          .reduce((s, r) => s + num(r[config.amountCol]), 0);
-  return { total, paid, pending };
+  return { total, pending, applied };
 }
 function sumBarInnerHtml(allData, config) {
-  const { total, paid, pending } = computeSums(allData, config);
+  const { total, pending, applied } = computeSums(allData, config);
   const fmt = n => 'NT$ ' + n.toLocaleString('zh-TW');
   return `
     <div class="sum-item"><span class="sum-label">總金額</span><span class="sum-val total">${fmt(total)}</span></div>
-    <div class="sum-item"><span class="sum-label">已核銷</span><span class="sum-val" style="color:var(--success)">${fmt(paid)}</span></div>
-    <div class="sum-item"><span class="sum-label">待處理</span><span class="sum-val" style="color:var(--warn)">${fmt(pending)}</span></div>`;
+    <div class="sum-item"><span class="sum-label">待申請</span><span class="sum-val" style="color:var(--warn)">${fmt(pending)}</span></div>
+    <div class="sum-item"><span class="sum-label">已申請</span><span class="sum-val" style="color:var(--success)">${fmt(applied)}</span></div>`;
 }
 // 只更新底部加總，不重畫整張表（保住輸入框焦點）
 function updateSumBar() {
@@ -781,31 +781,38 @@ function updateSumBar() {
   bar.innerHTML = sumBarInnerHtml(tableData[currentSheet] || [], config);
 }
 
-// ── 日期欄：哪些欄位要套用民國格式 ──
+// ── 日期欄：哪些欄位要套用日期選擇器 ──
 const DATE_COLS = new Set(['日期','簽約日期','報名日期','追蹤日期','預計到貨日','實際到貨日','出生年月日']);
 
-// 把各種寫法（2026-06-17、2026/6/17、115/6/17、0115-06-16T15:54:00、20260617…）整理成民國「YYY/MM/DD」
-function normalizeRocDate(raw) {
+// 把各種寫法整理成西元「YYYY-MM-DD」（原生日期選擇器只認這個格式）
+// 規則：年份 < 1912 視為民國年（自動 +1911）；含時間的時間戳用「當地時間」還原日期，避開時區差一天
+function toISODate(raw) {
+  const p2 = n => String(n).padStart(2, '0');
   const s = String(raw ?? '').trim();
   if (!s) return '';
-  let y, mo, d;
-  const m = s.match(/(\d{1,4})\D+(\d{1,2})\D+(\d{1,2})/);  // 有分隔符的情況
-  if (m) {
-    y = parseInt(m[1], 10); mo = parseInt(m[2], 10); d = parseInt(m[3], 10);
-  } else {
-    const digits = s.replace(/\D/g, '');
-    if (digits.length === 8) {                              // 西元 YYYYMMDD
-      y = +digits.slice(0,4); mo = +digits.slice(4,6); d = +digits.slice(6,8);
-    } else if (digits.length === 7) {                       // 民國 YYYMMDD
-      y = +digits.slice(0,3); mo = +digits.slice(3,5); d = +digits.slice(5,7);
-    } else {
-      return s;  // 認不得就原樣保留，絕不弄丟資料
+  // 含時間或帶 Z 的時間戳（例如 2026-06-16T16:00:00Z、0115-06-16T15:54:00）：用當地時間取出年月日
+  if (/T/.test(s) || /Z$/i.test(s) || /\d{1,2}:\d{2}/.test(s)) {
+    const dt = new Date(s);
+    if (!isNaN(dt.getTime())) {
+      let y = dt.getFullYear();
+      if (y < 1912) y += 1911;           // 民國年 → 西元年
+      return `${y}-${p2(dt.getMonth() + 1)}-${p2(dt.getDate())}`;
     }
   }
-  if (!y || !mo || !d || mo > 12 || d > 31) return s;
-  if (y >= 1912) y -= 1911;  // 西元 → 民國（民國元年 = 1912）
-  const p2 = n => String(n).padStart(2, '0');
-  return `${y}/${p2(mo)}/${p2(d)}`;
+  // 純日期字串（2026-06-17、2026/6/7、115/6/7、20260617、1150607）
+  let y, mo, d;
+  const m = s.match(/(\d{1,4})\D+(\d{1,2})\D+(\d{1,2})/);
+  if (m) {
+    y = +m[1]; mo = +m[2]; d = +m[3];
+  } else {
+    const dg = s.replace(/\D/g, '');
+    if (dg.length === 8)      { y = +dg.slice(0,4); mo = +dg.slice(4,6); d = +dg.slice(6,8); }  // 西元 YYYYMMDD
+    else if (dg.length === 7) { y = +dg.slice(0,3); mo = +dg.slice(3,5); d = +dg.slice(5,7); }  // 民國 YYYMMDD
+    else return '';
+  }
+  if (!y || !mo || !d || mo > 12 || d > 31) return '';
+  if (y < 1912) y += 1911;               // 民國年 → 西元年
+  return `${y}-${p2(mo)}-${p2(d)}`;
 }
 
 function renderCell(header, value, rowIndex, config, isReadOnly) {
@@ -819,7 +826,9 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
 
   const dd = config.dropdowns?.[header];
   if (dd) {
-    const opts = dd.map(o => `<option value="${o}"${o===value?' selected':''}>${o}</option>`).join('');
+    // 若這格的舊資料是清單裡沒有的選項（例如以前存過「已核銷」），仍保留它，不讓畫面變空白
+    const optList = (value && !dd.includes(value)) ? [value, ...dd] : dd;
+    const opts = optList.map(o => `<option value="${o}"${o===value?' selected':''}>${o}</option>`).join('');
     return `<select onchange="updateCell(${rowIndex},'${header}',this.value)"><option value=""></option>${opts}</select>`;
   }
   const isAddr = (header === '地址' || header === '通訊地址');
@@ -829,14 +838,12 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur()}"
       >${safe}</div>`;
   }
-  // 日期欄：顯示時自動整理成民國格式（115/06/17）；離開欄位時再整理一次
+  // 日期欄：原生日期選擇器（點一下跳月曆），存成西元 YYYY-MM-DD，免手打、避免時區差一天
   if (DATE_COLS.has(header)) {
-    const disp = normalizeRocDate(value).replace(/"/g,'&quot;');
-    return `<input type="text" class="date-input" value="${disp}"
-      oninput="updateCell(${rowIndex},'${header}',this.value)"
-      onblur="this.value=normalizeRocDate(this.value);updateCell(${rowIndex},'${header}',this.value)"
-      placeholder="例 115/06/17"
-      title="可輸入 115/06/17 或 2026-06-17，離開欄位後會自動轉成民國格式">`;
+    const iso = toISODate(value);
+    return `<input type="date" class="date-input" value="${iso}"
+      onchange="updateCell(${rowIndex},'${header}',this.value)"
+      title="點一下選日期；留白代表尚未填寫">`;
   }
   const inputSafe = String(value ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
   // 金額欄：手機叫出數字鍵盤；輸入時不再整表重畫，可連續輸入多位數
