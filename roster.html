@@ -229,6 +229,7 @@
 
   .amount-cell { text-align: right; font-family: "IBM Plex Mono", monospace; font-weight: 600; }
   .amount-cell input { text-align: right; }
+  td input.date-input { font-family: "IBM Plex Mono", monospace; letter-spacing: 0.02em; }
 
   .sum-bar {
     background: #f0fdf8; border-top: 2px solid var(--border);
@@ -358,6 +359,7 @@
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
+console.log('roster.html · v13（金額連續輸入修正 + 民國日期）');
 
 const SHEETS = {
   '合作廠商': {
@@ -779,6 +781,33 @@ function updateSumBar() {
   bar.innerHTML = sumBarInnerHtml(tableData[currentSheet] || [], config);
 }
 
+// ── 日期欄：哪些欄位要套用民國格式 ──
+const DATE_COLS = new Set(['日期','簽約日期','報名日期','追蹤日期','預計到貨日','實際到貨日','出生年月日']);
+
+// 把各種寫法（2026-06-17、2026/6/17、115/6/17、0115-06-16T15:54:00、20260617…）整理成民國「YYY/MM/DD」
+function normalizeRocDate(raw) {
+  const s = String(raw ?? '').trim();
+  if (!s) return '';
+  let y, mo, d;
+  const m = s.match(/(\d{1,4})\D+(\d{1,2})\D+(\d{1,2})/);  // 有分隔符的情況
+  if (m) {
+    y = parseInt(m[1], 10); mo = parseInt(m[2], 10); d = parseInt(m[3], 10);
+  } else {
+    const digits = s.replace(/\D/g, '');
+    if (digits.length === 8) {                              // 西元 YYYYMMDD
+      y = +digits.slice(0,4); mo = +digits.slice(4,6); d = +digits.slice(6,8);
+    } else if (digits.length === 7) {                       // 民國 YYYMMDD
+      y = +digits.slice(0,3); mo = +digits.slice(3,5); d = +digits.slice(5,7);
+    } else {
+      return s;  // 認不得就原樣保留，絕不弄丟資料
+    }
+  }
+  if (!y || !mo || !d || mo > 12 || d > 31) return s;
+  if (y >= 1912) y -= 1911;  // 西元 → 民國（民國元年 = 1912）
+  const p2 = n => String(n).padStart(2, '0');
+  return `${y}/${p2(mo)}/${p2(d)}`;
+}
+
 function renderCell(header, value, rowIndex, config, isReadOnly) {
   const safe = String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
@@ -799,6 +828,15 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
       onblur="updateCell(${rowIndex},'${header}',this.innerText.trim())"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur()}"
       >${safe}</div>`;
+  }
+  // 日期欄：顯示時自動整理成民國格式（115/06/17）；離開欄位時再整理一次
+  if (DATE_COLS.has(header)) {
+    const disp = normalizeRocDate(value).replace(/"/g,'&quot;');
+    return `<input type="text" class="date-input" value="${disp}"
+      oninput="updateCell(${rowIndex},'${header}',this.value)"
+      onblur="this.value=normalizeRocDate(this.value);updateCell(${rowIndex},'${header}',this.value)"
+      placeholder="例 115/06/17"
+      title="可輸入 115/06/17 或 2026-06-17，離開欄位後會自動轉成民國格式">`;
   }
   const inputSafe = String(value ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
   // 金額欄：手機叫出數字鍵盤；輸入時不再整表重畫，可連續輸入多位數
