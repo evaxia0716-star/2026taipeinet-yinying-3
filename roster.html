@@ -738,16 +738,9 @@ function renderTable() {
 
   html += `</tbody></table>`;
 
+  // 金額分頁：底部加總列（給固定 id="sumBar"，之後可單獨即時更新，不必整表重畫）
   if (config.amountCol && allData.length > 0) {
-    const total   = allData.reduce((s,r)=>s+(parseFloat(String(r[config.amountCol]||'0').replace(/,/g,''))||0),0);
-    const paid    = allData.filter(r=>r['付款狀態']==='已核銷').reduce((s,r)=>s+(parseFloat(String(r[config.amountCol]||'0').replace(/,/g,''))||0),0);
-    const pending = allData.filter(r=>r['付款狀態']==='待申請'||r['付款狀態']==='已申請').reduce((s,r)=>s+(parseFloat(String(r[config.amountCol]||'0').replace(/,/g,''))||0),0);
-    const fmt = n => 'NT$ ' + n.toLocaleString('zh-TW');
-    html += `<div class="sum-bar">
-      <div class="sum-item"><span class="sum-label">總金額</span><span class="sum-val total">${fmt(total)}</span></div>
-      <div class="sum-item"><span class="sum-label">已核銷</span><span class="sum-val" style="color:var(--success)">${fmt(paid)}</span></div>
-      <div class="sum-item"><span class="sum-label">待處理</span><span class="sum-val" style="color:var(--warn)">${fmt(pending)}</span></div>
-    </div>`;
+    html += `<div class="sum-bar" id="sumBar">${sumBarInnerHtml(allData, config)}</div>`;
   }
 
   if (isExternalSheet) {
@@ -757,6 +750,33 @@ function renderTable() {
 
   html += `</div>`;
   document.getElementById('tableArea').innerHTML = html;
+}
+
+// ── 加總計算與底部列：抽成獨立函式，給 renderTable 與 updateSumBar 共用 ──
+function computeSums(allData, config) {
+  const num = v => parseFloat(String(v ?? '0').replace(/,/g, '')) || 0;
+  const total   = allData.reduce((s, r) => s + num(r[config.amountCol]), 0);
+  const paid    = allData.filter(r => r['付款狀態'] === '已核銷')
+                         .reduce((s, r) => s + num(r[config.amountCol]), 0);
+  const pending = allData.filter(r => r['付款狀態'] === '待申請' || r['付款狀態'] === '已申請')
+                         .reduce((s, r) => s + num(r[config.amountCol]), 0);
+  return { total, paid, pending };
+}
+function sumBarInnerHtml(allData, config) {
+  const { total, paid, pending } = computeSums(allData, config);
+  const fmt = n => 'NT$ ' + n.toLocaleString('zh-TW');
+  return `
+    <div class="sum-item"><span class="sum-label">總金額</span><span class="sum-val total">${fmt(total)}</span></div>
+    <div class="sum-item"><span class="sum-label">已核銷</span><span class="sum-val" style="color:var(--success)">${fmt(paid)}</span></div>
+    <div class="sum-item"><span class="sum-label">待處理</span><span class="sum-val" style="color:var(--warn)">${fmt(pending)}</span></div>`;
+}
+// 只更新底部加總，不重畫整張表（保住輸入框焦點）
+function updateSumBar() {
+  const config = SHEETS[currentSheet];
+  if (!config.amountCol) return;
+  const bar = document.getElementById('sumBar');
+  if (!bar) return;
+  bar.innerHTML = sumBarInnerHtml(tableData[currentSheet] || [], config);
 }
 
 function renderCell(header, value, rowIndex, config, isReadOnly) {
@@ -781,7 +801,9 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
       >${safe}</div>`;
   }
   const inputSafe = String(value ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
-  return `<input type="text" value="${inputSafe}" oninput="updateCell(${rowIndex},'${header}',this.value)" placeholder="${header}">`;
+  // 金額欄：手機叫出數字鍵盤；輸入時不再整表重畫，可連續輸入多位數
+  const numAttr = (header === config.amountCol) ? ' inputmode="decimal"' : '';
+  return `<input type="text"${numAttr} value="${inputSafe}" oninput="updateCell(${rowIndex},'${header}',this.value)" placeholder="${header}">`;
 }
 
 function updateCell(rowIndex, header, value) {
@@ -790,7 +812,8 @@ function updateCell(rowIndex, header, value) {
   row[header] = value;
   markRowDirty(currentSheet, rowKeyOf(currentSheet, row));
   updateCount(currentSheet);
-  if (SHEETS[currentSheet].amountCol === header || header === '付款狀態') renderTable();
+  // 金額或付款狀態改變時，只刷新底部加總（不重畫整表，避免輸入框失焦）
+  if (SHEETS[currentSheet].amountCol === header || header === '付款狀態') updateSumBar();
 }
 
 function addRow() {
