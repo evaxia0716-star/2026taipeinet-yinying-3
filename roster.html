@@ -142,7 +142,7 @@
     height: var(--row-h);
   }
 
-  /* 欄寬類別 */
+  /* 欄寬類別（table-layout:fixed 下，欄寬以這裡的固定值為準，不隨內容伸縮） */
   col.col-num      { width: 32px; }
   col.col-id       { width: 38px; }
   col.col-tiny     { width: 52px; }
@@ -281,21 +281,7 @@
   .toast.show { transform: translateX(0); }
   .toast.err  { background: #7f1d1d; }
 
-  .view-toggle {
-    display: inline-flex; border: 1.5px solid var(--border2);
-    border-radius: 7px; overflow: hidden; background: var(--bg);
-  }
-  .view-toggle button {
-    padding: 0.3rem 0.7rem; font-size: 0.78rem; font-weight: 600;
-    border: none; background: transparent; color: var(--text-muted);
-    cursor: pointer; transition: all 0.15s; white-space: nowrap;
-    font-family: "Noto Sans TC", sans-serif;
-  }
-  .view-toggle button.active {
-    background: var(--accent); color: #fff;
-  }
-  .view-toggle button:not(.active):hover { background: var(--surface2); color: var(--text); }
-
+  /* 橫向捲動時固定「主名稱欄」（如廠商名稱／品項名稱），方便對照 */
   .table-wrap.full-view th.sticky-col,
   .table-wrap.full-view td.sticky-col {
     position: sticky; left: 0; z-index: 1;
@@ -317,7 +303,7 @@
 
 <header>
   <div class="header-left">
-    <div class="logo">PAC · 公用頻道 · v15</div>
+    <div class="logo">PAC · 公用頻道 · v16</div>
     <div class="project-title">台北有影 3<span class="sub">名單總管</span></div>
   </div>
   <div class="header-right">
@@ -344,10 +330,6 @@
     <input class="search-input" type="text" id="searchInput" placeholder="搜尋此名單…" oninput="renderTable()">
   </div>
   <button class="add-btn" id="addRowBtn" onclick="addRow()">＋ 新增</button>
-  <div class="view-toggle" id="viewToggle" style="display:none">
-    <button id="btnCompact" class="active" onclick="setViewMode('compact')">精簡</button>
-    <button id="btnFull"             onclick="setViewMode('full')">完整</button>
-  </div>
   <span class="row-count" id="rowCount"></span>
 </div>
 
@@ -359,13 +341,21 @@
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v15（日期選擇器 + 時區還原 + 兩段式請款 + 版本徽章）');
+console.log('roster.html · v16（統一完整顯示 + 固定欄寬 + 開銷↔採購串接 + 採購實際支出）');
+
+// ============================================================
+//  台北有影 3｜名單總管 roster.html  v16
+//  v16 變更：
+//   ① 移除「精簡／完整」切換 → 一律完整顯示；欄寬以固定值鎖死，間距不再忽寬忽窄
+//   ② 開銷記錄新增「對應採購單號」下拉，選項自動抓採購造冊的編號（買→花 串成一條線）
+//   ③ 採購造冊新增「實際支出」手填欄，與「預估總額」並排對照（估得準不準一眼看出）
+//  ⚠️ 搭配後端 Apps Script ROSTER_CONFIG 需同步加這兩欄，否則新欄位存不進 Sheets
+// ============================================================
 
 const SHEETS = {
   '合作廠商': {
     color: '#c2410c',
     headers: ['編號','類別','廠商名稱','服務項目','聯絡窗口','職稱','電話','Email','報價','合作狀態','簽約日期','備註'],
-    compactHeaders: ['編號','類別','廠商名稱','聯絡窗口','電話','合作狀態','備註'],
     stickyCol: '廠商名稱',
     dropdowns: {
       '類別':    ['設計','印刷','攝影','影片後製','場地','餐飲','公關','其他'],
@@ -423,8 +413,7 @@ const SHEETS = {
   },
   '採購造冊': {
     color: '#ca8a04',
-    headers: ['編號','採購類別','品項名稱','用途／對應名單','數量','單價','預估總額','廠商','採購狀態','預計到貨日','實際到貨日','已分發數','負責人','備註'],
-    compactHeaders: ['編號','採購類別','品項名稱','數量','採購狀態','負責人','備註'],
+    headers: ['編號','採購類別','品項名稱','用途／對應名單','數量','單價','預估總額','實際支出','廠商','採購狀態','預計到貨日','實際到貨日','已分發數','負責人','備註'],
     stickyCol: '品項名稱',
     dropdowns: {
       '採購類別': ['獎品類','公關禮品','典禮物資','印刷品','設備耗材','其他'],
@@ -433,7 +422,7 @@ const SHEETS = {
   },
   '開銷記錄': {
     color: '#b45309',
-    headers: ['編號','日期','類別','項目說明','廠商','金額','付款方式','付款狀態','發票號碼','負責人','備註'],
+    headers: ['編號','日期','類別','項目說明','對應採購單號','廠商','金額','付款方式','付款狀態','發票號碼','負責人','備註'],
     dropdowns: {
       '類別':    ['場地','設備','印刷設計','影片製作','餐飲','公關','人事','其他'],
       '付款方式':['匯款','現金','開票'],
@@ -459,7 +448,7 @@ let currentSheet = SHEET_NAMES[0];
 let tableData    = {};
 let loadedSheets = new Set();
 let isDirty      = false;
-let viewMode     = 'compact';
+let purchaseOptions = [];   // 開銷記錄「對應採購單號」的下拉選項（取自採購造冊編號）
 // ── 多人協作：每個分頁各自記錄「改過的列」與「刪除的列」 ──
 let dirtyKeys    = {};   // { 分頁名稱: Set(列的鍵) }
 let deletedKeys  = {};   // { 分頁名稱: Set(被刪除列的編號) }
@@ -474,11 +463,31 @@ function markRowDirty(sheetName, key) {
   isDirty = true;
 }
 
-function setViewMode(mode) {
-  viewMode = mode;
-  document.getElementById('btnCompact').classList.toggle('active', mode === 'compact');
-  document.getElementById('btnFull').classList.toggle('active', mode === 'full');
-  renderTable();
+// ── 開銷記錄「對應採購單號」：選項即時取自採購造冊的編號 ──
+function buildPurchaseOptions() {
+  const rows = tableData['採購造冊'] || [];
+  purchaseOptions = rows
+    .filter(r => String(r['編號'] ?? '').trim())
+    .map(r => {
+      const id   = String(r['編號']).trim();
+      const item = String(r['品項名稱'] ?? '').trim();
+      return { id, label: item ? `${id} · ${item}` : id };
+    });
+}
+// 確保採購造冊已載入（開銷記錄要用它的編號當下拉）；沒載過就先抓一次
+function ensurePurchaseOptions() {
+  if (loadedSheets.has('採購造冊')) { buildPurchaseOptions(); return Promise.resolve(); }
+  return fetch(`${API_URL}?action=readRoster&sheet=${encodeURIComponent('採購造冊')}`, { redirect: 'follow' })
+    .then(r => r.json())
+    .then(res => {
+      if (res && res.ok) {
+        tableData['採購造冊'] = res.data || [];
+        loadedSheets.add('採購造冊');
+        updateCount('採購造冊');
+      }
+    })
+    .catch(() => {})
+    .then(() => buildPurchaseOptions());
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -509,9 +518,6 @@ function switchTab(name) {
   document.getElementById('searchInput').value = '';
 
   const config = SHEETS[name];
-  const hasCompact = !!config.compactHeaders;
-  document.getElementById('viewToggle').style.display = hasCompact ? '' : 'none';
-  if (!hasCompact) viewMode = 'compact';
 
   // 外部 Sheet（學校名單、培訓學員）：禁用「新增」、不允許刪列
   const isExternalSheet = !!config.saveAction;
@@ -535,6 +541,8 @@ function switchTab(name) {
 
   if (!loadedSheets.has(name)) {
     loadCurrentSheet();
+  } else if (name === '開銷記錄') {
+    ensurePurchaseOptions().then(() => renderTable());   // 確保採購編號下拉是最新的
   } else {
     renderTable();
   }
@@ -563,9 +571,15 @@ function loadCurrentSheet() {
       }
 
       loadedSheets.add(name);
-      renderTable();
       updateCount(name);
       setSyncState('ok', `最後同步：${fmtTime()}`);
+
+      // 開銷記錄要先備妥採購編號下拉，再畫表
+      if (name === '開銷記錄') {
+        ensurePurchaseOptions().then(() => renderTable());
+      } else {
+        renderTable();
+      }
     })
     .catch(err => {
       document.getElementById('tableArea').innerHTML =
@@ -632,10 +646,11 @@ function renderTable() {
   const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
   const isExternalSheet = !!config.saveAction;
 
-  // 決定要渲染的欄位清單
-  const isCompact = viewMode === 'compact' && !!config.compactHeaders;
-  const headers   = isCompact ? config.compactHeaders : (config.headers || []);
-  const stickyCol = !isCompact && config.stickyCol ? config.stickyCol : null;
+  buildPurchaseOptions();   // 每次重畫都用最新的採購編號（採購那邊改了，這裡同步）
+
+  // 一律完整顯示：欄位即為該名單的完整 headers
+  const headers   = config.headers || [];
+  const stickyCol = config.stickyCol || null;
 
   const filtered = keyword
     ? allData.filter(row => (config.headers || []).some(h => String(row[h] ?? '').toLowerCase().includes(keyword)))
@@ -676,7 +691,7 @@ function renderTable() {
     '作品名稱':'col-desc', '獎項':'col-desc', '報導連結':'col-desc',
     '品項名稱':'col-desc', '用途／對應名單':'col-desc',
     '您的職業或身份':'col-desc', '職業或身份':'col-desc',
-    '廠商':'col-org',
+    '廠商':'col-org', '對應採購單號':'col-org',
     '職稱':'col-role', '職務':'col-role', '部門':'col-role',
     '專業領域':'col-desc',
     '電話':'col-tel', '聯絡電話':'col-tel',
@@ -688,7 +703,7 @@ function renderTable() {
     '付款狀態':'col-status', '付款方式':'col-status', '獎金匯款狀態':'col-status',
     '寄送狀態':'col-status', '採購狀態':'col-status', '代表性':'col-role',
     '報價':'col-amount', '出席費':'col-amount', '金額':'col-amount',
-    '單價':'col-amount', '預估總額':'col-amount',
+    '單價':'col-amount', '預估總額':'col-amount', '實際支出':'col-amount',
     '憑證號碼':'col-code', '發票號碼':'col-code',
     '簽約日期':'col-date', '報名日期':'col-date', '追蹤日期':'col-date',
     '預計到貨日':'col-date', '實際到貨日':'col-date',
@@ -711,6 +726,9 @@ function renderTable() {
 
   const wrapClass = stickyCol ? 'table-wrap full-view' : 'table-wrap';
 
+  // 金額相關欄位（套右對齊等寬字，數字看起來整齊）
+  const MONEY_HEADERS = new Set(['報價','出席費','金額','單價','預估總額','實際支出']);
+
   let html = `<div class="${wrapClass}"><table>${colGroup}<thead><tr>
     <th class="td-num">#</th>
     ${headers.map(h => `<th${h === stickyCol ? ' class="sticky-col"' : ''}>${h}</th>`).join('')}
@@ -723,7 +741,7 @@ function renderTable() {
       <td class="td-num">${fi + 1}</td>
       ${headers.map(h => {
         const isAddr   = (h === '地址' || h === '通訊地址');
-        const isAmt    = h === config.amountCol;
+        const isAmt    = (h === config.amountCol) || MONEY_HEADERS.has(h);
         const isSticky = h === stickyCol;
         const isReadOnly = !!(config.editable && !config.editable.includes(h));
 
@@ -783,6 +801,8 @@ function updateSumBar() {
 
 // ── 日期欄：哪些欄位要套用日期選擇器 ──
 const DATE_COLS = new Set(['日期','簽約日期','報名日期','追蹤日期','預計到貨日','實際到貨日','出生年月日']);
+// ── 金額相關欄位（手機叫數字鍵盤用） ──
+const MONEY_FIELDS = new Set(['報價','出席費','金額','單價','預估總額','實際支出']);
 
 // 把各種寫法整理成西元「YYYY-MM-DD」（原生日期選擇器只認這個格式）
 // 規則：年份 < 1912 視為民國年（自動 +1911）；含時間的時間戳用「當地時間」還原日期，避開時區差一天
@@ -824,6 +844,23 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
     return `<div class="ro-display">${safe}</div>`;
   }
 
+  // 對應採購單號：動態下拉，選項即時取自採購造冊的編號（顯示「編號 · 品項名稱」，存的是編號）
+  if (header === '對應採購單號') {
+    const cur = String(value ?? '').trim();
+    let opts = '<option value=""></option>';
+    const known = purchaseOptions.some(o => o.id === cur);
+    if (cur && !known) {
+      // 採購那筆被刪了仍保留舊值，不讓畫面變空白
+      opts += `<option value="${cur.replace(/"/g,'&quot;')}" selected>${cur}（採購名冊已無此編號）</option>`;
+    }
+    opts += purchaseOptions.map(o => {
+      const lbl = String(o.label).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const idv = String(o.id).replace(/"/g,'&quot;');
+      return `<option value="${idv}"${o.id===cur?' selected':''}>${lbl}</option>`;
+    }).join('');
+    return `<select onchange="updateCell(${rowIndex},'${header}',this.value)">${opts}</select>`;
+  }
+
   const dd = config.dropdowns?.[header];
   if (dd) {
     // 若這格的舊資料是清單裡沒有的選項（例如以前存過「已核銷」），仍保留它，不讓畫面變空白
@@ -847,7 +884,7 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
   }
   const inputSafe = String(value ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
   // 金額欄：手機叫出數字鍵盤；輸入時不再整表重畫，可連續輸入多位數
-  const numAttr = (header === config.amountCol) ? ' inputmode="decimal"' : '';
+  const numAttr = MONEY_FIELDS.has(header) ? ' inputmode="decimal"' : '';
   return `<input type="text"${numAttr} value="${inputSafe}" oninput="updateCell(${rowIndex},'${header}',this.value)" placeholder="${header}">`;
 }
 
