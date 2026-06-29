@@ -106,6 +106,24 @@
     white-space: nowrap;
   }
 
+  /* 培訓學員：梯次／未確認 篩選器 */
+  .training-filters { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .tf-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; }
+  .training-filters select {
+    background: var(--bg); border: 1.5px solid var(--border2); border-radius: 7px;
+    padding: 0.32rem 0.6rem; font-family: "Noto Sans TC", sans-serif; font-size: 0.82rem;
+    color: var(--text); outline: none; cursor: pointer; max-width: 180px;
+  }
+  .training-filters select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,0.1); }
+  .tf-toggle {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.32rem 0.6rem; border: 1.5px solid var(--border2); border-radius: 7px;
+    background: var(--bg); color: var(--text-dim); font-size: 0.8rem; cursor: pointer; user-select: none;
+    white-space: nowrap;
+  }
+  .tf-toggle input { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
+  .tf-toggle.on { border-color: var(--accent); color: var(--accent); background: #e6f5f2; font-weight: 700; }
+
   main { padding: 0.8rem 1.5rem 5rem; }
 
   .table-wrap {
@@ -215,6 +233,12 @@
     color: var(--text-muted); font-style: italic; font-size: 0.76rem;
   }
 
+  /* 確認出席：打勾框（前一天電話確認後勾起來） */
+  .confirm-box { display:flex; align-items:center; justify-content:center; gap:0.3rem; height:100%; min-height:var(--row-h); cursor:pointer; user-select:none; }
+  .confirm-box input { width:17px; height:17px; accent-color:var(--success); cursor:pointer; flex-shrink:0; }
+  .confirm-box span { font-size:0.76rem; color:var(--text-muted); }
+  .confirm-box input:checked ~ span { color:var(--success); font-weight:700; }
+
   .td-num { width: 32px; text-align: center; color: var(--text-muted); font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; padding: 0 4px; }
   .td-action { width: 32px; text-align: center; }
   .del-btn {
@@ -303,7 +327,7 @@
 
 <header>
   <div class="header-left">
-    <div class="logo">PAC · 公用頻道 · v16</div>
+    <div class="logo">PAC · 公用頻道 · v18</div>
     <div class="project-title">台北有影 3<span class="sub">名單總管</span></div>
   </div>
   <div class="header-right">
@@ -329,6 +353,7 @@
     <span class="search-icon">🔍</span>
     <input class="search-input" type="text" id="searchInput" placeholder="搜尋此名單…" oninput="renderTable()">
   </div>
+  <span id="trainingFilters" class="training-filters" style="display:none"></span>
   <button class="add-btn" id="addRowBtn" onclick="addRow()">＋ 新增</button>
   <span class="row-count" id="rowCount"></span>
 </div>
@@ -341,15 +366,20 @@
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v16（統一完整顯示 + 固定欄寬 + 開銷↔採購串接 + 採購實際支出）');
+console.log('roster.html · v18（培訓學員：梯次篩選 + 只看未確認 + 確認出席打勾框）');
 
 // ============================================================
-//  台北有影 3｜名單總管 roster.html  v16
-//  v16 變更：
-//   ① 移除「精簡／完整」切換 → 一律完整顯示；欄寬以固定值鎖死，間距不再忽寬忽窄
-//   ② 開銷記錄新增「對應採購單號」下拉，選項自動抓採購造冊的編號（買→花 串成一條線）
-//   ③ 採購造冊新增「實際支出」手填欄，與「預估總額」並排對照（估得準不準一眼看出）
-//  ⚠️ 搭配後端 Apps Script ROSTER_CONFIG 需同步加這兩欄，否則新欄位存不進 Sheets
+//  台北有影 3｜名單總管 roster.html  v18
+//  v18 變更（培訓學員，含上版 v17 的確認出席打勾框）：
+//   ① 工具列新增「梯次」下拉：選某一梯 → 只看那一梯的人，下拉同時顯示各梯人數
+//   ② 新增「只看未確認」開關：把確認出席還空白的人挑出來，打電話時超好用
+//   ③ 切到其他名單時自動隱藏這兩個篩選，不會干擾其他頁
+//  v17 變更：
+//   ① 新增「確認出席」打勾框：前一天打電話確認後勾起來，勾＝會來、不勾＝尚未確認
+//   ② 打勾框自動搬到「姓名」後面，打電話時一眼就看到、不必一直往右捲
+//   ③ 存的值為「會來」（空白＝尚未確認），同步回報名表回應 Sheet 最右側新欄位
+//  ⚠️ 後端 Apps Script 需先：TRAINING_EDITABLE_FIELDS 加入「確認出席」、
+//     並換上新版 readTrainingFormData（修同名欄位互蓋），再重新部署
 // ============================================================
 
 const SHEETS = {
@@ -404,7 +434,7 @@ const SHEETS = {
     saveAction:     'writeTrainingRoster',
     dynamicHeaders: true,                    // 欄位由 API 動態提供
     sourceName:     '人才培訓報名表（Google 表單）',
-    editable:       ['出席紀錄','結業狀態','備註'],  // 與後端 TRAINING_EDITABLE_FIELDS 一致
+    editable:       ['確認出席','出席紀錄','結業狀態','備註'],  // 與後端 TRAINING_EDITABLE_FIELDS 一致
     headers: [],                             // 載入後從 API 填入
     dropdowns: {
       '出席紀錄': ['全程出席','部分出席','缺席'],
@@ -449,6 +479,10 @@ let tableData    = {};
 let loadedSheets = new Set();
 let isDirty      = false;
 let purchaseOptions = [];   // 開銷記錄「對應採購單號」的下拉選項（取自採購造冊編號）
+// ── 培訓學員：梯次／未確認 篩選狀態 ──
+const TRAINING_BATCH_FIELD = '參加梯次';
+let trainingBatchFilter = '';         // '' = 全部；'__blank__' = 未填梯次
+let trainingUnconfirmedOnly = false;  // 只看「確認出席」還空白的（電話還沒打的）
 // ── 多人協作：每個分頁各自記錄「改過的列」與「刪除的列」 ──
 let dirtyKeys    = {};   // { 分頁名稱: Set(列的鍵) }
 let deletedKeys  = {};   // { 分頁名稱: Set(被刪除列的編號) }
@@ -516,6 +550,8 @@ function switchTab(name) {
   tab.style.setProperty('--tab-color', SHEETS[name].color);
   document.getElementById('colorBar').style.background = SHEETS[name].color;
   document.getElementById('searchInput').value = '';
+  trainingBatchFilter = '';
+  trainingUnconfirmedOnly = false;
 
   const config = SHEETS[name];
 
@@ -566,7 +602,17 @@ function loadCurrentSheet() {
 
       // 動態欄位：從 API 回傳填入 headers 與 editable
       if (config.dynamicHeaders) {
-        if (res.headers) config.headers = res.headers;
+        if (res.headers) {
+          let hs = res.headers.slice();
+          // 把「確認出席」搬到姓名後面：打電話時一眼就看到，不用一直往右捲
+          const ci = hs.indexOf('確認出席');
+          if (ci > -1) {
+            hs.splice(ci, 1);
+            const ni = hs.indexOf('姓名');
+            hs.splice(ni > -1 ? ni + 1 : 0, 0, '確認出席');
+          }
+          config.headers = hs;
+        }
         if (res.editable) config.editable = res.editable;
       }
 
@@ -652,11 +698,29 @@ function renderTable() {
   const headers   = config.headers || [];
   const stickyCol = config.stickyCol || null;
 
-  const filtered = keyword
+  syncTrainingFilters();   // 培訓學員才會顯示「梯次／只看未確認」篩選器
+
+  let filtered = keyword
     ? allData.filter(row => (config.headers || []).some(h => String(row[h] ?? '').toLowerCase().includes(keyword)))
     : allData;
 
-  document.getElementById('rowCount').textContent = keyword
+  // 培訓學員專屬：依梯次、只看未確認 再篩一次
+  let extraFilter = false;
+  if (config.dynamicHeaders && (config.headers || []).includes(TRAINING_BATCH_FIELD)) {
+    if (trainingBatchFilter) {
+      extraFilter = true;
+      filtered = filtered.filter(r => {
+        const v = String(r[TRAINING_BATCH_FIELD] ?? '').trim();
+        return trainingBatchFilter === '__blank__' ? v === '' : v === trainingBatchFilter;
+      });
+    }
+    if (trainingUnconfirmedOnly) {
+      extraFilter = true;
+      filtered = filtered.filter(r => String(r['確認出席'] ?? '').trim() === '');
+    }
+  }
+
+  document.getElementById('rowCount').textContent = (keyword || extraFilter)
     ? `找到 ${filtered.length} / ${allData.length} 筆`
     : `共 ${allData.length} 筆`;
 
@@ -700,6 +764,7 @@ function renderTable() {
     '合作狀態':'col-status', '邀請狀態':'col-status', '出席確認':'col-status',
     '邀請函寄送':'col-status', '新聞稿寄送':'col-status',
     '繳費狀態':'col-status', '出席紀錄':'col-status', '結業狀態':'col-status',
+    '確認出席':'col-tag',
     '付款狀態':'col-status', '付款方式':'col-status', '獎金匯款狀態':'col-status',
     '寄送狀態':'col-status', '採購狀態':'col-status', '代表性':'col-role',
     '報價':'col-amount', '出席費':'col-amount', '金額':'col-amount',
@@ -772,6 +837,54 @@ function renderTable() {
   document.getElementById('tableArea').innerHTML = html;
 }
 
+// 培訓學員：依目前資料即時產生「梯次下拉 + 只看未確認」兩個篩選器（其他名單自動隱藏）
+function syncTrainingFilters() {
+  const box = document.getElementById('trainingFilters');
+  if (!box) return;
+  const cfg = SHEETS[currentSheet];
+  const hasBatch = cfg && cfg.dynamicHeaders && (cfg.headers || []).includes(TRAINING_BATCH_FIELD);
+  if (!hasBatch) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+  const all = tableData[currentSheet] || [];
+  const counts = {};
+  all.forEach(r => {
+    const k = String(r[TRAINING_BATCH_FIELD] ?? '').trim() || '（未填）';
+    counts[k] = (counts[k] || 0) + 1;
+  });
+  const keys = Object.keys(counts).sort((a, b) => {
+    const pa = parseMD(a), pb = parseMD(b);
+    if (pa && pb) return (pa.mo - pb.mo) || (pa.dy - pb.dy);
+    if (pa) return -1; if (pb) return 1;
+    return a.localeCompare(b);
+  });
+  const unconfirmed = all.filter(r => String(r['確認出席'] ?? '').trim() === '').length;
+
+  const optHtml = `<option value="">全部梯次（${all.length}）</option>` +
+    keys.map(k => {
+      const val = (k === '（未填）') ? '__blank__' : k;
+      const sel = (trainingBatchFilter === val) ? ' selected' : '';
+      return `<option value="${String(val).replace(/"/g, '&quot;')}"${sel}>${k}（${counts[k]}）</option>`;
+    }).join('');
+
+  box.style.display = 'flex';
+  box.innerHTML =
+    `<span class="tf-label">梯次</span>` +
+    `<select onchange="trainingBatchFilter=this.value;renderTable()">${optHtml}</select>` +
+    `<label class="tf-toggle${trainingUnconfirmedOnly ? ' on' : ''}">` +
+      `<input type="checkbox" ${trainingUnconfirmedOnly ? 'checked' : ''} onchange="trainingUnconfirmedOnly=this.checked;renderTable()">` +
+      `只看未確認（${unconfirmed}）</label>`;
+}
+
+// 從「7月18日 / 7/18」抓出月、日，用來把梯次由早到晚排序
+function parseMD(s) {
+  const t = String(s || '').trim();
+  let m = t.match(/(\d{1,2})\s*月\s*(\d{1,2})/);
+  if (m) return { mo: +m[1], dy: +m[2] };
+  m = t.match(/(?:^|[^0-9])(\d{1,2})[\/\-.](\d{1,2})(?![0-9])/);
+  if (m) return { mo: +m[1], dy: +m[2] };
+  return null;
+}
+
 // ── 加總計算與底部列：抽成獨立函式，給 renderTable 與 updateSumBar 共用 ──
 function computeSums(allData, config) {
   const num = v => parseFloat(String(v ?? '0').replace(/,/g, '')) || 0;
@@ -842,6 +955,15 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
   if (isReadOnly) {
     if (!safe) return `<div class="ro-display empty">（空白）</div>`;
     return `<div class="ro-display">${safe}</div>`;
+  }
+
+  // 確認出席：打勾框。前一天打電話確認後勾起來；勾＝會來、不勾＝尚未確認
+  if (header === '確認出席') {
+    const yes = String(value ?? '').trim() !== '';
+    return `<label class="confirm-box">`
+      + `<input type="checkbox" ${yes ? 'checked' : ''} `
+      + `onchange="updateCell(${rowIndex},'${header}',this.checked?'會來':'')">`
+      + `<span>會來</span></label>`;
   }
 
   // 對應採購單號：動態下拉，選項即時取自採購造冊的編號（顯示「編號 · 品項名稱」，存的是編號）
