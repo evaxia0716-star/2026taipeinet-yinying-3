@@ -327,7 +327,7 @@
 
 <header>
   <div class="header-left">
-    <div class="logo">PAC · 公用頻道 · v18</div>
+    <div class="logo">PAC · 公用頻道 · v19</div>
     <div class="project-title">台北有影 3<span class="sub">名單總管</span></div>
   </div>
   <div class="header-right">
@@ -366,10 +366,13 @@
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v18（培訓學員：梯次篩選 + 只看未確認 + 確認出席打勾框）');
+console.log('roster.html · v19（學校名單學制下拉改為 高中職／五專／大學／社區大學）');
 
 // ============================================================
-//  台北有影 3｜名單總管 roster.html  v18
+//  台北有影 3｜名單總管 roster.html  v19
+//  v19 變更：
+//   ・學校名單「學制」下拉改為實際使用的四類：高中職／五專／大學／社區大學
+//     （配合最終 109 間名單；舊的「國小／國中／大學技專」已用不到）
 //  v18 變更（培訓學員，含上版 v17 的確認出席打勾框）：
 //   ① 工具列新增「梯次」下拉：選某一梯 → 只看那一梯的人，下拉同時顯示各梯人數
 //   ② 新增「只看未確認」開關：把確認出席還空白的人挑出來，打電話時超好用
@@ -467,7 +470,7 @@ const SHEETS = {
     sourceName:   '臺北市學校海報徵選寄送名單',
     headers: ['編號','學制','學校名稱','行政區','郵遞區號','地址','電話','聯絡窗口','寄送狀態','追蹤日期','備註'],
     dropdowns: {
-      '學制':    ['國小','國中','高中職','大學／技專'],
+      '學制':    ['高中職','五專','大學','社區大學'],
       '寄送狀態':['未寄送','已寄送','退信']
     }
   }
