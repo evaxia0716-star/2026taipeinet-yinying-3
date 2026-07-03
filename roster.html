@@ -381,7 +381,7 @@
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v20.1（學校名單改「自動撐開」欄寬：行政區自己收窄、地址自己拉寬；其餘表維持固定寬）');
+console.log('roster.html · v20.2（學校名單自動撐開欄寬；下拉改「確認狀態」對齊 Sheet，以 roster 為下拉唯一來源）');
 
 // ============================================================
 //  台北有影 3｜名單總管 roster.html  v20
@@ -497,10 +497,9 @@ const SHEETS = {
     headers: [],                             // 載入後從 API 填入
     dropdowns: {
       '學制':    ['高中職','五專','大學','社區大學'],
-      '寄送狀態':['未寄送','已寄送','退信'],
-      // ⚠️ 若 Sheet 上這欄的下拉清單和這裡不同，儲存會被打回票；
-      //    出現「違反資料驗證」錯誤時，把下面選項改成與 Sheet 完全一致。
-      '公私立／體制':['國立','市立','公立','私立','待確認']
+      // ★ 以 roster 為主：Sheet 端已移除資料驗證，這裡就是唯一的下拉來源。
+      //   值採「寄送語系」以配合現有 109 筆內容（全為「待寄送」）。
+      '確認狀態':['待寄送','已寄送','退信']
     }
   }
 };
