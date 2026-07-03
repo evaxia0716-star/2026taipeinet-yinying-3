@@ -142,6 +142,21 @@
     width: max-content; min-width: 100%;
   }
 
+  /* 自動撐開模式：欄寬由內容決定（行政區自己收窄、地址自己拉寬）。
+     用於學校名單這類「欄位不固定、長短差很多」的動態名單。 */
+  .table-wrap.auto-width table { table-layout: auto; }
+  .table-wrap.auto-width td { height: auto; }
+  .table-wrap.auto-width td input,
+  .table-wrap.auto-width td select {
+    white-space: normal; word-break: break-word;
+    min-width: 60px;                 /* 太窄的欄至少留一點點手指點擊空間 */
+  }
+  /* 長內容欄（地址、Email、備註）給個上限，免得單一欄吃掉整個畫面 */
+  .table-wrap.auto-width td { max-width: 320px; }
+  .table-wrap.auto-width .ro-display,
+  .table-wrap.auto-width td input,
+  .table-wrap.auto-width td select { overflow-wrap: anywhere; }
+
   thead th {
     padding: 0.55rem 0.75rem; text-align: left;
     font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
@@ -366,7 +381,7 @@
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v20（學校名單改動態欄位·對齊臺北市正式派報清單；開銷記錄欄位統一）');
+console.log('roster.html · v20.1（學校名單改「自動撐開」欄寬：行政區自己收窄、地址自己拉寬；其餘表維持固定寬）');
 
 // ============================================================
 //  台北有影 3｜名單總管 roster.html  v20
@@ -478,7 +493,7 @@ const SHEETS = {
     saveAction:     'writeSchoolRoster',
     dynamicHeaders: true,
     sourceName:     '臺北市正式派報清單（Google Sheets）',
-    stickyCol:      '學校名稱',
+    autoWidth:      true,                    // ★ 欄寬由內容決定（不用固定停車格）
     headers: [],                             // 載入後從 API 填入
     dropdowns: {
       '學制':    ['高中職','五專','大學','社區大學'],
@@ -800,16 +815,25 @@ function renderTable() {
     '媒體類型':'col-tag', '學制':'col-edu', '公私立／體制':'col-tag',
     '學校名稱':'col-name', '行政區':'col-district',
     '郵遞區號':'col-zip',
+    // ★ 學校名單（臺北市正式派報清單）各欄量身寬度
+    '編號欄':'col-id', '確認狀態':'col-status',
+    '行政區／所在地':'col-district', '寄送方式':'col-status',
+    '電子郵件':'col-email', '電子信箱':'col-email',
+    '建議聯絡窗口':'col-contact',
     '備註':'col-note'
   };
 
-  const colGroup = `<colgroup>
+  // 自動撐開模式：不畫固定「停車格」（colgroup），讓瀏覽器照內容分配欄寬
+  const autoWidth = !!config.autoWidth;
+  const colGroup = autoWidth ? '' : `<colgroup>
     <col class="col-num">
     ${headers.map(h => `<col class="${COL_CLASS[h] || 'col-default'}">`).join('')}
     ${isExternalSheet ? '' : '<col class="col-action">'}
   </colgroup>`;
 
-  const wrapClass = stickyCol ? 'table-wrap full-view' : 'table-wrap';
+  const wrapClass = autoWidth
+    ? 'table-wrap auto-width'
+    : (stickyCol ? 'table-wrap full-view' : 'table-wrap');
 
   // 金額相關欄位（套右對齊等寬字，數字看起來整齊）
   const MONEY_HEADERS = new Set(['報價','出席費','金額','單價','預估總額','實際支出']);
