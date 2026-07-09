@@ -1029,6 +1029,9 @@ function isMinorLocal(birthRaw) {
   let age = today.getFullYear() - b.getFullYear();
   const md = today.getMonth() - b.getMonth();
   if (md < 0 || (md === 0 && today.getDate() < b.getDate())) age--;
+  // 防呆：算出來未滿 6 歲，代表生日欄被帶錯值（例如系統帶入 2026 年），
+  // 不可能是真的來上課的學員 → 視為填錯，不掛「未成年」標籤
+  if (age < 6) return false;
   return age < 18;
 }
 
