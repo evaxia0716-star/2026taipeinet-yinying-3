@@ -390,7 +390,7 @@
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v21（培訓學員：電訪模式精簡欄位＋完整模式姓名凍結欄＋可編輯欄位前移＋未成年標記）');
+console.log('roster.html · v21.1（電訪模式欄位改版：職業身份＋得知管道，移除出席紀錄／結業狀態；關鍵字模糊比對欄名）');
 
 // ============================================================
 //  台北有影 3｜名單總管 roster.html  v21
@@ -466,8 +466,11 @@ const SHEETS = {
     headers: [],                             // 載入後從 API 填入
     // ★ v21 完整模式：姓名凍結在最左，往右捲不迷路
     stickyCol: '姓名',
-    // ★ v21 電訪模式：只顯示打電話會用到的欄位（依這個順序排）
-    compactFields: ['姓名','確認出席','參加梯次','聯絡電話','出生年月日','出席紀錄','結業狀態','備註'],
+    // ★ v21.1 電訪模式：只顯示打電話會用到的欄位（依這個順序排）。
+    //   「職業」「得知本課程」用關鍵字比對（實際欄名是問卷長標題，
+    //   例如「您的職業或身份」「您是從何處得知本課程資訊?」，
+    //   這樣寫不怕標題微調或全形半形問號差異）。
+    compactFields: ['姓名','確認出席','參加梯次','聯絡電話','出生年月日','職業','得知本課程','備註'],
     dropdowns: {
       '出席紀錄': ['全程出席','部分出席','缺席'],
       '結業狀態': ['在學中','已結業','未結業','中途退出']
@@ -531,6 +534,19 @@ function markRowDirty(sheetName, key) {
   if (!key) return;
   (dirtyKeys[sheetName] = dirtyKeys[sheetName] || new Set()).add(String(key));
   isDirty = true;
+}
+
+// ★ v21.1：把 compactFields 的關鍵字對應到實際欄名。
+//   先找完全相同的欄名，找不到再找「包含這個關鍵字」的欄名
+//   （例如關鍵字「職業」→ 命中「您的職業或身份」）。
+function resolveCompactHeaders(compactFields, fullHeaders) {
+  const out = [];
+  compactFields.forEach(f => {
+    const hit = fullHeaders.find(h => h === f)
+             || fullHeaders.find(h => h.includes(f));
+    if (hit && !out.includes(hit)) out.push(hit);
+  });
+  return out;
 }
 
 // ── 開銷記錄「對應採購單號」：選項即時取自採購造冊的編號 ──
@@ -643,9 +659,9 @@ function loadCurrentSheet() {
         if (res.headers) {
           let hs = res.headers.slice();
           if (config.compactFields) {
-            // ★ v21 培訓學員：把「電訪重點欄」照順序搬到最前面，其餘照原順序跟在後面。
-            //   完整模式往右捲時，前段就是所有要填的欄位，不用捲到最右邊。
-            const pri  = config.compactFields.filter(h => hs.includes(h));
+            // ★ v21.1 培訓學員：把「電訪重點欄」照順序搬到最前面（關鍵字模糊比對），
+            //   其餘照原順序跟在後面。完整模式往右捲時，前段就是最常用的欄位。
+            const pri  = resolveCompactHeaders(config.compactFields, hs);
             const rest = hs.filter(h => !pri.includes(h));
             hs = pri.concat(rest);
           } else {
@@ -749,7 +765,7 @@ function renderTable() {
   const fullHeaders = config.headers || [];
   const compactOn   = !!config.compactFields && trainingCompactView;
   const headers     = compactOn
-    ? config.compactFields.filter(h => fullHeaders.includes(h))
+    ? resolveCompactHeaders(config.compactFields, fullHeaders)
     : fullHeaders;
   // 凍結欄只在「完整模式」需要（電訪模式欄位少，不用捲、也就不用凍結）
   const stickyCol = (!compactOn && config.stickyCol && headers.includes(config.stickyCol)) ? config.stickyCol : null;
@@ -847,7 +863,7 @@ function renderTable() {
   const autoWidth = !!config.autoWidth;
   const colGroup = autoWidth ? '' : `<colgroup>
     <col class="col-num">
-    ${headers.map(h => `<col class="${COL_CLASS[h] || 'col-default'}">`).join('')}
+    ${headers.map(h => `<col class="${COL_CLASS[h] || (h.includes('得知') ? 'col-org' : 'col-default')}">`).join('')}
     ${isExternalSheet ? '' : '<col class="col-action">'}
   </colgroup>`;
 
