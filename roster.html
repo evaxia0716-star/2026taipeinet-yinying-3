@@ -106,7 +106,7 @@
     white-space: nowrap;
   }
 
-  /* 培訓學員：梯次／未確認 篩選器 */
+  /* 培訓學員：電訪模式／梯次／未確認 篩選器 */
   .training-filters { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
   .tf-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; }
   .training-filters select {
@@ -248,6 +248,15 @@
     color: var(--text-muted); font-style: italic; font-size: 0.76rem;
   }
 
+  /* ★ v21 未成年標記（電訪時提醒：需家長／監護人授權書） */
+  .minor-flag {
+    display: inline-block; margin-left: 0.3rem;
+    font-size: 0.66rem; font-weight: 700; color: #fff;
+    background: var(--danger); border-radius: 4px;
+    padding: 0.05rem 0.32rem; vertical-align: middle;
+    white-space: nowrap;
+  }
+
   /* 打勾框（確認出席／已通知） */
   .confirm-box { display:flex; align-items:center; justify-content:center; gap:0.3rem; height:100%; min-height:var(--row-h); cursor:pointer; user-select:none; }
   .confirm-box input { width:17px; height:17px; accent-color:var(--success); cursor:pointer; flex-shrink:0; }
@@ -320,7 +329,7 @@
   .toast.show { transform: translateX(0); }
   .toast.err  { background: #7f1d1d; }
 
-  /* 橫向捲動時固定「主名稱欄」（如廠商名稱／品項名稱），方便對照 */
+  /* 橫向捲動時固定「主名稱欄」（如廠商名稱／培訓學員姓名），方便對照 */
   .table-wrap.full-view th.sticky-col,
   .table-wrap.full-view td.sticky-col {
     position: sticky; left: 0; z-index: 1;
@@ -342,7 +351,7 @@
 
 <header>
   <div class="header-left">
-    <div class="logo">PAC · 公用頻道 · v20</div>
+    <div class="logo">PAC · 公用頻道 · v21</div>
     <div class="project-title">台北有影 3<span class="sub">名單總管</span></div>
   </div>
   <div class="header-right">
@@ -381,24 +390,21 @@
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v20.2（學校名單自動撐開欄寬；下拉改「確認狀態」對齊 Sheet，以 roster 為下拉唯一來源）');
+console.log('roster.html · v21（培訓學員：電訪模式精簡欄位＋完整模式姓名凍結欄＋可編輯欄位前移＋未成年標記）');
 
 // ============================================================
-//  台北有影 3｜名單總管 roster.html  v20
-//  v20 變更（需搭配 Apps Script v23 一起部署）：
-//   ① 學校名單改「動態欄位」：欄位跟著 Google Sheet「臺北市正式派報清單」
-//      第一列走。之後在 Sheet 加新欄（Email、已通知、備註…），
-//      這裡重新整理就自動出現、也能回填，不必再改程式。
-//   ② 「已通知」欄自動變成打勾框（勾＝已通知、不勾＝尚未）。
-//      ⚠️ Sheet 那邊只要打標題文字就好，不要用「插入→核取方塊」，
-//      否則儲存格資料驗證會擋掉回填。
-//   ③ 外部名單（學校／培訓）的「編號」欄改唯讀：它是回填對位的鑰匙，
-//      改了會寫錯行，所以鎖起來保護。
-//   ④ 開銷記錄：「發票號碼」統一改名「統一發票號碼」（前後端與 Sheet 一致）。
-//   ⑤ 開銷記錄下拉（此處為唯一來源）：付款方式＝虛擬儲值／匯款／現金／待定；
-//      付款狀態＝待申請／已申請／暫緩。後端 ROSTER_CONFIG 已對齊此處。
-//      （修正「儲存失敗：Failed to fetch」的元兇——前端送出 Sheet
-//        資料驗證不認得的值，整批被打回票）
+//  台北有影 3｜名單總管 roster.html  v21
+//  v21 變更（純前端，Apps Script v23 不必重新部署）：
+//   ① 培訓學員新增「📞 電訪模式」（預設開啟）：只顯示打電話會用到的
+//      欄位——姓名／確認出席／參加梯次／聯絡電話／出生年月日／
+//      出席紀錄／結業狀態／備註。不必再橫向捲到天邊。
+//   ② 完整欄位模式：可編輯欄位（出席紀錄、結業狀態、備註）搬到
+//      最前面緊跟姓名；「姓名」設為凍結欄，往右捲時一直釘在左邊。
+//   ③ 出生年月日欄自動標記「未成年」紅標（未滿 18），電訪時順口
+//      提醒對方要交家長／監護人授權書。
+//   ④ 搜尋照樣搜「全部欄位」（含電訪模式下隱藏的欄），梯次篩選、
+//      只看未確認全保留。儲存邏輯不變（只送可編輯欄位＋時間戳記）。
+//  v20：學校名單動態欄位＋自動撐開欄寬；開銷下拉對齊 Sheet
 //  v19：學校名單學制下拉改四類（已由動態欄位取代該設計，僅留紀錄）
 //  v18：培訓學員梯次篩選＋只看未確認
 //  v17：培訓學員「確認出席」打勾框
@@ -458,6 +464,10 @@ const SHEETS = {
     sourceName:     '人才培訓報名表（Google 表單）',
     editable:       ['確認出席','出席紀錄','結業狀態','備註'],  // 與後端 TRAINING_EDITABLE_FIELDS 一致
     headers: [],                             // 載入後從 API 填入
+    // ★ v21 完整模式：姓名凍結在最左，往右捲不迷路
+    stickyCol: '姓名',
+    // ★ v21 電訪模式：只顯示打電話會用到的欄位（依這個順序排）
+    compactFields: ['姓名','確認出席','參加梯次','聯絡電話','出生年月日','出席紀錄','結業狀態','備註'],
     dropdowns: {
       '出席紀錄': ['全程出席','部分出席','缺席'],
       '結業狀態': ['在學中','已結業','未結業','中途退出']
@@ -474,11 +484,10 @@ const SHEETS = {
   },
   '開銷記錄': {
     color: '#b45309',
-    // ★ v20：「發票號碼」→「統一發票號碼」（後端與 Sheet 標題列同步改）
     headers: ['編號','日期','類別','項目說明','廠商','金額','付款方式','付款狀態','負責人','備註'],
     dropdowns: {
       '類別':    ['場地','設備','印刷設計','影片製作','餐飲','公關','人事','其他'],
-      // ★ v20：與後端／Sheet 資料驗證完全對齊（不一致會被 Sheet 打回票→儲存失敗）
+      // ★ 與後端／Sheet 資料驗證完全對齊（不一致會被 Sheet 打回票→儲存失敗）
       '付款方式':['虛擬儲值','匯款','現金','待定'],
       '付款狀態':['待申請','已申請','暫緩']
     },
@@ -486,19 +495,14 @@ const SHEETS = {
   },
   '學校名單': {
     color: '#059669',
-    // ★ v20：改動態欄位，資料來源「臺北市正式派報清單」（109 間）
-    //   欄位跟著 Sheet 第一列走；除「編號」外全部可編輯、可回填。
-    //   Sheet 加新欄（Email、已通知、備註…）→ 這裡重整就自動出現。
     sourceAction:   'readSchoolRoster',
     saveAction:     'writeSchoolRoster',
     dynamicHeaders: true,
     sourceName:     '臺北市正式派報清單（Google Sheets）',
-    autoWidth:      true,                    // ★ 欄寬由內容決定（不用固定停車格）
+    autoWidth:      true,                    // 欄寬由內容決定（不用固定停車格）
     headers: [],                             // 載入後從 API 填入
     dropdowns: {
       '學制':    ['高中職','五專','大學','社區大學'],
-      // ★ 以 roster 為主：Sheet 端已移除資料驗證，這裡就是唯一的下拉來源。
-      //   值採「寄送語系」以配合現有 109 筆內容（全為「待寄送」）。
       '確認狀態':['待寄送','已寄送','退信']
     }
   }
@@ -510,10 +514,11 @@ let tableData    = {};
 let loadedSheets = new Set();
 let isDirty      = false;
 let purchaseOptions = [];   // 開銷記錄「對應採購單號」的下拉選項（取自採購造冊編號）
-// ── 培訓學員：梯次／未確認 篩選狀態 ──
+// ── 培訓學員：梯次／未確認／電訪模式 篩選狀態 ──
 const TRAINING_BATCH_FIELD = '參加梯次';
 let trainingBatchFilter = '';         // '' = 全部；'__blank__' = 未填梯次
 let trainingUnconfirmedOnly = false;  // 只看「確認出席」還空白的（電話還沒打的）
+let trainingCompactView = true;       // ★ v21 電訪模式：預設開啟（只顯示打電話用的欄位）
 // ── 多人協作：每個分頁各自記錄「改過的列」與「刪除的列」 ──
 let dirtyKeys    = {};   // { 分頁名稱: Set(列的鍵) }
 let deletedKeys  = {};   // { 分頁名稱: Set(被刪除列的編號) }
@@ -583,6 +588,7 @@ function switchTab(name) {
   document.getElementById('searchInput').value = '';
   trainingBatchFilter = '';
   trainingUnconfirmedOnly = false;
+  trainingCompactView = true;   // ★ v21 每次進來預設回到電訪模式（好記、好預期）
 
   const config = SHEETS[name];
 
@@ -636,12 +642,20 @@ function loadCurrentSheet() {
       if (config.dynamicHeaders) {
         if (res.headers) {
           let hs = res.headers.slice();
-          // 把「確認出席」搬到姓名後面：打電話時一眼就看到，不用一直往右捲
-          const ci = hs.indexOf('確認出席');
-          if (ci > -1) {
-            hs.splice(ci, 1);
-            const ni = hs.indexOf('姓名');
-            hs.splice(ni > -1 ? ni + 1 : 0, 0, '確認出席');
+          if (config.compactFields) {
+            // ★ v21 培訓學員：把「電訪重點欄」照順序搬到最前面，其餘照原順序跟在後面。
+            //   完整模式往右捲時，前段就是所有要填的欄位，不用捲到最右邊。
+            const pri  = config.compactFields.filter(h => hs.includes(h));
+            const rest = hs.filter(h => !pri.includes(h));
+            hs = pri.concat(rest);
+          } else {
+            // 其他動態名單（學校名單）：維持把「確認出席」搬到姓名後的舊邏輯
+            const ci = hs.indexOf('確認出席');
+            if (ci > -1) {
+              hs.splice(ci, 1);
+              const ni = hs.indexOf('姓名');
+              hs.splice(ni > -1 ? ni + 1 : 0, 0, '確認出席');
+            }
           }
           config.headers = hs;
         }
@@ -728,19 +742,27 @@ function renderTable() {
 
   buildPurchaseOptions();   // 每次重畫都用最新的採購編號（採購那邊改了，這裡同步）
 
-  // 一律完整顯示：欄位即為該名單的完整 headers
-  const headers   = config.headers || [];
-  const stickyCol = (config.stickyCol && headers.includes(config.stickyCol)) ? config.stickyCol : null;
+  // ★ v21 顯示欄位：
+  //   ・電訪模式（培訓學員）→ 只顯示 compactFields（打電話用的精簡欄）
+  //   ・其他情況 → 完整 headers
+  //   注意：搜尋一律搜「完整欄位」，電訪模式下被隱藏的欄也搜得到。
+  const fullHeaders = config.headers || [];
+  const compactOn   = !!config.compactFields && trainingCompactView;
+  const headers     = compactOn
+    ? config.compactFields.filter(h => fullHeaders.includes(h))
+    : fullHeaders;
+  // 凍結欄只在「完整模式」需要（電訪模式欄位少，不用捲、也就不用凍結）
+  const stickyCol = (!compactOn && config.stickyCol && headers.includes(config.stickyCol)) ? config.stickyCol : null;
 
-  syncTrainingFilters();   // 培訓學員才會顯示「梯次／只看未確認」篩選器
+  syncTrainingFilters();   // 培訓學員才會顯示「電訪模式／梯次／只看未確認」篩選器
 
   let filtered = keyword
-    ? allData.filter(row => (config.headers || []).some(h => String(row[h] ?? '').toLowerCase().includes(keyword)))
+    ? allData.filter(row => fullHeaders.some(h => String(row[h] ?? '').toLowerCase().includes(keyword)))
     : allData;
 
   // 培訓學員專屬：依梯次、只看未確認 再篩一次
   let extraFilter = false;
-  if (config.dynamicHeaders && (config.headers || []).includes(TRAINING_BATCH_FIELD)) {
+  if (config.dynamicHeaders && fullHeaders.includes(TRAINING_BATCH_FIELD)) {
     if (trainingBatchFilter) {
       extraFilter = true;
       filtered = filtered.filter(r => {
@@ -814,7 +836,6 @@ function renderTable() {
     '媒體類型':'col-tag', '學制':'col-edu', '公私立／體制':'col-tag',
     '學校名稱':'col-name', '行政區':'col-district',
     '郵遞區號':'col-zip',
-    // ★ 學校名單（臺北市正式派報清單）各欄量身寬度
     '編號欄':'col-id', '確認狀態':'col-status',
     '行政區／所在地':'col-district', '寄送方式':'col-status',
     '電子郵件':'col-email', '電子信箱':'col-email',
@@ -883,7 +904,7 @@ function renderTable() {
   document.getElementById('tableArea').innerHTML = html;
 }
 
-// 培訓學員：依目前資料即時產生「梯次下拉 + 只看未確認」兩個篩選器（其他名單自動隱藏）
+// 培訓學員：依目前資料即時產生「電訪模式 + 梯次下拉 + 只看未確認」篩選器（其他名單自動隱藏）
 function syncTrainingFilters() {
   const box = document.getElementById('trainingFilters');
   if (!box) return;
@@ -914,6 +935,9 @@ function syncTrainingFilters() {
 
   box.style.display = 'flex';
   box.innerHTML =
+    `<label class="tf-toggle${trainingCompactView ? ' on' : ''}" title="只顯示打電話會用到的欄位；關掉可看報名表全部資訊">` +
+      `<input type="checkbox" ${trainingCompactView ? 'checked' : ''} onchange="trainingCompactView=this.checked;renderTable()">` +
+      `📞 電訪模式</label>` +
     `<span class="tf-label">梯次</span>` +
     `<select onchange="trainingBatchFilter=this.value;renderTable()">${optHtml}</select>` +
     `<label class="tf-toggle${trainingUnconfirmedOnly ? ' on' : ''}">` +
@@ -994,12 +1018,30 @@ function toISODate(raw) {
   return `${y}-${p2(mo)}-${p2(d)}`;
 }
 
+// ★ v21：是否未成年（未滿 18）。解析不了生日回 null（不標記）。
+function isMinorLocal(birthRaw) {
+  const iso = toISODate(birthRaw);
+  if (!iso) return null;
+  const b = new Date(iso + 'T00:00:00');
+  if (isNaN(b.getTime())) return null;
+  const today = new Date();
+  if (b.getTime() > today.getTime()) return false;   // 生日填成未來 → 明顯輸錯，不標
+  let age = today.getFullYear() - b.getFullYear();
+  const md = today.getMonth() - b.getMonth();
+  if (md < 0 || (md === 0 && today.getDate() < b.getDate())) age--;
+  return age < 18;
+}
+
 function renderCell(header, value, rowIndex, config, isReadOnly) {
   const safe = String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
   // 唯讀欄位（培訓學員的表單原始資料、外部名單的編號）
   if (isReadOnly) {
     if (!safe) return `<div class="ro-display empty">（空白）</div>`;
+    // ★ v21 出生年月日：未成年掛紅標，電訪時順口提醒需家長／監護人授權書
+    if (header === '出生年月日' && isMinorLocal(value) === true) {
+      return `<div class="ro-display">${safe}<span class="minor-flag" title="未滿 18 歲，需家長／監護人授權書">未成年</span></div>`;
+    }
     return `<div class="ro-display">${safe}</div>`;
   }
 
@@ -1012,7 +1054,7 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
       + `<span>會來</span></label>`;
   }
 
-  // ★ v20 已通知：打勾框。寄出／通知學校後勾起來；勾＝已通知、不勾＝尚未
+  // 已通知：打勾框。寄出／通知學校後勾起來；勾＝已通知、不勾＝尚未
   //   Sheet 儲存格會存文字「已通知」（未勾＝空白）。
   if (header === '已通知') {
     const yes = String(value ?? '').trim() !== '';
