@@ -192,7 +192,7 @@
   col.col-email    { width: 150px; }
   col.col-desc     { width: 140px; }
   col.col-org      { width: 160px; }
-  col.col-note     { width: 150px; }
+  col.col-note     { width: 220px; }
   col.col-edu      { width: 80px; }
   col.col-name     { width: 200px; }
   col.col-ownership{ width: 68px; }
@@ -996,7 +996,7 @@ function renderTable() {
     html += `<tr data-index="${ri}">
       <td class="td-num">${fi + 1}</td>
       ${headers.map(h => {
-        const isAddr   = (h === '地址' || h === '通訊地址');
+        const isAddr   = (h === '地址' || h === '通訊地址' || h === '備註');   // ★ 備註改多行格：字多自動換行、列高自動長
         const isAmt    = (h === config.amountCol) || MONEY_HEADERS.has(h);
         const isSticky = h === stickyCol;
         // 唯讀：① 有 editable 清單且此欄不在清單內（培訓學員）
@@ -1240,7 +1240,8 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
     const opts = optList.map(o => `<option value="${o}"${o===value?' selected':''}>${o}</option>`).join('');
     return `<select onchange="updateCell(${rowIndex},'${header}',this.value)"><option value=""></option>${opts}</select>`;
   }
-  const isAddr = (header === '地址' || header === '通訊地址');
+  // 多行文字格（地址、備註）：contenteditable，字多自動換行、整列跟著長高，不再被截斷
+  const isAddr = (header === '地址' || header === '通訊地址' || header === '備註');
   if (isAddr) {
     return `<div class="addr-edit" contenteditable="true"
       onblur="updateCell(${rowIndex},'${header}',this.innerText.trim())"
