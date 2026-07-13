@@ -247,6 +247,12 @@
   td.readonly-cell .ro-display.empty {
     color: var(--text-muted); font-style: italic; font-size: 0.76rem;
   }
+  /* ★ v22：非 readonly-cell 內的 ro-display（採購造冊自動計算的已分發數）也要有基本樣式 */
+  td .ro-display {
+    display: block; width: 100%; min-height: var(--row-h);
+    padding: 0.32rem 0.55rem; font-size: 0.82rem; line-height: 1.5;
+    color: var(--text-dim); box-sizing: border-box; cursor: default;
+  }
 
   /* ★ v21 未成年標記（電訪時提醒：需家長／監護人授權書） */
   .minor-flag {
@@ -351,7 +357,7 @@
 
 <header>
   <div class="header-left">
-    <div class="logo">PAC · 公用頻道 · v21.1</div>
+    <div class="logo">PAC · 公用頻道 · v22</div>
     <div class="project-title">台北有影 3<span class="sub">名單總管</span></div>
   </div>
   <div class="header-right">
@@ -390,22 +396,24 @@
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v21.1（電訪模式欄位改版：職業身份＋得知管道，移除出席紀錄／結業狀態；關鍵字模糊比對欄名）');
+console.log('roster.html · v22（新增「分發記錄」領用流水帳：自動算已分發／剩餘，存檔後回寫採購造冊）');
 
 // ============================================================
-//  台北有影 3｜名單總管 roster.html  v21
-//  v21 變更（純前端，Apps Script v23 不必重新部署）：
-//   ① 培訓學員新增「📞 電訪模式」（預設開啟）：只顯示打電話會用到的
-//      欄位——姓名／確認出席／參加梯次／聯絡電話／出生年月日／
-//      出席紀錄／結業狀態／備註。不必再橫向捲到天邊。
-//   ② 完整欄位模式：可編輯欄位（出席紀錄、結業狀態、備註）搬到
-//      最前面緊跟姓名；「姓名」設為凍結欄，往右捲時一直釘在左邊。
-//   ③ 出生年月日欄自動標記「未成年」紅標（未滿 18），電訪時順口
-//      提醒對方要交家長／監護人授權書。
-//   ④ 搜尋照樣搜「全部欄位」（含電訪模式下隱藏的欄），梯次篩選、
-//      只看未確認全保留。儲存邏輯不變（只送可編輯欄位＋時間戳記）。
+//  台北有影 3｜名單總管 roster.html  v22
+//  v22 變更（需搭配 Apps Script v24 重新部署）：
+//   ① 新增「分發記錄」分頁：採購物資的領用流水帳。每次拾取記一筆
+//      （日期、對應採購品項、領用數量、用途、領用人、經手人、備註），
+//      「對應採購單號」下拉直接選採購造冊的品項，選了自動帶品項名稱。
+//   ② 採購造冊「已分發數」：品項只要在分發記錄有流水帳，就改為
+//      自動計算（唯讀，顯示「已領 ∕ 剩」）；沒有流水帳的品項維持
+//      手填，完全相容既有資料。
+//   ③ 分發記錄底部即時統計列：每個品項「已領／總數／剩」一眼看完，
+//      領超過會亮紅字。
+//   ④ 儲存分發記錄後，自動把各品項加總回寫採購造冊的「已分發數」，
+//      Google Sheet 與畫面永遠對得上（核銷時直接印分發記錄分頁）。
+//  v21.1 電訪模式欄位改版：職業身份＋得知管道；關鍵字模糊比對欄名
+//  v21 培訓學員電訪模式＋姓名凍結欄＋未成年紅標
 //  v20：學校名單動態欄位＋自動撐開欄寬；開銷下拉對齊 Sheet
-//  v19：學校名單學制下拉改四類（已由動態欄位取代該設計，僅留紀錄）
 //  v18：培訓學員梯次篩選＋只看未確認
 //  v17：培訓學員「確認出席」打勾框
 // ============================================================
@@ -485,9 +493,20 @@ const SHEETS = {
       '採購狀態': ['規劃中','比價中','已下訂','已到貨','已分發完畢','取消']
     }
   },
+  '分發記錄': {
+    // ★ v22：採購物資「領用流水帳」。像銀行存摺：採購造冊是帳戶總額，
+    //   這裡每領一次記一筆，系統自動算已分發與剩餘。
+    color: '#ea580c',
+    headers: ['編號','日期','對應採購單號','品項名稱','領用數量','用途','領用人','經手人','備註'],
+    needsPurchase: true,            // 「對應採購單號」下拉取自採購造冊
+    distLog: true,                  // 底部顯示各品項「已領／總數／剩」統計列
+    readonlyCols: ['品項名稱'],     // 選了採購單號自動帶入，不必手打
+    dropdowns: {}
+  },
   '開銷記錄': {
     color: '#b45309',
     headers: ['編號','日期','類別','項目說明','廠商','金額','付款方式','付款狀態','負責人','備註'],
+    needsPurchase: true,            // 「對應採購單號」欄（若 Sheet 有）下拉取自採購造冊
     dropdowns: {
       '類別':    ['場地','設備','印刷設計','影片製作','餐飲','公關','人事','其他'],
       // ★ 與後端／Sheet 資料驗證完全對齊（不一致會被 Sheet 打回票→儲存失敗）
@@ -516,7 +535,7 @@ let currentSheet = SHEET_NAMES[0];
 let tableData    = {};
 let loadedSheets = new Set();
 let isDirty      = false;
-let purchaseOptions = [];   // 開銷記錄「對應採購單號」的下拉選項（取自採購造冊編號）
+let purchaseOptions = [];   // 「對應採購單號」的下拉選項（取自採購造冊編號）
 // ── 培訓學員：梯次／未確認／電訪模式 篩選狀態 ──
 const TRAINING_BATCH_FIELD = '參加梯次';
 let trainingBatchFilter = '';         // '' = 全部；'__blank__' = 未填梯次
@@ -549,7 +568,8 @@ function resolveCompactHeaders(compactFields, fullHeaders) {
   return out;
 }
 
-// ── 開銷記錄「對應採購單號」：選項即時取自採購造冊的編號 ──
+// ── 「對應採購單號」：選項即時取自採購造冊的編號 ──
+// ★ v22：多帶 item（品項名稱）與 qty（數量），給分發記錄自動帶品項、算剩餘用
 function buildPurchaseOptions() {
   const rows = tableData['採購造冊'] || [];
   purchaseOptions = rows
@@ -557,10 +577,11 @@ function buildPurchaseOptions() {
     .map(r => {
       const id   = String(r['編號']).trim();
       const item = String(r['品項名稱'] ?? '').trim();
-      return { id, label: item ? `${id} · ${item}` : id };
+      const qty  = String(r['數量'] ?? '').trim();
+      return { id, item, qty, label: item ? `${id} · ${item}` : id };
     });
 }
-// 確保採購造冊已載入（開銷記錄要用它的編號當下拉）；沒載過就先抓一次
+// 確保採購造冊已載入（開銷記錄／分發記錄要用它的編號當下拉）；沒載過就先抓一次
 function ensurePurchaseOptions() {
   if (loadedSheets.has('採購造冊')) { buildPurchaseOptions(); return Promise.resolve(); }
   return fetch(`${API_URL}?action=readRoster&sheet=${encodeURIComponent('採購造冊')}`, { redirect: 'follow' })
@@ -574,6 +595,83 @@ function ensurePurchaseOptions() {
     })
     .catch(() => {})
     .then(() => buildPurchaseOptions());
+}
+
+// ★ v22：確保「分發記錄」已載入（看採購造冊時要靠它算已分發／剩餘）
+function ensureDistLog() {
+  if (loadedSheets.has('分發記錄')) return Promise.resolve();
+  return fetch(`${API_URL}?action=readRoster&sheet=${encodeURIComponent('分發記錄')}`, { redirect: 'follow' })
+    .then(r => r.json())
+    .then(res => {
+      if (res && res.ok) {
+        tableData['分發記錄'] = res.data || [];
+        loadedSheets.add('分發記錄');
+        updateCount('分發記錄');
+      }
+    })
+    .catch(() => {});
+}
+
+// ★ v22：各品項「已領用」加總（key = 採購造冊編號）
+function distSums() {
+  const toNum = v => parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
+  const used = {};
+  (tableData['分發記錄'] || []).forEach(r => {
+    const id = String(r['對應採購單號'] ?? '').trim();
+    if (!id) return;
+    used[id] = (used[id] || 0) + toNum(r['領用數量']);
+  });
+  return used;
+}
+
+// ★ v22：分發記錄底部統計列——每個品項「已領／總數／剩」
+function distBarInnerHtml() {
+  const toNum = v => parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
+  const used  = distSums();
+  if (!purchaseOptions.length) {
+    return '<div class="sum-item"><span class="sum-label">採購造冊尚無品項</span></div>';
+  }
+  return purchaseOptions.map(o => {
+    const total = toNum(o.qty);
+    const u     = used[o.id] || 0;
+    const left  = total - u;
+    const col   = left < 0 ? 'var(--danger)' : (total && left === 0) ? 'var(--text-muted)' : 'var(--success)';
+    const name  = String(o.item || o.id).replace(/</g, '&lt;');
+    return `<div class="sum-item"><span class="sum-label">${name}</span>` +
+           `<span class="sum-val">已領 ${u}${total ? '／' + total : ''}</span>` +
+           `<span class="sum-val" style="color:${col}">剩 ${left}${left < 0 ? ' ⚠️' : ''}</span></div>`;
+  }).join('');
+}
+function updateDistBar() {
+  const bar = document.getElementById('distBar');
+  if (bar) bar.innerHTML = distBarInnerHtml();
+}
+
+// ★ v22：存完分發記錄後，把各品項加總回寫採購造冊「已分發數」
+//   （只送「編號＋已分發數」兩欄，後端 mergeIntoSheet_ 只動這一欄，不碰其他資料）
+function syncDistributedToPurchase() {
+  ensurePurchaseOptions().then(() => {
+    const used = distSums();
+    const rows = tableData['採購造冊'] || [];
+    const updates = [];
+    rows.forEach(r => {
+      const id = String(r['編號'] ?? '').trim();
+      if (!id || used[id] === undefined) return;   // 沒有流水帳的品項不動（保留手填值）
+      if (String(r['已分發數'] ?? '').trim() !== String(used[id])) {
+        r['已分發數'] = String(used[id]);
+        updates.push({ '編號': id, '已分發數': String(used[id]) });
+      }
+    });
+    if (!updates.length) return;
+    fetch(API_URL, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'writeRoster', sheet: '採購造冊', data: { updates: updates, deletes: [] } })
+    })
+    .then(r => r.json())
+    .then(res => { if (res.ok) showToast(`✓ 已把 ${updates.length} 個品項的「已分發數」同步回採購造冊`); })
+    .catch(() => {});
+  });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -627,12 +725,21 @@ function switchTab(name) {
       hint.innerHTML = '✏️ 欄位可直接編輯，儲存後同步回 Sheets';
     }
     document.getElementById('toolbar').appendChild(hint);
+  } else if (config.distLog) {
+    // ★ v22：分發記錄的使用提示
+    const hint = document.createElement('span');
+    hint.id = 'schoolHint';
+    hint.className = 'school-hint';
+    hint.innerHTML = '📦 每領一次記一筆；選「對應採購單號」自動帶品項，存檔後自動回寫採購造冊的已分發數';
+    document.getElementById('toolbar').appendChild(hint);
   }
 
   if (!loadedSheets.has(name)) {
     loadCurrentSheet();
-  } else if (name === '開銷記錄') {
+  } else if (config.needsPurchase) {
     ensurePurchaseOptions().then(() => renderTable());   // 確保採購編號下拉是最新的
+  } else if (name === '採購造冊') {
+    ensureDistLog().then(() => renderTable());           // ★ v22 算已分發／剩餘要用流水帳
   } else {
     renderTable();
   }
@@ -682,9 +789,11 @@ function loadCurrentSheet() {
       updateCount(name);
       setSyncState('ok', `最後同步：${fmtTime()}`);
 
-      // 開銷記錄要先備妥採購編號下拉，再畫表
-      if (name === '開銷記錄') {
+      // 開銷記錄／分發記錄要先備妥採購編號下拉，再畫表
+      if (config.needsPurchase) {
         ensurePurchaseOptions().then(() => renderTable());
+      } else if (name === '採購造冊') {
+        ensureDistLog().then(() => renderTable());   // ★ v22
       } else {
         renderTable();
       }
@@ -741,6 +850,8 @@ function saveCurrentSheet() {
     dirtyKeys[name]   = new Set();
     deletedKeys[name] = new Set();
     isDirty = false;
+    // ★ v22：存完分發記錄，順手把加總回寫採購造冊「已分發數」
+    if (config.distLog) syncDistributedToPurchase();
     // 重新讀取，顯示合併後（含同事更新）的最新內容
     loadedSheets.delete(name);
     loadCurrentSheet();
@@ -818,14 +929,15 @@ function renderTable() {
     '編號':'col-id', '類別':'col-tag', '組別':'col-tag', '梯次':'col-tag',
     '採購類別':'col-tag', '得知管道':'col-tag',
     '性別':'col-tiny', '年齡':'col-tiny',
-    '數量':'col-tiny', '已分發數':'col-tiny',
+    '數量':'col-tiny', '已分發數':'col-status', '領用數量':'col-tiny',
     '姓名':'col-name-s', '得獎者姓名':'col-name-s', '記者姓名':'col-name-s',
     '聯絡窗口':'col-contact', '建議聯絡窗口':'col-contact', '負責人':'col-name-s',
+    '領用人':'col-name-s', '經手人':'col-name-s',
     '廠商名稱':'col-org', '媒體名稱':'col-org', '任職單位':'col-org',
     '姓名／單位':'col-org', '團隊名稱':'col-org',
     '服務項目':'col-desc', '項目說明':'col-desc', '主要任務':'col-desc',
     '作品名稱':'col-desc', '獎項':'col-desc', '報導連結':'col-desc',
-    '品項名稱':'col-desc', '用途／對應名單':'col-desc',
+    '品項名稱':'col-desc', '用途／對應名單':'col-desc', '用途':'col-desc',
     '您的職業或身份':'col-desc', '職業或身份':'col-desc',
     '廠商':'col-org', '對應採購單號':'col-org',
     '職稱':'col-role', '職務':'col-role', '部門':'col-role',
@@ -843,7 +955,7 @@ function renderTable() {
     '單價':'col-amount', '預估總額':'col-amount', '實際支出':'col-amount',
     '統一發票號碼':'col-code',
     '簽約日期':'col-date', '報名日期':'col-date', '追蹤日期':'col-date',
-    '預計到貨日':'col-date', '實際到貨日':'col-date',
+    '預計到貨日':'col-date', '實際到貨日':'col-date', '日期':'col-date',
     '到場時間':'col-date', '出生年月日':'col-date',
     '時間戳記':'col-datetime',
     '參加梯次':'col-tag',
@@ -855,7 +967,6 @@ function renderTable() {
     '編號欄':'col-id', '確認狀態':'col-status',
     '行政區／所在地':'col-district', '寄送方式':'col-status',
     '電子郵件':'col-email', '電子信箱':'col-email',
-    '建議聯絡窗口':'col-contact',
     '備註':'col-note'
   };
 
@@ -890,8 +1001,10 @@ function renderTable() {
         const isSticky = h === stickyCol;
         // 唯讀：① 有 editable 清單且此欄不在清單內（培訓學員）
         //       ② 外部名單的「編號」（回填對位的鑰匙，鎖起來保護）
+        //       ③ ★ v22 config.readonlyCols 指定的欄（分發記錄的品項名稱）
         const isReadOnly = !!(config.editable && !config.editable.includes(h))
-                        || (isExternalSheet && h === '編號');
+                        || (isExternalSheet && h === '編號')
+                        || !!(config.readonlyCols && config.readonlyCols.includes(h));
 
         let cls = '';
         if (isAmt)      cls = 'amount-cell';
@@ -909,6 +1022,11 @@ function renderTable() {
   // 金額分頁：底部加總列（給固定 id="sumBar"，之後可單獨即時更新，不必整表重畫）
   if (config.amountCol && allData.length > 0) {
     html += `<div class="sum-bar" id="sumBar">${sumBarInnerHtml(allData, config)}</div>`;
+  }
+
+  // ★ v22 分發記錄：底部「各品項 已領／總數／剩」統計列
+  if (config.distLog && allData.length > 0) {
+    html += `<div class="sum-bar" id="distBar">${distBarInnerHtml()}</div>`;
   }
 
   if (isExternalSheet) {
@@ -1054,7 +1172,22 @@ function isMinorLocal(birthRaw) {
 function renderCell(header, value, rowIndex, config, isReadOnly) {
   const safe = String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  // 唯讀欄位（培訓學員的表單原始資料、外部名單的編號）
+  // ★ v22 採購造冊：品項只要在「分發記錄」有流水帳，「已分發數」改為自動計算（唯讀）。
+  //   沒有流水帳的品項維持原本可手填（完全相容既有資料）。
+  if (currentSheet === '採購造冊' && header === '已分發數') {
+    const row  = (tableData['採購造冊'] || [])[rowIndex] || {};
+    const id   = String(row['編號'] ?? '').trim();
+    const used = distSums();
+    if (id && used[id] !== undefined) {
+      const total = parseFloat(String(row['數量'] ?? '').replace(/,/g, '')) || 0;
+      const left  = total - used[id];
+      const col   = left < 0 ? 'var(--danger)' : 'var(--text-muted)';
+      return `<div class="ro-display" title="由「分發記錄」流水帳自動加總；要修改請至分發記錄分頁">`
+        + `${used[id]}<span style="color:${col}"> ∕ 剩 ${left}${left < 0 ? ' ⚠️' : ''}</span></div>`;
+    }
+  }
+
+  // 唯讀欄位（培訓學員的表單原始資料、外部名單的編號、分發記錄的品項名稱）
   if (isReadOnly) {
     if (!safe) return `<div class="ro-display empty">（空白）</div>`;
     // ★ v21 出生年月日：未成年掛紅標，電訪時順口提醒需家長／監護人授權書
@@ -1123,7 +1256,8 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
   }
   const inputSafe = String(value ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
   // 金額欄：手機叫出數字鍵盤；輸入時不再整表重畫，可連續輸入多位數
-  const numAttr = MONEY_FIELDS.has(header) ? ' inputmode="decimal"' : '';
+  // ★ v22：領用數量也叫數字鍵盤
+  const numAttr = (MONEY_FIELDS.has(header) || header === '領用數量') ? ' inputmode="decimal"' : '';
   return `<input type="text"${numAttr} value="${inputSafe}" oninput="updateCell(${rowIndex},'${header}',this.value)" placeholder="${header}">`;
 }
 
@@ -1133,6 +1267,15 @@ function updateCell(rowIndex, header, value) {
   row[header] = value;
   markRowDirty(currentSheet, rowKeyOf(currentSheet, row));
   updateCount(currentSheet);
+  // ★ v22 分發記錄：選了「對應採購單號」→ 自動帶入品項名稱（帳看得懂，不用背編號）
+  if (SHEETS[currentSheet].distLog && header === '對應採購單號') {
+    const hit = purchaseOptions.find(o => o.id === String(value).trim());
+    row['品項名稱'] = hit ? hit.item : '';
+    renderTable();   // select 的 change 已完成，重畫不會打斷輸入
+    return;
+  }
+  // ★ v22 分發記錄：改了領用數量 → 即時刷新底部「已領／剩」統計列
+  if (SHEETS[currentSheet].distLog && header === '領用數量') updateDistBar();
   // 金額或付款狀態改變時，只刷新底部加總（不重畫整表，避免輸入框失焦）
   if (SHEETS[currentSheet].amountCol === header || header === '付款狀態') updateSumBar();
 }
@@ -1146,6 +1289,11 @@ function addRow() {
   if ((cfg.headers || []).includes('編號')) {
     const maxNo = (tableData[currentSheet] || []).reduce((m, r) => Math.max(m, parseInt(r['編號']) || 0), 0);
     newRow['編號'] = String(maxNo + 1);
+  }
+  // ★ v22 分發記錄：新增一筆時自動帶今天日期（多數領用都是「現在領」）
+  if (cfg.distLog && newRow['日期'] !== undefined) {
+    const n = new Date();
+    newRow['日期'] = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
   }
   tableData[currentSheet].push(newRow);
   markRowDirty(currentSheet, rowKeyOf(currentSheet, newRow));
