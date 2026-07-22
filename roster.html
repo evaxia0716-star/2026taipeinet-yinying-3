@@ -131,6 +131,9 @@
   }
   /* 自動撐開模式：欄寬由內容決定（行政區自己收窄、地址自己拉寬）。
      用於學校名單這類「欄位不固定、長短差很多」的動態名單。 */
+  /* ★ v23.3 內層容器：寬度隨表格內容撐開，底部各列（加總／勾稽／來源）跟著同寬，
+     橫向捲動時右下角不再露白條、底線不斷 */
+  .tw-inner { width: max-content; min-width: 100%; }
   .table-wrap.auto-width table { table-layout: auto; }
   .table-wrap.auto-width td { height: auto; }
   .table-wrap.auto-width td input,
@@ -397,7 +400,7 @@
 <div class="toast" id="toast"></div>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v23.2（隱藏編號欄＋類別加寬＋項目說明斷行＋對應採購自動帶金額＋日期排序）');
+console.log('roster.html · v23.3（修正橫向捲動時右下角露白條、底部加總列寬度不足）');
 // ============================================================
 //  台北有影 3｜名單總管 roster.html  v23.2
 //  v23.2 變更（純前端，Apps Script 不用動）：
@@ -1109,7 +1112,9 @@ function renderTable() {
     : (stickyCol ? 'table-wrap full-view' : 'table-wrap');
   // 金額相關欄位（套右對齊等寬字，數字看起來整齊）
   const MONEY_HEADERS = new Set(['報價','出席費','金額','單價','預估總額','實際支出']);
-  let html = `<div class="${wrapClass}"><table>${colGroup}<thead><tr>
+  // ★ v23.3 tw-inner：把表格與底部各列包在一起，寬度一律隨表格（max-content）。
+  //   否則橫向捲動時，底部加總／勾稽列只有「可視寬度」，右邊會露出白條、底線斷掉。
+  let html = `<div class="${wrapClass}"><div class="tw-inner"><table>${colGroup}<thead><tr>
     <th class="td-num">#</th>
     ${headers.map(h => `<th${h === stickyCol ? ' class="sticky-col"' : ''}>${h}</th>`).join('')}
     ${isExternalSheet ? '' : '<th class="td-action"></th>'}
@@ -1155,7 +1160,7 @@ function renderTable() {
     const sourceName = config.sourceName || '外部 Sheet';
     html += `<div class="source-bar">📊 資料來源：${sourceName} · 編輯後按「✓ 儲存」同步回 Sheets</div>`;
   }
-  html += `</div>`;
+  html += `</div></div>`;   // ★ v23.3 先關 tw-inner，再關 table-wrap
   document.getElementById('tableArea').innerHTML = html;
 }
 // 培訓學員：依目前資料即時產生「電訪模式 + 梯次下拉 + 只看未確認」篩選器（其他名單自動隱藏）
