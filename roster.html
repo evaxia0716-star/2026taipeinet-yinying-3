@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>台北有影 3｜名單總管</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -15,11 +14,9 @@
     --danger: #dc2626; --warn: #d97706; --success: #059669;
     --row-h: 36px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { font-size: 15px; }
   body { font-family: "Noto Sans TC", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
   header {
     position: sticky; top: 0; z-index: 100;
     background: #134e4a; padding: 0 1.5rem;
@@ -32,7 +29,6 @@
   .project-title { font-size: 1rem; font-weight: 700; color: #fff; }
   .project-title .sub { color: #99f6e4; font-size: 0.85rem; font-weight: 400; margin-left: 0.4rem; }
   .header-right { display: flex; align-items: center; gap: 0.4rem; }
-
   .btn {
     display: inline-flex; align-items: center; gap: 0.3rem;
     padding: 0.38rem 0.85rem; border-radius: 7px;
@@ -49,7 +45,6 @@
   }
   .btn-accent:hover { background: #0f766e; }
   .btn-accent:disabled { opacity: .55; cursor: not-allowed; }
-
   .tabs-bar {
     background: #fff; border-bottom: 2px solid var(--border);
     padding: 0 1.5rem; display: flex; align-items: flex-end; gap: 0; overflow-x: auto;
@@ -71,7 +66,6 @@
     background: var(--surface2); color: var(--text-muted);
   }
   .tab.active .cnt { background: var(--tab-color, var(--accent)); color: #fff; }
-
   .toolbar {
     background: #fff; border-bottom: 1px solid var(--border);
     padding: 0.45rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
@@ -87,7 +81,6 @@
   .search-input::placeholder { color: var(--text-muted); }
   .search-icon { position: absolute; left: 0.55rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem; pointer-events: none; }
   .row-count { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; color: var(--text-muted); margin-left: auto; }
-
   .add-btn {
     display: inline-flex; align-items: center; gap: 0.35rem;
     padding: 0.38rem 0.95rem; border-radius: 7px;
@@ -97,7 +90,6 @@
     white-space: nowrap;
   }
   .add-btn:hover { background: var(--accent-hover); }
-
   .school-hint {
     display: inline-flex; align-items: center; gap: 0.3rem;
     padding: 0.3rem 0.7rem; border-radius: 7px;
@@ -105,7 +97,6 @@
     color: var(--text-muted); font-size: 0.76rem;
     white-space: nowrap;
   }
-
   /* 培訓學員：電訪模式／梯次／未確認 篩選器 */
   .training-filters { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
   .tf-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; }
@@ -123,9 +114,7 @@
   }
   .tf-toggle input { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
   .tf-toggle.on { border-color: var(--accent); color: var(--accent); background: #e6f5f2; font-weight: 700; }
-
   main { padding: 0.8rem 1.5rem 5rem; }
-
   .table-wrap {
     overflow-x: auto; border: 1.5px solid var(--border);
     border-radius: 10px; background: #fff;
@@ -135,13 +124,11 @@
   }
   .table-wrap::-webkit-scrollbar { height: 6px; }
   .table-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
   table {
     border-collapse: collapse; font-size: 0.84rem;
     table-layout: fixed;
     width: max-content; min-width: 100%;
   }
-
   /* 自動撐開模式：欄寬由內容決定（行政區自己收窄、地址自己拉寬）。
      用於學校名單這類「欄位不固定、長短差很多」的動態名單。 */
   .table-wrap.auto-width table { table-layout: auto; }
@@ -156,7 +143,6 @@
   .table-wrap.auto-width .ro-display,
   .table-wrap.auto-width td input,
   .table-wrap.auto-width td select { overflow-wrap: anywhere; }
-
   thead th {
     padding: 0.55rem 0.75rem; text-align: left;
     font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
@@ -164,17 +150,14 @@
     border-bottom: 1.5px solid var(--border);
     white-space: nowrap; position: sticky; top: 0; z-index: 2;
   }
-
   tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: #f0fdf8; }
-
   tbody td {
     padding: 0;
     vertical-align: middle;
     height: var(--row-h);
   }
-
   /* 欄寬類別（table-layout:fixed 下，欄寬以這裡的固定值為準，不隨內容伸縮） */
   col.col-num      { width: 32px; }
   col.col-id       { width: 38px; }
@@ -203,7 +186,6 @@
   col.col-action   { width: 32px; }
   col.col-default  { width: 110px; }
   col.col-long     { width: 200px; }
-
   td input, td select {
     background: transparent; border: 1.5px solid transparent;
     color: var(--text); font-family: "Noto Sans TC", sans-serif;
@@ -215,7 +197,6 @@
   }
   td input:hover, td select:hover { border-color: var(--border2); background: var(--bg); }
   td input:focus, td select:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px rgba(13,148,136,0.12); }
-
   td.addr-cell { height: auto; padding: 0; vertical-align: top; }
   td.addr-cell .addr-edit {
     display: block;
@@ -231,7 +212,6 @@
   }
   td.addr-cell .addr-edit:hover { border-color: var(--border2); background: var(--bg); }
   td.addr-cell .addr-edit:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px rgba(13,148,136,0.12); }
-
   /* 唯讀欄位（培訓學員的表單原始資料、外部名單的「編號」） */
   td.readonly-cell { height: auto; vertical-align: top; padding: 0; background: #fafcfb; }
   td.readonly-cell .ro-display {
@@ -253,7 +233,6 @@
     padding: 0.32rem 0.55rem; font-size: 0.82rem; line-height: 1.5;
     color: var(--text-dim); box-sizing: border-box; cursor: default;
   }
-
   /* ★ v21 未成年標記（電訪時提醒：需家長／監護人授權書） */
   .minor-flag {
     display: inline-block; margin-left: 0.3rem;
@@ -262,13 +241,11 @@
     padding: 0.05rem 0.32rem; vertical-align: middle;
     white-space: nowrap;
   }
-
   /* 打勾框（確認出席／已通知） */
   .confirm-box { display:flex; align-items:center; justify-content:center; gap:0.3rem; height:100%; min-height:var(--row-h); cursor:pointer; user-select:none; }
   .confirm-box input { width:17px; height:17px; accent-color:var(--success); cursor:pointer; flex-shrink:0; }
   .confirm-box span { font-size:0.76rem; color:var(--text-muted); }
   .confirm-box input:checked ~ span { color:var(--success); font-weight:700; }
-
   .td-num { width: 32px; text-align: center; color: var(--text-muted); font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; padding: 0 4px; }
   .td-action { width: 32px; text-align: center; }
   .del-btn {
@@ -280,11 +257,9 @@
   .del-btn:hover { border-color: #fca5a5; color: var(--danger); background: #fef2f2; }
   tr:not(:hover) .del-btn { opacity: 0; }
   tr:hover .del-btn { opacity: 1; }
-
   .amount-cell { text-align: right; font-family: "IBM Plex Mono", monospace; font-weight: 600; }
   .amount-cell input { text-align: right; }
   td input.date-input { font-family: "IBM Plex Mono", monospace; letter-spacing: 0.02em; }
-
   .sum-bar {
     background: #f0fdf8; border-top: 2px solid var(--border);
     padding: 0.5rem 1rem; display: flex; align-items: center; gap: 1.2rem;
@@ -294,16 +269,13 @@
   .sum-label { color: var(--text-muted); font-weight: 600; }
   .sum-val { font-family: "IBM Plex Mono", monospace; font-weight: 700; color: var(--text); }
   .sum-val.total { color: var(--accent); font-size: 1rem; }
-
   .source-bar {
     background: #f0fdf8; border-top: 1px solid var(--border);
     padding: 0.4rem 1rem; font-size: 0.76rem; color: var(--text-muted);
     border-radius: 0 0 10px 10px;
   }
-
   .empty-state { text-align: center; padding: 3rem 0; color: var(--text-muted); }
   .empty-icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
-
   .loading {
     display: flex; align-items: center; justify-content: center;
     height: 140px; color: var(--text-muted); gap: 0.7rem; font-size: 0.86rem;
@@ -314,7 +286,6 @@
     animation: spin 0.7s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-
   .sync-bar {
     background: var(--surface2); border-bottom: 1px solid var(--border);
     padding: 0.32rem 1.5rem; display: flex; align-items: center; gap: 0.8rem;
@@ -323,8 +294,34 @@
   .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
   .sync-dot.ok  { background: var(--success); }
   .sync-dot.err { background: var(--danger); }
+  /* ★ v23 預算儀表板：滑動桿＋進度條＋已花費／剩餘／使用率 */
+  .budget-bar {
+    background: #fff; border-bottom: 2px solid var(--border);
+    padding: 0.55rem 1.5rem 0.65rem;
+  }
+  .budget-row { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; }
+  .budget-label { font-size: 0.84rem; font-weight: 700; color: var(--text-dim); white-space: nowrap; }
+  .budget-slider {
+    flex: 1; min-width: 150px; max-width: 360px;
+    accent-color: var(--accent); height: 20px; cursor: pointer;
+  }
+  .budget-amount {
+    font-family: "IBM Plex Mono", monospace; font-weight: 700;
+    font-size: 1rem; color: var(--accent); white-space: nowrap;
+  }
+  .budget-stats { display: flex; gap: 1.1rem; margin-left: auto; flex-wrap: wrap; align-items: baseline; }
+  .budget-stat { display: flex; align-items: baseline; gap: 0.3rem; white-space: nowrap; }
+  .budget-stat .k { font-size: 0.74rem; color: var(--text-muted); font-weight: 600; }
+  .budget-stat .v { font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 0.9rem; }
+  .budget-meter {
+    margin-top: 0.45rem; height: 9px; border-radius: 5px;
+    background: var(--surface2); overflow: hidden;
+  }
+  .budget-fill {
+    height: 100%; border-radius: 5px; background: var(--accent);
+    width: 0%; transition: width 0.3s, background 0.3s;
+  }
   .sheet-color-bar { height: 3px; background: var(--tab-color, var(--accent)); transition: background 0.2s; }
-
   .toast {
     position: fixed; bottom: 1.5rem; right: 1.5rem;
     background: #134e4a; color: #fff; border-radius: 8px;
@@ -334,7 +331,6 @@
   }
   .toast.show { transform: translateX(0); }
   .toast.err  { background: #7f1d1d; }
-
   /* 橫向捲動時固定「主名稱欄」（如廠商名稱／培訓學員姓名），方便對照 */
   .table-wrap.full-view th.sticky-col,
   .table-wrap.full-view td.sticky-col {
@@ -346,18 +342,16 @@
     background: var(--surface2); z-index: 3;
   }
   .table-wrap.full-view tbody tr:hover td.sticky-col { background: #f0fdf8; }
-
   @media (max-width: 1200px) {
     main { padding: 0.6rem 1rem 4rem; }
-    header, .tabs-bar, .toolbar, .sync-bar { padding-left: 1rem; padding-right: 1rem; }
+    header, .tabs-bar, .toolbar, .sync-bar, .budget-bar { padding-left: 1rem; padding-right: 1rem; }
   }
 </style>
 </head>
 <body>
-
 <header>
   <div class="header-left">
-    <div class="logo">PAC · 公用頻道 · v22</div>
+    <div class="logo">PAC · 公用頻道 · v23</div>
     <div class="project-title">台北有影 3<span class="sub">名單總管</span></div>
   </div>
   <div class="header-right">
@@ -367,17 +361,26 @@
     <button class="btn btn-accent" id="saveBtn" onclick="saveCurrentSheet()">✓ 儲存</button>
   </div>
 </header>
-
 <div class="sheet-color-bar" id="colorBar"></div>
-
 <div class="sync-bar">
   <div class="sync-dot" id="syncDot"></div>
   <span id="syncText">連線中…</span>
   <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace" id="rowInfo"></span>
 </div>
-
+<!-- ★ v23 預算儀表板：全頁常駐。滑桿拖動→放開自動儲存到 Google Sheets（全員共用同一個數字） -->
+<div class="budget-bar" id="budgetBar">
+  <div class="budget-row">
+    <span class="budget-label">💰 專案預算</span>
+    <input type="range" class="budget-slider" id="budgetSlider"
+      min="0" max="2000000" step="10000" value="1000000"
+      oninput="onBudgetSlide(this.value)" onchange="saveBudget(this.value)"
+      title="拖動調整總預算（上限 200 萬，1 萬一格）；放開後自動儲存（同事看到的是同一個數字）">
+    <span class="budget-amount" id="budgetAmount">NT$ 1,000,000</span>
+    <div class="budget-stats" id="budgetStats"></div>
+  </div>
+  <div class="budget-meter"><div class="budget-fill" id="budgetFill"></div></div>
+</div>
 <div class="tabs-bar" id="tabsBar"></div>
-
 <div class="toolbar" id="toolbar">
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
@@ -387,37 +390,42 @@
   <button class="add-btn" id="addRowBtn" onclick="addRow()">＋ 新增</button>
   <span class="row-count" id="rowCount"></span>
 </div>
-
 <main>
   <div id="tableArea"><div class="loading"><div class="spinner"></div>載入中…</div></div>
 </main>
-
 <div class="toast" id="toast"></div>
-
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v22（新增「分發記錄」領用流水帳：自動算已分發／剩餘，存檔後回寫採購造冊）');
-
+console.log('roster.html · v23.1（預算滑桿上限 200 萬＋培訓電訪結果下拉）');
 // ============================================================
-//  台北有影 3｜名單總管 roster.html  v22
-//  v22 變更（需搭配 Apps Script v24 重新部署）：
-//   ① 新增「分發記錄」分頁：採購物資的領用流水帳。每次拾取記一筆
-//      （日期、對應採購品項、領用數量、用途、領用人、經手人、備註），
-//      「對應採購單號」下拉直接選採購造冊的品項，選了自動帶品項名稱。
-//   ② 採購造冊「已分發數」：品項只要在分發記錄有流水帳，就改為
-//      自動計算（唯讀，顯示「已領 ∕ 剩」）；沒有流水帳的品項維持
-//      手填，完全相容既有資料。
-//   ③ 分發記錄底部即時統計列：每個品項「已領／總數／剩」一眼看完，
-//      領超過會亮紅字。
-//   ④ 儲存分發記錄後，自動把各品項加總回寫採購造冊的「已分發數」，
-//      Google Sheet 與畫面永遠對得上（核銷時直接印分發記錄分頁）。
+//  台北有影 3｜名單總管 roster.html  v23.1
+//  v23.1 變更（純前端，Apps Script 不用動）：
+//   ① 預算滑桿上限改 200 萬（1 萬一格，拖起來更精準）；若 Sheets 裡
+//      存的預算超過 200 萬，滑桿上限會自動撐大，不會蓋掉。
+//   ② 培訓學員「確認出席」由打勾框改為「電訪結果」下拉：
+//      會來（綠）／取消（紅）／未接／關機／再聯絡（橘）。
+//      寫回報名表的仍是純文字，同事直接看 Sheet 也一目了然。
+//   ③ 「只看未確認」改為「只看待電訪」：空白、未接、關機、再聯絡
+//      都算還要打；會來、取消算有結果。清單就是待辦名單。
+//  v23 變更（需搭配 Apps Script v25 重新部署）：
+//   ① 頂部「預算儀表板」：滑動桿調總預算（預設 100 萬），放開自動
+//      儲存到 Google Sheets「專案設定」分頁（全員共用）。進度條即時
+//      顯示 已花費／剩餘／使用率；80% 轉橘、超支轉紅。
+//      「已花費」＝開銷記錄全部金額加總（開銷記錄是唯一的錢帳）。
+//   ② 開銷記錄新增「對應採購」下拉：這筆錢如果是買採購造冊裡的
+//      東西，就選對應品項；純執行費用留空。從此「花了多少」只看
+//      開銷記錄一張表，不會漏也不會重複。
+//   ③ 採購造冊底部「錢帳勾稽」提醒列：已到貨但開銷記錄找不到的
+//      品項會列出來，提醒「這筆錢還沒入帳」。
+//   ④ 分發記錄新增「活動場次」欄：把原本埋在備註的「Day 1／市民
+//      大聲說／8月場次」變成正式欄位，結案報告直接篩選交代。
+//  v22 分發記錄領用流水帳：自動算已分發／剩餘，存檔後回寫採購造冊
 //  v21.1 電訪模式欄位改版：職業身份＋得知管道；關鍵字模糊比對欄名
 //  v21 培訓學員電訪模式＋姓名凍結欄＋未成年紅標
 //  v20：學校名單動態欄位＋自動撐開欄寬；開銷下拉對齊 Sheet
 //  v18：培訓學員梯次篩選＋只看未確認
 //  v17：培訓學員「確認出席」打勾框
 // ============================================================
-
 const SHEETS = {
   '合作廠商': {
     color: '#c2410c',
@@ -496,17 +504,21 @@ const SHEETS = {
   '分發記錄': {
     // ★ v22：採購物資「領用流水帳」。像銀行存摺：採購造冊是帳戶總額，
     //   這裡每領一次記一筆，系統自動算已分發與剩餘。
+    // ★ v23：新增「活動場次」欄——這批東西用在哪一場（例：市民大聲說 Day 1、
+    //   8月台北場），結案報告直接篩選交代，不必再翻備註。
     color: '#ea580c',
-    headers: ['編號','日期','對應採購單號','品項名稱','領用數量','用途','領用人','經手人','備註'],
+    headers: ['編號','日期','對應採購單號','品項名稱','領用數量','用途','活動場次','領用人','經手人','備註'],
     needsPurchase: true,            // 「對應採購單號」下拉取自採購造冊
     distLog: true,                  // 底部顯示各品項「已領／總數／剩」統計列
     readonlyCols: ['品項名稱'],     // 選了採購單號自動帶入，不必手打
     dropdowns: {}
   },
   '開銷記錄': {
+    // ★ v23：新增「對應採購」下拉——這筆錢若是買採購造冊裡的東西就選品項，
+    //   純執行費用（餐飲、講師費…）留空。開銷記錄從此是唯一的錢帳。
     color: '#b45309',
-    headers: ['編號','日期','類別','項目說明','廠商','金額','付款方式','付款狀態','負責人','備註'],
-    needsPurchase: true,            // 「對應採購單號」欄（若 Sheet 有）下拉取自採購造冊
+    headers: ['編號','日期','類別','項目說明','廠商','對應採購','金額','付款方式','付款狀態','負責人','備註'],
+    needsPurchase: true,            // 「對應採購」下拉取自採購造冊
     dropdowns: {
       '類別':    ['場地','設備','印刷設計','影片製作','餐飲','公關','人事','其他'],
       // ★ 與後端／Sheet 資料驗證完全對齊（不一致會被 Sheet 打回票→儲存失敗）
@@ -529,15 +541,22 @@ const SHEETS = {
     }
   }
 };
-
 const SHEET_NAMES = Object.keys(SHEETS);
 let currentSheet = SHEET_NAMES[0];
 let tableData    = {};
 let loadedSheets = new Set();
 let isDirty      = false;
-let purchaseOptions = [];   // 「對應採購單號」的下拉選項（取自採購造冊編號）
+let purchaseOptions = [];   // 「對應採購單號／對應採購」的下拉選項（取自採購造冊編號）
 // ── 培訓學員：梯次／未確認／電訪模式 篩選狀態 ──
 const TRAINING_BATCH_FIELD = '參加梯次';
+// ★ v23.1 電訪結果選項（存回 Sheet 的就是這些字）
+const TRAINING_CALL_OPTIONS = ['會來','取消','未接','關機','再聯絡'];
+// 還要再打嗎？空白＝還沒打；未接／關機／再聯絡＝打了沒結果 → 都算「待電訪」
+// 會來／取消＝有結果，不用再打
+const trainingNeedsCall = v => {
+  const s = String(v ?? '').trim();
+  return s === '' || (s !== '會來' && s !== '取消');
+};
 let trainingBatchFilter = '';         // '' = 全部；'__blank__' = 未填梯次
 let trainingUnconfirmedOnly = false;  // 只看「確認出席」還空白的（電話還沒打的）
 let trainingCompactView = true;       // ★ v21 電訪模式：預設開啟（只顯示打電話用的欄位）
@@ -554,7 +573,6 @@ function markRowDirty(sheetName, key) {
   (dirtyKeys[sheetName] = dirtyKeys[sheetName] || new Set()).add(String(key));
   isDirty = true;
 }
-
 // ★ v21.1：把 compactFields 的關鍵字對應到實際欄名。
 //   先找完全相同的欄名，找不到再找「包含這個關鍵字」的欄名
 //   （例如關鍵字「職業」→ 命中「您的職業或身份」）。
@@ -567,8 +585,7 @@ function resolveCompactHeaders(compactFields, fullHeaders) {
   });
   return out;
 }
-
-// ── 「對應採購單號」：選項即時取自採購造冊的編號 ──
+// ── 「對應採購單號／對應採購」：選項即時取自採購造冊的編號 ──
 // ★ v22：多帶 item（品項名稱）與 qty（數量），給分發記錄自動帶品項、算剩餘用
 function buildPurchaseOptions() {
   const rows = tableData['採購造冊'] || [];
@@ -596,7 +613,6 @@ function ensurePurchaseOptions() {
     .catch(() => {})
     .then(() => buildPurchaseOptions());
 }
-
 // ★ v22：確保「分發記錄」已載入（看採購造冊時要靠它算已分發／剩餘）
 function ensureDistLog() {
   if (loadedSheets.has('分發記錄')) return Promise.resolve();
@@ -611,7 +627,108 @@ function ensureDistLog() {
     })
     .catch(() => {});
 }
-
+// ★ v23：確保「開銷記錄」已載入（預算儀表板的「已花費」與採購勾稽都要用）
+function ensureExpense() {
+  if (loadedSheets.has('開銷記錄')) return Promise.resolve();
+  return fetch(`${API_URL}?action=readRoster&sheet=${encodeURIComponent('開銷記錄')}`, { redirect: 'follow' })
+    .then(r => r.json())
+    .then(res => {
+      if (res && res.ok) {
+        tableData['開銷記錄'] = res.data || [];
+        loadedSheets.add('開銷記錄');
+        updateCount('開銷記錄');
+      }
+    })
+    .catch(() => {});
+}
+// ============================================================
+//  ★ v23 預算儀表板
+//  比喻：預算是「油箱容量」，開銷記錄是「已用掉的油」。
+//  滑桿調的是油箱大小；進度條顯示油用到哪了。
+//  數字存在 Google Sheets「專案設定」分頁 → 同事打開看到同一個數字。
+// ============================================================
+let projectBudget = 1000000;   // 預設 100 萬；載入後以 Sheets 為準
+const fmtNT = n => 'NT$ ' + (Math.round(n) || 0).toLocaleString('zh-TW');
+function loadBudget() {
+  fetch(`${API_URL}?action=readBudget`, { redirect: 'follow' })
+    .then(r => r.json())
+    .then(res => {
+      if (res && res.ok && res.budget > 0) {
+        projectBudget = res.budget;
+        const s = document.getElementById('budgetSlider');
+        if (projectBudget > +s.max) s.max = String(projectBudget);   // 超過滑桿上限就把上限撐大
+        s.value = String(projectBudget);
+      }
+      updateBudgetBar();
+    })
+    .catch(() => { updateBudgetBar(); });
+}
+function onBudgetSlide(v) {        // 拖動中：即時預覽，不打 API
+  projectBudget = +v;
+  updateBudgetBar();
+}
+let budgetSaveTimer;
+function saveBudget(v) {           // 放開滑桿：存回 Sheets（0.4 秒防抖，連拖只存最後一次）
+  projectBudget = +v;
+  updateBudgetBar();
+  clearTimeout(budgetSaveTimer);
+  budgetSaveTimer = setTimeout(() => {
+    fetch(API_URL, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'writeBudget', budget: projectBudget })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.ok) showToast('✓ 專案預算已儲存：' + fmtNT(projectBudget));
+      else showToast('預算儲存失敗：' + (res.msg || ''), 'err');
+    })
+    .catch(err => showToast('預算儲存失敗：' + err.message, 'err'));
+  }, 400);
+}
+function expenseSpent_() {         // 已花費 ＝ 開銷記錄全部金額加總（唯一的錢帳）
+  const num = v => parseFloat(String(v ?? '0').replace(/,/g, '')) || 0;
+  return (tableData['開銷記錄'] || []).reduce((s, r) => s + num(r['金額']), 0);
+}
+function updateBudgetBar() {
+  const spent = expenseSpent_();
+  const left  = projectBudget - spent;
+  const pct   = projectBudget > 0 ? Math.round(spent / projectBudget * 100) : 0;
+  document.getElementById('budgetAmount').textContent = fmtNT(projectBudget);
+  const fill = document.getElementById('budgetFill');
+  fill.style.width = Math.min(100, pct) + '%';
+  fill.style.background = pct >= 100 ? 'var(--danger)' : pct >= 80 ? 'var(--warn)' : 'var(--accent)';
+  const loaded  = loadedSheets.has('開銷記錄');
+  const leftCol = left < 0 ? 'var(--danger)' : 'var(--success)';
+  const pctCol  = pct >= 100 ? 'var(--danger)' : pct >= 80 ? 'var(--warn)' : 'var(--text)';
+  document.getElementById('budgetStats').innerHTML = loaded
+    ? `<span class="budget-stat"><span class="k">已花費</span><span class="v">${fmtNT(spent)}</span></span>` +
+      `<span class="budget-stat"><span class="k">剩餘</span><span class="v" style="color:${leftCol}">${fmtNT(left)}${left < 0 ? ' ⚠️ 超支' : ''}</span></span>` +
+      `<span class="budget-stat"><span class="k">使用率</span><span class="v" style="color:${pctCol}">${pct}%</span></span>`
+    : `<span class="budget-stat"><span class="k">開銷資料載入中…</span></span>`;
+}
+// ★ v23 採購造冊「錢帳勾稽」：已到貨但開銷記錄查無「對應採購」的品項 → 提醒還沒入帳
+function purchaseLinkBarHtml(rows) {
+  if (!loadedSheets.has('開銷記錄')) {
+    return '<div class="sum-item"><span class="sum-label">💡 錢帳勾稽</span><span class="sum-val">開銷記錄載入中…</span></div>';
+  }
+  const linked = new Set(
+    (tableData['開銷記錄'] || [])
+      .map(r => String(r['對應採購'] ?? '').trim())
+      .filter(Boolean)
+  );
+  const missing = rows.filter(r => {
+    const st = String(r['採購狀態'] ?? '').trim();
+    if (st !== '已到貨' && st !== '已分發完畢') return false;
+    return !linked.has(String(r['編號'] ?? '').trim());
+  }).map(r => String(r['品項名稱'] || r['編號'] || '').replace(/</g, '&lt;'));
+  if (!missing.length) {
+    return '<div class="sum-item"><span class="sum-label">💡 錢帳勾稽</span>' +
+           '<span class="sum-val" style="color:var(--success)">已到貨品項都已入帳（開銷記錄）✓</span></div>';
+  }
+  return '<div class="sum-item"><span class="sum-label">💡 還沒入帳（開銷記錄查無這些採購）</span>' +
+         `<span class="sum-val" style="color:var(--warn)">${missing.join('、')}</span></div>`;
+}
 // ★ v22：各品項「已領用」加總（key = 採購造冊編號）
 function distSums() {
   const toNum = v => parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
@@ -623,7 +740,6 @@ function distSums() {
   });
   return used;
 }
-
 // ★ v22：分發記錄底部統計列——每個品項「已領／總數／剩」
 function distBarInnerHtml() {
   const toNum = v => parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
@@ -646,7 +762,6 @@ function updateDistBar() {
   const bar = document.getElementById('distBar');
   if (bar) bar.innerHTML = distBarInnerHtml();
 }
-
 // ★ v22：存完分發記錄後，把各品項加總回寫採購造冊「已分發數」
 //   （只送「編號＋已分發數」兩欄，後端 mergeIntoSheet_ 只動這一欄，不碰其他資料）
 function syncDistributedToPurchase() {
@@ -673,12 +788,12 @@ function syncDistributedToPurchase() {
     .catch(() => {});
   });
 }
-
 window.addEventListener('DOMContentLoaded', () => {
   buildTabs();
   switchTab(SHEET_NAMES[0]);
+  loadBudget();                                   // ★ v23 讀取共用預算
+  ensureExpense().then(() => updateBudgetBar());  // ★ v23 預載開銷 → 算「已花費」
 });
-
 function buildTabs() {
   const bar = document.getElementById('tabsBar');
   SHEET_NAMES.forEach(name => {
@@ -691,7 +806,6 @@ function buildTabs() {
     bar.appendChild(div);
   });
 }
-
 function switchTab(name) {
   currentSheet = name;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -703,13 +817,10 @@ function switchTab(name) {
   trainingBatchFilter = '';
   trainingUnconfirmedOnly = false;
   trainingCompactView = true;   // ★ v21 每次進來預設回到電訪模式（好記、好預期）
-
   const config = SHEETS[name];
-
   // 外部 Sheet（學校名單、培訓學員）：禁用「新增」、不允許刪列
   const isExternalSheet = !!config.saveAction;
   document.getElementById('addRowBtn').style.display = isExternalSheet ? 'none' : '';
-
   // 提示語：根據 sheet 種類顯示不同訊息
   const existingHint = document.getElementById('schoolHint');
   if (existingHint) existingHint.remove();
@@ -732,35 +843,39 @@ function switchTab(name) {
     hint.className = 'school-hint';
     hint.innerHTML = '📦 每領一次記一筆；選「對應採購單號」自動帶品項，存檔後自動回寫採購造冊的已分發數';
     document.getElementById('toolbar').appendChild(hint);
+  } else if (name === '開銷記錄') {
+    // ★ v23：開銷記錄的使用提示（唯一錢帳原則）
+    const hint = document.createElement('span');
+    hint.id = 'schoolHint';
+    hint.className = 'school-hint';
+    hint.innerHTML = '🧾 所有花費都記這裡；若是買採購造冊裡的東西，「對應採購」選對應品項，純執行費用留空';
+    document.getElementById('toolbar').appendChild(hint);
   }
-
   if (!loadedSheets.has(name)) {
     loadCurrentSheet();
   } else if (config.needsPurchase) {
     ensurePurchaseOptions().then(() => renderTable());   // 確保採購編號下拉是最新的
   } else if (name === '採購造冊') {
-    ensureDistLog().then(() => renderTable());           // ★ v22 算已分發／剩餘要用流水帳
+    // ★ v22 算已分發／剩餘要用流水帳；★ v23 錢帳勾稽要用開銷記錄
+    Promise.all([ensureDistLog(), ensureExpense()]).then(() => renderTable());
   } else {
     renderTable();
   }
 }
-
 function loadCurrentSheet() {
   const name   = currentSheet;
   const config = SHEETS[name];
   const url    = config.sourceAction
     ? `${API_URL}?action=${config.sourceAction}`
     : `${API_URL}?action=readRoster&sheet=${encodeURIComponent(name)}`;
-
   setTableLoading();
   setSyncState('loading', '連線中…');
-
+  loadBudget();   // ★ v23 順手同步最新預算（同事可能改過）
   fetch(url, { redirect: 'follow' })
     .then(r => r.json())
     .then(res => {
       if (!res.ok) throw new Error(res.msg || '讀取失敗');
       tableData[name] = res.data || [];
-
       // 動態欄位：從 API 回傳填入 headers 與 editable
       if (config.dynamicHeaders) {
         if (res.headers) {
@@ -784,16 +899,14 @@ function loadCurrentSheet() {
         }
         if (res.editable) config.editable = res.editable;
       }
-
       loadedSheets.add(name);
       updateCount(name);
       setSyncState('ok', `最後同步：${fmtTime()}`);
-
       // 開銷記錄／分發記錄要先備妥採購編號下拉，再畫表
       if (config.needsPurchase) {
         ensurePurchaseOptions().then(() => renderTable());
       } else if (name === '採購造冊') {
-        ensureDistLog().then(() => renderTable());   // ★ v22
+        Promise.all([ensureDistLog(), ensureExpense()]).then(() => renderTable());   // ★ v22＋v23
       } else {
         renderTable();
       }
@@ -805,19 +918,16 @@ function loadCurrentSheet() {
       showToast('讀取失敗：' + err.message, 'err');
     });
 }
-
 function saveCurrentSheet() {
   const name   = currentSheet;
   const config = SHEETS[name];
   const all    = tableData[name] || [];
   const btn    = document.getElementById('saveBtn');
   btn.disabled = true; btn.textContent = '儲存中…';
-
   // 只挑出「改過的列」與「刪除清單」，不整批覆蓋 → 不會洗掉同事其他列
   const dset      = dirtyKeys[name] || new Set();
   const dirtyRows = all.filter(r => dset.has(rowKeyOf(name, r)));
   const deletes   = Array.from(deletedKeys[name] || new Set());
-
   let body;
   if (config.saveAction) {
     // 外部 Sheet（學校／培訓）：只送改過的列，後端依鍵就地更新（非破壞性）
@@ -836,7 +946,6 @@ function saveCurrentSheet() {
     // 內部名單：逐列合併（只送改過的列 + 刪除清單）
     body = JSON.stringify({ action: 'writeRoster', sheet: name, data: { updates: dirtyRows, deletes } });
   }
-
   fetch(API_URL, {
     method: 'POST', redirect: 'follow',
     headers: { 'Content-Type': 'text/plain' },
@@ -859,16 +968,13 @@ function saveCurrentSheet() {
   .catch(err => showToast('儲存失敗：' + err.message, 'err'))
   .finally(() => { btn.disabled = false; btn.textContent = '✓ 儲存'; });
 }
-
 function renderTable() {
   const name    = currentSheet;
   const config  = SHEETS[name];
   const allData = tableData[name] || [];
   const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
   const isExternalSheet = !!config.saveAction;
-
   buildPurchaseOptions();   // 每次重畫都用最新的採購編號（採購那邊改了，這裡同步）
-
   // ★ v21 顯示欄位：
   //   ・電訪模式（培訓學員）→ 只顯示 compactFields（打電話用的精簡欄）
   //   ・其他情況 → 完整 headers
@@ -880,13 +986,10 @@ function renderTable() {
     : fullHeaders;
   // 凍結欄只在「完整模式」需要（電訪模式欄位少，不用捲、也就不用凍結）
   const stickyCol = (!compactOn && config.stickyCol && headers.includes(config.stickyCol)) ? config.stickyCol : null;
-
   syncTrainingFilters();   // 培訓學員才會顯示「電訪模式／梯次／只看未確認」篩選器
-
   let filtered = keyword
     ? allData.filter(row => fullHeaders.some(h => String(row[h] ?? '').toLowerCase().includes(keyword)))
     : allData;
-
   // 培訓學員專屬：依梯次、只看未確認 再篩一次
   let extraFilter = false;
   if (config.dynamicHeaders && fullHeaders.includes(TRAINING_BATCH_FIELD)) {
@@ -899,14 +1002,13 @@ function renderTable() {
     }
     if (trainingUnconfirmedOnly) {
       extraFilter = true;
-      filtered = filtered.filter(r => String(r['確認出席'] ?? '').trim() === '');
+      // ★ v23.1 「待電訪」＝空白＋未接＋關機＋再聯絡（會來／取消算有結果）
+      filtered = filtered.filter(r => trainingNeedsCall(r['確認出席']));
     }
   }
-
   document.getElementById('rowCount').textContent = (keyword || extraFilter)
     ? `找到 ${filtered.length} / ${allData.length} 筆`
     : `共 ${allData.length} 筆`;
-
   if (allData.length === 0) {
     const emptyMsg = config.dynamicHeaders
       ? '尚無資料<br><span style="font-size:0.8rem;color:var(--text-muted)">來源 Sheet 有資料後會自動出現於此</span>'
@@ -923,7 +1025,6 @@ function renderTable() {
       `<div class="empty-state"><div class="empty-icon">🔍</div><div>找不到「${keyword}」相關資料</div></div>`;
     return;
   }
-
   // 欄寬語意對照表
   const COL_CLASS = {
     '編號':'col-id', '類別':'col-tag', '組別':'col-tag', '梯次':'col-tag',
@@ -939,7 +1040,8 @@ function renderTable() {
     '作品名稱':'col-desc', '獎項':'col-desc', '報導連結':'col-desc',
     '品項名稱':'col-desc', '用途／對應名單':'col-desc', '用途':'col-desc',
     '您的職業或身份':'col-desc', '職業或身份':'col-desc',
-    '廠商':'col-org', '對應採購單號':'col-org',
+    '廠商':'col-org', '對應採購單號':'col-org', '對應採購':'col-org',
+    '活動場次':'col-desc',
     '職稱':'col-role', '職務':'col-role', '部門':'col-role',
     '專業領域':'col-desc',
     '電話':'col-tel', '聯絡電話':'col-tel',
@@ -948,7 +1050,7 @@ function renderTable() {
     '合作狀態':'col-status', '邀請狀態':'col-status', '出席確認':'col-status',
     '邀請函寄送':'col-status', '新聞稿寄送':'col-status',
     '繳費狀態':'col-status', '出席紀錄':'col-status', '結業狀態':'col-status',
-    '確認出席':'col-tag', '已通知':'col-tag',
+    '確認出席':'col-status', '已通知':'col-tag',
     '付款狀態':'col-status', '付款方式':'col-status', '獎金匯款狀態':'col-status',
     '寄送狀態':'col-status', '採購狀態':'col-status', '代表性':'col-role',
     '報價':'col-amount', '出席費':'col-amount', '金額':'col-amount',
@@ -969,7 +1071,6 @@ function renderTable() {
     '電子郵件':'col-email', '電子信箱':'col-email',
     '備註':'col-note'
   };
-
   // 自動撐開模式：不畫固定「停車格」（colgroup），讓瀏覽器照內容分配欄寬
   const autoWidth = !!config.autoWidth;
   const colGroup = autoWidth ? '' : `<colgroup>
@@ -977,20 +1078,16 @@ function renderTable() {
     ${headers.map(h => `<col class="${COL_CLASS[h] || (h.includes('得知') ? 'col-org' : 'col-default')}">`).join('')}
     ${isExternalSheet ? '' : '<col class="col-action">'}
   </colgroup>`;
-
   const wrapClass = autoWidth
     ? 'table-wrap auto-width'
     : (stickyCol ? 'table-wrap full-view' : 'table-wrap');
-
   // 金額相關欄位（套右對齊等寬字，數字看起來整齊）
   const MONEY_HEADERS = new Set(['報價','出席費','金額','單價','預估總額','實際支出']);
-
   let html = `<div class="${wrapClass}"><table>${colGroup}<thead><tr>
     <th class="td-num">#</th>
     ${headers.map(h => `<th${h === stickyCol ? ' class="sticky-col"' : ''}>${h}</th>`).join('')}
     ${isExternalSheet ? '' : '<th class="td-action"></th>'}
   </tr></thead><tbody>`;
-
   filtered.forEach((row, fi) => {
     const ri = allData.indexOf(row);
     html += `<tr data-index="${ri}">
@@ -1005,7 +1102,6 @@ function renderTable() {
         const isReadOnly = !!(config.editable && !config.editable.includes(h))
                         || (isExternalSheet && h === '編號')
                         || !!(config.readonlyCols && config.readonlyCols.includes(h));
-
         let cls = '';
         if (isAmt)      cls = 'amount-cell';
         if (isAddr)     cls = 'addr-cell';
@@ -1016,28 +1112,26 @@ function renderTable() {
       ${isExternalSheet ? '' : `<td class="td-action"><button class="del-btn" onclick="deleteRow(${ri})" title="刪除">✕</button></td>`}
     </tr>`;
   });
-
   html += `</tbody></table>`;
-
   // 金額分頁：底部加總列（給固定 id="sumBar"，之後可單獨即時更新，不必整表重畫）
   if (config.amountCol && allData.length > 0) {
     html += `<div class="sum-bar" id="sumBar">${sumBarInnerHtml(allData, config)}</div>`;
   }
-
   // ★ v22 分發記錄：底部「各品項 已領／總數／剩」統計列
   if (config.distLog && allData.length > 0) {
     html += `<div class="sum-bar" id="distBar">${distBarInnerHtml()}</div>`;
   }
-
+  // ★ v23 採購造冊：底部「錢帳勾稽」提醒列
+  if (name === '採購造冊' && allData.length > 0) {
+    html += `<div class="sum-bar" id="purchaseLinkBar">${purchaseLinkBarHtml(allData)}</div>`;
+  }
   if (isExternalSheet) {
     const sourceName = config.sourceName || '外部 Sheet';
     html += `<div class="source-bar">📊 資料來源：${sourceName} · 編輯後按「✓ 儲存」同步回 Sheets</div>`;
   }
-
   html += `</div>`;
   document.getElementById('tableArea').innerHTML = html;
 }
-
 // 培訓學員：依目前資料即時產生「電訪模式 + 梯次下拉 + 只看未確認」篩選器（其他名單自動隱藏）
 function syncTrainingFilters() {
   const box = document.getElementById('trainingFilters');
@@ -1045,7 +1139,6 @@ function syncTrainingFilters() {
   const cfg = SHEETS[currentSheet];
   const hasBatch = cfg && cfg.dynamicHeaders && (cfg.headers || []).includes(TRAINING_BATCH_FIELD);
   if (!hasBatch) { box.style.display = 'none'; box.innerHTML = ''; return; }
-
   const all = tableData[currentSheet] || [];
   const counts = {};
   all.forEach(r => {
@@ -1058,15 +1151,13 @@ function syncTrainingFilters() {
     if (pa) return -1; if (pb) return 1;
     return a.localeCompare(b);
   });
-  const unconfirmed = all.filter(r => String(r['確認出席'] ?? '').trim() === '').length;
-
+  const unconfirmed = all.filter(r => trainingNeedsCall(r['確認出席'])).length;   // ★ v23.1 待電訪人數
   const optHtml = `<option value="">全部梯次（${all.length}）</option>` +
     keys.map(k => {
       const val = (k === '（未填）') ? '__blank__' : k;
       const sel = (trainingBatchFilter === val) ? ' selected' : '';
       return `<option value="${String(val).replace(/"/g, '&quot;')}"${sel}>${k}（${counts[k]}）</option>`;
     }).join('');
-
   box.style.display = 'flex';
   box.innerHTML =
     `<label class="tf-toggle${trainingCompactView ? ' on' : ''}" title="只顯示打電話會用到的欄位；關掉可看報名表全部資訊">` +
@@ -1074,11 +1165,10 @@ function syncTrainingFilters() {
       `📞 電訪模式</label>` +
     `<span class="tf-label">梯次</span>` +
     `<select onchange="trainingBatchFilter=this.value;renderTable()">${optHtml}</select>` +
-    `<label class="tf-toggle${trainingUnconfirmedOnly ? ' on' : ''}">` +
+    `<label class="tf-toggle${trainingUnconfirmedOnly ? ' on' : ''}" title="空白、未接、關機、再聯絡都算待電訪；會來／取消算有結果">` +
       `<input type="checkbox" ${trainingUnconfirmedOnly ? 'checked' : ''} onchange="trainingUnconfirmedOnly=this.checked;renderTable()">` +
-      `只看未確認（${unconfirmed}）</label>`;
+      `只看待電訪（${unconfirmed}）</label>`;
 }
-
 // 從「7月18日 / 7/18」抓出月、日，用來把梯次由早到晚排序
 function parseMD(s) {
   const t = String(s || '').trim();
@@ -1088,7 +1178,6 @@ function parseMD(s) {
   if (m) return { mo: +m[1], dy: +m[2] };
   return null;
 }
-
 // ── 加總計算與底部列：抽成獨立函式，給 renderTable 與 updateSumBar 共用 ──
 function computeSums(allData, config) {
   const num = v => parseFloat(String(v ?? '0').replace(/,/g, '')) || 0;
@@ -1115,12 +1204,10 @@ function updateSumBar() {
   if (!bar) return;
   bar.innerHTML = sumBarInnerHtml(tableData[currentSheet] || [], config);
 }
-
 // ── 日期欄：哪些欄位要套用日期選擇器 ──
 const DATE_COLS = new Set(['日期','簽約日期','報名日期','追蹤日期','預計到貨日','實際到貨日','出生年月日']);
 // ── 金額相關欄位（手機叫數字鍵盤用） ──
 const MONEY_FIELDS = new Set(['報價','出席費','金額','單價','預估總額','實際支出']);
-
 // 把各種寫法整理成西元「YYYY-MM-DD」（原生日期選擇器只認這個格式）
 // 規則：年份 < 1912 視為民國年（自動 +1911）；含時間的時間戳用「當地時間」還原日期，避開時區差一天
 function toISODate(raw) {
@@ -1151,7 +1238,6 @@ function toISODate(raw) {
   if (y < 1912) y += 1911;               // 民國年 → 西元年
   return `${y}-${p2(mo)}-${p2(d)}`;
 }
-
 // ★ v21：是否未成年（未滿 18）。解析不了生日回 null（不標記）。
 function isMinorLocal(birthRaw) {
   const iso = toISODate(birthRaw);
@@ -1168,10 +1254,8 @@ function isMinorLocal(birthRaw) {
   if (age < 6) return false;
   return age < 18;
 }
-
 function renderCell(header, value, rowIndex, config, isReadOnly) {
   const safe = String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-
   // ★ v22 採購造冊：品項只要在「分發記錄」有流水帳，「已分發數」改為自動計算（唯讀）。
   //   沒有流水帳的品項維持原本可手填（完全相容既有資料）。
   if (currentSheet === '採購造冊' && header === '已分發數') {
@@ -1186,7 +1270,6 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
         + `${used[id]}<span style="color:${col}"> ∕ 剩 ${left}${left < 0 ? ' ⚠️' : ''}</span></div>`;
     }
   }
-
   // 唯讀欄位（培訓學員的表單原始資料、外部名單的編號、分發記錄的品項名稱）
   if (isReadOnly) {
     if (!safe) return `<div class="ro-display empty">（空白）</div>`;
@@ -1196,16 +1279,29 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
     }
     return `<div class="ro-display">${safe}</div>`;
   }
-
-  // 確認出席：打勾框。前一天打電話確認後勾起來；勾＝會來、不勾＝尚未確認
+  // 確認出席：
+  //  ・★ v23.1 培訓學員 → 「電訪結果」下拉（會來／取消／未接／關機／再聯絡），
+  //    選了直接變色，一覽表就能看出誰還要追。寫回 Sheet 的是純文字。
+  //  ・其他名單 → 維持原本的打勾框（勾＝會來、不勾＝尚未確認）
   if (header === '確認出席') {
+    if (config.dynamicHeaders && config.editable) {
+      const cur = String(value ?? '').trim();
+      const col = cur === '會來' ? 'var(--success)'
+                : cur === '取消' ? 'var(--danger)'
+                : cur ? 'var(--warn)' : 'var(--text-muted)';
+      let optList = TRAINING_CALL_OPTIONS.slice();
+      if (cur && !optList.includes(cur)) optList = [cur, ...optList];   // 舊資料的其他寫法也保留
+      const opts = optList.map(o => `<option value="${o}"${o === cur ? ' selected' : ''}>${o}</option>`).join('');
+      return `<select style="color:${col};font-weight:${cur ? '700' : '400'}" `
+        + `onchange="updateCell(${rowIndex},'${header}',this.value)">`
+        + `<option value=""${cur ? '' : ' selected'}>（未電訪）</option>${opts}</select>`;
+    }
     const yes = String(value ?? '').trim() !== '';
     return `<label class="confirm-box">`
       + `<input type="checkbox" ${yes ? 'checked' : ''} `
       + `onchange="updateCell(${rowIndex},'${header}',this.checked?'會來':'')">`
       + `<span>會來</span></label>`;
   }
-
   // 已通知：打勾框。寄出／通知學校後勾起來；勾＝已通知、不勾＝尚未
   //   Sheet 儲存格會存文字「已通知」（未勾＝空白）。
   if (header === '已通知') {
@@ -1215,11 +1311,14 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
       + `onchange="updateCell(${rowIndex},'${header}',this.checked?'已通知':'')">`
       + `<span>已通知</span></label>`;
   }
-
-  // 對應採購單號：動態下拉，選項即時取自採購造冊的編號（顯示「編號 · 品項名稱」，存的是編號）
-  if (header === '對應採購單號') {
+  // 對應採購單號（分發記錄）／對應採購（開銷記錄）：動態下拉，
+  // 選項即時取自採購造冊的編號（顯示「編號 · 品項名稱」，存的是編號）
+  if (header === '對應採購單號' || header === '對應採購') {
     const cur = String(value ?? '').trim();
-    let opts = '<option value=""></option>';
+    // ★ v23 開銷記錄：空白選項標示「非採購」，一眼看懂留空的意思
+    let opts = (header === '對應採購')
+      ? '<option value="">（非採購）</option>'
+      : '<option value=""></option>';
     const known = purchaseOptions.some(o => o.id === cur);
     if (cur && !known) {
       // 採購那筆被刪了仍保留舊值，不讓畫面變空白
@@ -1232,7 +1331,6 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
     }).join('');
     return `<select onchange="updateCell(${rowIndex},'${header}',this.value)">${opts}</select>`;
   }
-
   const dd = config.dropdowns?.[header];
   if (dd) {
     // 若這格的舊資料是清單裡沒有的選項（例如以前存過「已核銷」），仍保留它，不讓畫面變空白
@@ -1261,13 +1359,17 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
   const numAttr = (MONEY_FIELDS.has(header) || header === '領用數量') ? ' inputmode="decimal"' : '';
   return `<input type="text"${numAttr} value="${inputSafe}" oninput="updateCell(${rowIndex},'${header}',this.value)" placeholder="${header}">`;
 }
-
 function updateCell(rowIndex, header, value) {
   if (!tableData[currentSheet]) return;
   const row = tableData[currentSheet][rowIndex];
   row[header] = value;
   markRowDirty(currentSheet, rowKeyOf(currentSheet, row));
   updateCount(currentSheet);
+  // ★ v23.1 培訓學員：選了電訪結果 → 重畫（顏色即時變、「待電訪」計數即時更新）
+  if (SHEETS[currentSheet].dynamicHeaders && header === '確認出席') {
+    renderTable();   // select 的 change 已完成，重畫不會打斷輸入
+    return;
+  }
   // ★ v22 分發記錄：選了「對應採購單號」→ 自動帶入品項名稱（帳看得懂，不用背編號）
   if (SHEETS[currentSheet].distLog && header === '對應採購單號') {
     const hit = purchaseOptions.find(o => o.id === String(value).trim());
@@ -1277,10 +1379,12 @@ function updateCell(rowIndex, header, value) {
   }
   // ★ v22 分發記錄：改了領用數量 → 即時刷新底部「已領／剩」統計列
   if (SHEETS[currentSheet].distLog && header === '領用數量') updateDistBar();
-  // 金額或付款狀態改變時，只刷新底部加總（不重畫整表，避免輸入框失焦）
-  if (SHEETS[currentSheet].amountCol === header || header === '付款狀態') updateSumBar();
+  // 金額或付款狀態改變時，只刷新底部加總與預算儀表板（不重畫整表，避免輸入框失焦）
+  if (SHEETS[currentSheet].amountCol === header || header === '付款狀態') {
+    updateSumBar();
+    updateBudgetBar();   // ★ v23 「已花費／剩餘」跟著跳
+  }
 }
-
 function addRow() {
   if (!tableData[currentSheet]) tableData[currentSheet] = [];
   const cfg = SHEETS[currentSheet];
@@ -1310,7 +1414,6 @@ function addRow() {
     }
   }, 60);
 }
-
 function deleteRow(rowIndex) {
   if (!confirm('確定刪除這一列？')) return;
   const row = tableData[currentSheet][rowIndex];
@@ -1324,19 +1427,18 @@ function deleteRow(rowIndex) {
   updateCount(currentSheet);
   renderTable();
 }
-
 function updateCount(name) {
   const el = document.getElementById('cnt-' + name);
   if (el) el.textContent = (tableData[name] || []).length;
   const info = document.getElementById('rowInfo');
   if (info && name === currentSheet) info.textContent = `${(tableData[name] || []).length} 筆`;
+  // ★ v23 開銷記錄筆數有動（新增／刪除／載入）→ 預算儀表板跟著更新
+  if (name === '開銷記錄') updateBudgetBar();
 }
-
 function setTableLoading() {
   document.getElementById('tableArea').innerHTML =
     '<div class="loading"><div class="spinner"></div>從 Google Sheets 讀取中…</div>';
 }
-
 function setSyncState(state, text) {
   const dot   = document.getElementById('syncDot');
   const label = document.getElementById('syncLabel');
@@ -1345,7 +1447,6 @@ function setSyncState(state, text) {
   if (info)  info.textContent  = text;
   if (label) label.textContent = state==='ok' ? fmtTime()+' 已同步' : state==='err' ? '連線異常' : '…';
 }
-
 let toastTimer;
 function showToast(msg, type='ok') {
   const el = document.getElementById('toast');
@@ -1354,12 +1455,10 @@ function showToast(msg, type='ok') {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { el.className = 'toast'; }, 3500);
 }
-
 function fmtTime() {
   const n = new Date();
   return `${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;
 }
-
 window.addEventListener('beforeunload', e => { if (isDirty) { e.preventDefault(); e.returnValue = ''; } });
 </script>
 </body>
