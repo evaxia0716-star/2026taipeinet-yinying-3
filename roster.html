@@ -163,6 +163,7 @@
   col.col-id       { width: 38px; }
   col.col-tiny     { width: 52px; }
   col.col-tag      { width: 78px; }
+  col.col-cat      { width: 100px; }   /* ★ v23.2 類別欄加寬：「影片後製」四個字完整顯示 */
   col.col-role     { width: 80px; }
   col.col-code     { width: 90px; }
   col.col-status   { width: 90px; }
@@ -396,9 +397,20 @@
 <div class="toast" id="toast"></div>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v23.1（預算滑桿上限 200 萬＋培訓電訪結果下拉）');
+console.log('roster.html · v23.2（隱藏編號欄＋類別加寬＋項目說明斷行＋對應採購自動帶金額＋日期排序）');
 // ============================================================
-//  台北有影 3｜名單總管 roster.html  v23.1
+//  台北有影 3｜名單總管 roster.html  v23.2
+//  v23.2 變更（純前端，Apps Script 不用動）：
+//   ① 內部名單畫面隱藏「編號」欄（和 # 重複）。編號仍在資料裡當對位鍵
+//      （像身分證字號，多人儲存／刪除全靠它），只是不顯示；# 是排隊號碼。
+//   ② 「類別」欄加寬（78→100px），「影片後製」等四字選項完整顯示。
+//   ③ 「項目說明」改多行格：字多自動斷行、列高自動長，不再被截斷。
+//   ④ 「對應採購」串接升級：空白顯示「—」不吵；選了品項→金額空白
+//      自動帶採購「總額」、項目說明空白自動帶品項名稱（都可再修改），
+//      選單變主色粗體，一眼看出這筆有勾稽。
+//   ⑤ 有「日期」欄的內部名單（開銷／分發）依日期由早到晚自動排序顯示
+//      （同日再依編號）。只排畫面，資料與儲存機制不動，後補的舊日期
+//      自動歸位；日期空白的排最後。
 //  v23.1 變更（純前端，Apps Script 不用動）：
 //   ① 預算滑桿上限改 200 萬（1 萬一格，拖起來更精準）；若 Sheets 裡
 //      存的預算超過 200 萬，滑桿上限會自動撐大，不會蓋掉。
@@ -595,7 +607,8 @@ function buildPurchaseOptions() {
       const id   = String(r['編號']).trim();
       const item = String(r['品項名稱'] ?? '').trim();
       const qty  = String(r['數量'] ?? '').trim();
-      return { id, item, qty, label: item ? `${id} · ${item}` : id };
+      const amt  = parseFloat(String(r['總額'] ?? '').replace(/,/g, '')) || 0;   // ★ v23.2 給開銷自動帶金額用
+      return { id, item, qty, amt, label: item ? `${id} · ${item}` : id };
     });
 }
 // 確保採購造冊已載入（開銷記錄／分發記錄要用它的編號當下拉）；沒載過就先抓一次
@@ -848,7 +861,7 @@ function switchTab(name) {
     const hint = document.createElement('span');
     hint.id = 'schoolHint';
     hint.className = 'school-hint';
-    hint.innerHTML = '🧾 所有花費都記這裡；若是買採購造冊裡的東西，「對應採購」選對應品項，純執行費用留空';
+    hint.innerHTML = '🧾 所有花費都記這裡；買採購造冊的東西→「對應採購」選品項（自動帶金額與說明），純執行費用留「—」';
     document.getElementById('toolbar').appendChild(hint);
   }
   if (!loadedSheets.has(name)) {
@@ -981,9 +994,12 @@ function renderTable() {
   //   注意：搜尋一律搜「完整欄位」，電訪模式下被隱藏的欄也搜得到。
   const fullHeaders = config.headers || [];
   const compactOn   = !!config.compactFields && trainingCompactView;
-  const headers     = compactOn
+  let headers       = compactOn
     ? resolveCompactHeaders(config.compactFields, fullHeaders)
     : fullHeaders;
+  // ★ v23.2 內部名單：畫面隱藏「編號」欄（和 # 重複）。
+  //   編號仍在每筆資料裡當對位鍵（儲存／刪除靠它），只是不顯示。
+  if (!config.dynamicHeaders) headers = headers.filter(h => h !== '編號');
   // 凍結欄只在「完整模式」需要（電訪模式欄位少，不用捲、也就不用凍結）
   const stickyCol = (!compactOn && config.stickyCol && headers.includes(config.stickyCol)) ? config.stickyCol : null;
   syncTrainingFilters();   // 培訓學員才會顯示「電訪模式／梯次／只看未確認」篩選器
@@ -1006,6 +1022,16 @@ function renderTable() {
       filtered = filtered.filter(r => trainingNeedsCall(r['確認出席']));
     }
   }
+  // ★ v23.2 自動排序：有「日期」欄的內部名單，依日期由早到晚顯示（同日再依編號）。
+  //   只排「畫面」，資料本身與儲存機制完全不動；日期空白的排最後。
+  if (!config.dynamicHeaders && fullHeaders.includes('日期')) {
+    filtered = filtered.slice().sort((a, b) => {
+      const da = toISODate(a['日期']) || '9999-12-31';
+      const db = toISODate(b['日期']) || '9999-12-31';
+      if (da !== db) return da < db ? -1 : 1;
+      return (parseInt(a['編號']) || 0) - (parseInt(b['編號']) || 0);
+    });
+  }
   document.getElementById('rowCount').textContent = (keyword || extraFilter)
     ? `找到 ${filtered.length} / ${allData.length} 筆`
     : `共 ${allData.length} 筆`;
@@ -1027,7 +1053,7 @@ function renderTable() {
   }
   // 欄寬語意對照表
   const COL_CLASS = {
-    '編號':'col-id', '類別':'col-tag', '組別':'col-tag', '梯次':'col-tag',
+    '編號':'col-id', '類別':'col-cat', '組別':'col-tag', '梯次':'col-tag',
     '採購類別':'col-tag', '得知管道':'col-tag',
     '性別':'col-tiny', '年齡':'col-tiny',
     '數量':'col-tiny', '已分發數':'col-status', '領用數量':'col-tiny',
@@ -1093,7 +1119,7 @@ function renderTable() {
     html += `<tr data-index="${ri}">
       <td class="td-num">${fi + 1}</td>
       ${headers.map(h => {
-        const isAddr   = (h === '地址' || h === '通訊地址' || h === '備註');   // ★ 備註改多行格：字多自動換行、列高自動長
+        const isAddr   = (h === '地址' || h === '通訊地址' || h === '備註' || h === '項目說明');   // ★ 多行格：字多自動換行、列高自動長（v23.2 加入項目說明）
         const isAmt    = (h === config.amountCol) || MONEY_HEADERS.has(h);
         const isSticky = h === stickyCol;
         // 唯讀：① 有 editable 清單且此欄不在清單內（培訓學員）
@@ -1315,9 +1341,10 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
   // 選項即時取自採購造冊的編號（顯示「編號 · 品項名稱」，存的是編號）
   if (header === '對應採購單號' || header === '對應採購') {
     const cur = String(value ?? '').trim();
-    // ★ v23 開銷記錄：空白選項標示「非採購」，一眼看懂留空的意思
+    // ★ v23.2 開銷記錄：空白顯示「—」（純執行費用），畫面不吵；
+    //   選了品項會變主色粗體，一眼看出這筆有勾稽採購
     let opts = (header === '對應採購')
-      ? '<option value="">（非採購）</option>'
+      ? '<option value="">—</option>'
       : '<option value=""></option>';
     const known = purchaseOptions.some(o => o.id === cur);
     if (cur && !known) {
@@ -1329,7 +1356,9 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
       const idv = String(o.id).replace(/"/g,'&quot;');
       return `<option value="${idv}"${o.id===cur?' selected':''}>${lbl}</option>`;
     }).join('');
-    return `<select onchange="updateCell(${rowIndex},'${header}',this.value)">${opts}</select>`;
+    // ★ v23.2 有勾稽採購 → 主色粗體；空白 → 淡灰
+    const selCol = cur ? 'var(--accent)' : 'var(--text-muted)';
+    return `<select style="color:${selCol};font-weight:${cur ? '700' : '400'}" onchange="updateCell(${rowIndex},'${header}',this.value)">${opts}</select>`;
   }
   const dd = config.dropdowns?.[header];
   if (dd) {
@@ -1338,8 +1367,8 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
     const opts = optList.map(o => `<option value="${o}"${o===value?' selected':''}>${o}</option>`).join('');
     return `<select onchange="updateCell(${rowIndex},'${header}',this.value)"><option value=""></option>${opts}</select>`;
   }
-  // 多行文字格（地址、備註）：contenteditable，字多自動換行、整列跟著長高，不再被截斷
-  const isAddr = (header === '地址' || header === '通訊地址' || header === '備註');
+  // 多行文字格（地址、備註、項目說明）：contenteditable，字多自動換行、整列跟著長高，不再被截斷
+  const isAddr = (header === '地址' || header === '通訊地址' || header === '備註' || header === '項目說明');
   if (isAddr) {
     return `<div class="addr-edit" contenteditable="true"
       onblur="updateCell(${rowIndex},'${header}',this.innerText.trim())"
@@ -1368,6 +1397,22 @@ function updateCell(rowIndex, header, value) {
   // ★ v23.1 培訓學員：選了電訪結果 → 重畫（顏色即時變、「待電訪」計數即時更新）
   if (SHEETS[currentSheet].dynamicHeaders && header === '確認出席') {
     renderTable();   // select 的 change 已完成，重畫不會打斷輸入
+    return;
+  }
+  // ★ v23.2 開銷記錄：選了「對應採購」→ 兩表真正串接：
+  //   金額空白 → 自動帶採購的「總額」；項目說明空白 → 自動帶品項名稱（都可再修改）
+  if (currentSheet === '開銷記錄' && header === '對應採購') {
+    const hit = purchaseOptions.find(o => o.id === String(value).trim());
+    if (hit) {
+      const curAmt = parseFloat(String(row['金額'] ?? '').replace(/,/g, '')) || 0;
+      const filledAmt = (!curAmt && hit.amt);
+      if (filledAmt) row['金額'] = String(hit.amt);
+      if (!String(row['項目說明'] ?? '').trim() && hit.item) row['項目說明'] = '採購｜' + hit.item;
+      showToast('✓ 已串接採購「' + hit.item + '」' + (filledAmt ? '，帶入金額 ' + hit.amt.toLocaleString('zh-TW') + '（可修改）' : ''));
+    }
+    renderTable();   // select 的 change 已完成，重畫不會打斷輸入
+    updateSumBar();
+    updateBudgetBar();
     return;
   }
   // ★ v22 分發記錄：選了「對應採購單號」→ 自動帶入品項名稱（帳看得懂，不用背編號）
