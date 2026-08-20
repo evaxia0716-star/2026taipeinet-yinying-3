@@ -238,19 +238,20 @@
     padding: 0.05rem 0.32rem; vertical-align: middle;
     white-space: nowrap;
   }
-  /* ★ v24 徵件審查：Drive 文件連結變成可點的按鈕（審查一定要點得開） */
-  .doc-link {
-    display: inline-flex; align-items: center; gap: 0.22rem;
-    margin: 2px; padding: 0.2rem 0.5rem;
-    border-radius: 5px; background: #ede9fe; color: #5b21b6;
-    border: 1px solid #c4b5fd;
-    font-size: 0.75rem; font-weight: 700; text-decoration: none;
-    white-space: nowrap; transition: all 0.15s;
+  /* ★ v27 徵件審查：文件只標示「有沒有上傳」，不做開啟連結。
+     檔案在報名者的雲端帳號，點開常被權限擋；要看內容請到 Google Sheets 點原生連結。 */
+  .doc-ok {
+    display: inline-block; padding: 0.12rem 0.45rem;
+    border-radius: 4px; background: #e8f5e9; color: var(--success);
+    border: 1px solid #a5d6a7;
+    font-size: 0.74rem; font-weight: 700; white-space: nowrap;
   }
-  .doc-link:hover { background: #ddd6fe; color: #4c1d95; }
-  .doc-link.video { background: #fce7f3; color: #9d174d; border-color: #f9a8d4; }
-  .doc-link.video:hover { background: #fbcfe8; }
-  .doc-none { color: var(--text-muted); font-size: 0.74rem; font-style: italic; }
+  .doc-none {
+    display: inline-block; padding: 0.12rem 0.45rem;
+    border-radius: 4px; background: #fef2f2; color: var(--danger);
+    border: 1px solid #fca5a5;
+    font-size: 0.74rem; font-weight: 700; white-space: nowrap;
+  }
   /* ★ v24 缺件標籤 */
   .miss-tag {
     display: inline-block; margin: 1px 2px 1px 0;
@@ -371,7 +372,7 @@
 <body>
 <header>
   <div class="header-left">
-    <div class="logo">PAC · 公用頻道 · v26</div>
+    <div class="logo">PAC · 公用頻道 · v27</div>
     <div class="project-title">台北有影 3<span class="sub">名單總管</span></div>
   </div>
   <div class="header-right">
@@ -418,9 +419,16 @@
 <div class="toast" id="toast"></div>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v26（徵件審查＋得獎配對＋獎項名額與獎金控管）');
+console.log('roster.html · v27（審查介面簡化：文件只標示有無上傳，不開啟檔案）');
 // ============================================================
-//  台北有影 3｜名單總管 roster.html  v26
+//  台北有影 3｜名單總管 roster.html  v27
+//  ------------------------------------------------------------
+//  v27 變更（純前端，Apps Script 不用動）：
+//   ★ 審查介面簡化：文件欄不再做「開啟」按鈕，只標示 ✓ 已上傳 ／ ✕ 未上傳。
+//     理由：檔案在報名者的雲端帳號，網頁點開常被權限擋，反而多一步挫折。
+//     要看實際內容，到 Google Sheets 點那一格的原生連結即可。
+//   ★ 審查模式欄位精簡：只留 作品名稱／審查狀態／擬獲獎項／缺件項目／
+//     參賽組別／參賽姓名／審查備註。文件齊不齊看「缺件項目」就夠。
 //  ------------------------------------------------------------
 //  v26 變更（需搭配 Apps Script v27.7 以上）：
 //   ★ 獎項名額與獎金控管：檔案上方 AWARDS 設定組別、獎項、名額、獎金。
@@ -521,8 +529,9 @@ const SHEETS = {
     headers:        [],
     stickyCol:      '作品名稱',
     // 審查模式：只顯示審查會用到的欄位（關鍵字模糊比對，不怕表單標題微調）
-    compactFields:  ['作品名稱','審查狀態','擬獲獎項','缺件項目','參賽組別','參賽姓名',
-                     '參賽影片','身分證','學生證明','審查備註'],
+    // 審查模式只留判斷會用到的欄位。文件齊不齊看「缺件項目」就夠，
+    // 不必逐欄確認；要看實際檔案請到 Google Sheets。
+    compactFields:  ['作品名稱','審查狀態','擬獲獎項','缺件項目','參賽組別','參賽姓名','審查備註'],
     dropdowns: {
       '審查狀態': ['待審','資格通過','資料不全','已退件','已補件']
       // 「擬獲獎項」的選項由 AWARDS 自動產生，見 renderCell
@@ -713,19 +722,15 @@ function resolveCompactHeaders(compactFields, fullHeaders) {
 function isUrlValue(v) {
   return /^https?:\/\//i.test(String(v ?? '').trim());
 }
-// ★ v24：把連結欄畫成可點的按鈕。一格裡有多個連結（換行或逗號分隔）也拆得開。
-function renderDocLinks(header, value) {
+// ★ v27：文件欄只標示「有沒有上傳」。
+//   檔案在報名者的雲端帳號，網頁點開常被權限擋，反而多一步挫折。
+//   要看實際內容，到 Google Sheets 點那一格的原生連結即可。
+function renderDocMark(header, value) {
   const raw = String(value ?? '').trim();
-  if (!raw) return '<div class="ro-display"><span class="doc-none">（未上傳）</span></div>';
-  const urls = raw.split(/[\s,，、]+/).filter(u => /^https?:\/\//i.test(u));
-  if (!urls.length) return `<div class="ro-display">${escapeHtml(raw)}</div>`;
-  const isVideo = /影片|video|作品/.test(header);
-  const label   = isVideo ? '▶ 看影片' : '📄 開啟';
-  const cls     = isVideo ? 'doc-link video' : 'doc-link';
-  const links = urls.map((u, i) =>
-    `<a class="${cls}" href="${escapeHtml(u)}" target="_blank" rel="noopener" title="${escapeHtml(header)}">`
-    + `${label}${urls.length > 1 ? ' ' + (i + 1) : ''}</a>`).join('');
-  return `<div class="ro-display">${links}</div>`;
+  if (!raw) return '<div class="ro-display"><span class="doc-none">✕ 未上傳</span></div>';
+  const n = raw.split(/[\s,，、]+/).filter(u => /^https?:\/\//i.test(u)).length;
+  return `<div class="ro-display" title="要看內容請到 Google Sheets 點這一格的連結">`
+    + `<span class="doc-ok">✓ 已上傳${n > 1 ? ' ×' + n : ''}</span></div>`;
 }
 function escapeHtml(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1029,7 +1034,7 @@ function switchTab(name) {
     const hint = document.createElement('span');
     hint.id = 'schoolHint';
     hint.className = 'school-hint';
-    hint.innerHTML = '🎬 點文件按鈕看影片與證件 → 選「審查狀態」→ 按「✓ 儲存」｜評審定案後填「擬獲獎項」，再按「🏆 轉入得獎者」';
+    hint.innerHTML = '🎬 看「缺件項目」判斷文件齊不齊 → 選「審查狀態」→ 按「✓ 儲存」｜要看影片與證件請到 Google Sheets';
     document.getElementById('toolbar').appendChild(hint);
   } else if (isExternalSheet) {
     const hint = document.createElement('span');
@@ -1556,17 +1561,16 @@ function renderCell(header, value, rowIndex, config, isReadOnly, row) {
     return `<div class="ro-display" title="系統自動核對；補齊後把審查狀態改成「已補件」">`
       + miss.map(m => `<span class="miss-tag">${escapeHtml(m)}</span>`).join('') + `</div>`;
   }
-  // ★ v24：唯讀欄位若是 Drive／網頁連結 → 變成可點的按鈕（審查一定要點得開）
+  // ★ v27：唯讀欄位若是 Drive 連結 → 只標示「已上傳」，不做開啟按鈕
   if (isReadOnly && isUrlValue(value)) {
-    return renderDocLinks(header, value);
+    return renderDocMark(header, value);
   }
   // 唯讀欄位
   if (isReadOnly) {
     if (!safe) {
-      // 文件類欄位空白 → 明確標示「未上傳」，比空白好判讀
       const docish = /影片|身分證|學生證明|上傳|檔案|同意|授權|抄襲|證明/.test(header);
       return `<div class="ro-display ${docish ? '' : 'empty'}">`
-        + (docish ? '<span class="doc-none">（未上傳）</span>' : '（空白）') + `</div>`;
+        + (docish ? '<span class="doc-none">✕ 未上傳</span>' : '（空白）') + `</div>`;
     }
     if (header === '出生年月日' && isMinorLocal(value) === true) {
       return `<div class="ro-display">${safe}<span class="minor-flag" title="未滿 18 歲，需家長／監護人授權書">未成年</span></div>`;
