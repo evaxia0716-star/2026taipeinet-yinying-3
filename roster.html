@@ -97,7 +97,7 @@
     color: var(--text-muted); font-size: 0.76rem;
     white-space: nowrap;
   }
-  /* 培訓學員：電訪模式／梯次／未確認 篩選器 */
+  /* 篩選器（培訓學員的電訪模式／徵件作品的審查模式共用樣式） */
   .training-filters { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
   .tf-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; }
   .training-filters select {
@@ -129,19 +129,14 @@
     table-layout: fixed;
     width: max-content; min-width: 100%;
   }
-  /* 自動撐開模式：欄寬由內容決定（行政區自己收窄、地址自己拉寬）。
-     用於學校名單這類「欄位不固定、長短差很多」的動態名單。 */
-  /* ★ v23.3 內層容器：寬度隨表格內容撐開，底部各列（加總／勾稽／來源）跟著同寬，
-     橫向捲動時右下角不再露白條、底線不斷 */
   .tw-inner { width: max-content; min-width: 100%; }
   .table-wrap.auto-width table { table-layout: auto; }
   .table-wrap.auto-width td { height: auto; }
   .table-wrap.auto-width td input,
   .table-wrap.auto-width td select {
     white-space: normal; word-break: break-word;
-    min-width: 60px;                 /* 太窄的欄至少留一點點手指點擊空間 */
+    min-width: 60px;
   }
-  /* 長內容欄（地址、Email、備註）給個上限，免得單一欄吃掉整個畫面 */
   .table-wrap.auto-width td { max-width: 320px; }
   .table-wrap.auto-width .ro-display,
   .table-wrap.auto-width td input,
@@ -161,12 +156,11 @@
     vertical-align: middle;
     height: var(--row-h);
   }
-  /* 欄寬類別（table-layout:fixed 下，欄寬以這裡的固定值為準，不隨內容伸縮） */
   col.col-num      { width: 32px; }
   col.col-id       { width: 38px; }
   col.col-tiny     { width: 52px; }
   col.col-tag      { width: 78px; }
-  col.col-cat      { width: 100px; }   /* ★ v23.2 類別欄加寬：「影片後製」四個字完整顯示 */
+  col.col-cat      { width: 100px; }
   col.col-role     { width: 80px; }
   col.col-code     { width: 90px; }
   col.col-status   { width: 90px; }
@@ -190,6 +184,8 @@
   col.col-action   { width: 32px; }
   col.col-default  { width: 110px; }
   col.col-long     { width: 200px; }
+  col.col-doc      { width: 96px; }   /* ★ v24 文件連結欄（影片、身分證、學生證明…） */
+  col.col-miss     { width: 150px; }  /* ★ v24 缺件項目欄 */
   td input, td select {
     background: transparent; border: 1.5px solid transparent;
     color: var(--text); font-family: "Noto Sans TC", sans-serif;
@@ -216,7 +212,6 @@
   }
   td.addr-cell .addr-edit:hover { border-color: var(--border2); background: var(--bg); }
   td.addr-cell .addr-edit:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px rgba(13,148,136,0.12); }
-  /* 唯讀欄位（培訓學員的表單原始資料、外部名單的「編號」） */
   td.readonly-cell { height: auto; vertical-align: top; padding: 0; background: #fafcfb; }
   td.readonly-cell .ro-display {
     display: block;
@@ -231,13 +226,11 @@
   td.readonly-cell .ro-display.empty {
     color: var(--text-muted); font-style: italic; font-size: 0.76rem;
   }
-  /* ★ v22：非 readonly-cell 內的 ro-display（採購造冊自動計算的已分發數）也要有基本樣式 */
   td .ro-display {
     display: block; width: 100%; min-height: var(--row-h);
     padding: 0.32rem 0.55rem; font-size: 0.82rem; line-height: 1.5;
     color: var(--text-dim); box-sizing: border-box; cursor: default;
   }
-  /* ★ v21 未成年標記（電訪時提醒：需家長／監護人授權書） */
   .minor-flag {
     display: inline-block; margin-left: 0.3rem;
     font-size: 0.66rem; font-weight: 700; color: #fff;
@@ -245,7 +238,32 @@
     padding: 0.05rem 0.32rem; vertical-align: middle;
     white-space: nowrap;
   }
-  /* 打勾框（確認出席／已通知） */
+  /* ★ v24 徵件審查：Drive 文件連結變成可點的按鈕（審查一定要點得開） */
+  .doc-link {
+    display: inline-flex; align-items: center; gap: 0.22rem;
+    margin: 2px; padding: 0.2rem 0.5rem;
+    border-radius: 5px; background: #ede9fe; color: #5b21b6;
+    border: 1px solid #c4b5fd;
+    font-size: 0.75rem; font-weight: 700; text-decoration: none;
+    white-space: nowrap; transition: all 0.15s;
+  }
+  .doc-link:hover { background: #ddd6fe; color: #4c1d95; }
+  .doc-link.video { background: #fce7f3; color: #9d174d; border-color: #f9a8d4; }
+  .doc-link.video:hover { background: #fbcfe8; }
+  .doc-none { color: var(--text-muted); font-size: 0.74rem; font-style: italic; }
+  /* ★ v24 缺件標籤 */
+  .miss-tag {
+    display: inline-block; margin: 1px 2px 1px 0;
+    padding: 0.08rem 0.42rem; border-radius: 4px;
+    background: #fef2f2; color: var(--danger); border: 1px solid #fca5a5;
+    font-size: 0.7rem; font-weight: 700; white-space: nowrap;
+  }
+  .miss-ok { color: var(--success); font-size: 0.76rem; font-weight: 700; }
+  /* ★ v24 審查狀態列底色：一眼看出哪幾件還沒處理 */
+  tbody tr.row-pending { background: #fffdf5; }
+  tbody tr.row-pending:hover { background: #fef9e7; }
+  tbody tr.row-incomplete { background: #fff7f7; }
+  tbody tr.row-incomplete:hover { background: #fdeaea; }
   .confirm-box { display:flex; align-items:center; justify-content:center; gap:0.3rem; height:100%; min-height:var(--row-h); cursor:pointer; user-select:none; }
   .confirm-box input { width:17px; height:17px; accent-color:var(--success); cursor:pointer; flex-shrink:0; }
   .confirm-box span { font-size:0.76rem; color:var(--text-muted); }
@@ -298,7 +316,6 @@
   .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
   .sync-dot.ok  { background: var(--success); }
   .sync-dot.err { background: var(--danger); }
-  /* ★ v23 預算儀表板：滑動桿＋進度條＋已花費／剩餘／使用率 */
   .budget-bar {
     background: #fff; border-bottom: 2px solid var(--border);
     padding: 0.55rem 1.5rem 0.65rem;
@@ -335,7 +352,6 @@
   }
   .toast.show { transform: translateX(0); }
   .toast.err  { background: #7f1d1d; }
-  /* 橫向捲動時固定「主名稱欄」（如廠商名稱／培訓學員姓名），方便對照 */
   .table-wrap.full-view th.sticky-col,
   .table-wrap.full-view td.sticky-col {
     position: sticky; left: 0; z-index: 1;
@@ -355,7 +371,7 @@
 <body>
 <header>
   <div class="header-left">
-    <div class="logo">PAC · 公用頻道 · v23</div>
+    <div class="logo">PAC · 公用頻道 · v26</div>
     <div class="project-title">台北有影 3<span class="sub">名單總管</span></div>
   </div>
   <div class="header-right">
@@ -371,7 +387,6 @@
   <span id="syncText">連線中…</span>
   <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace" id="rowInfo"></span>
 </div>
-<!-- ★ v23 預算儀表板：全頁常駐。滑桿拖動→放開自動儲存到 Google Sheets（全員共用同一個數字） -->
 <div class="budget-bar" id="budgetBar">
   <div class="budget-row">
     <span class="budget-label">💰 專案預算</span>
@@ -392,6 +407,9 @@
   </div>
   <span id="trainingFilters" class="training-filters" style="display:none"></span>
   <button class="add-btn" id="addRowBtn" onclick="addRow()">＋ 新增</button>
+  <button class="add-btn" id="toWinnerBtn" onclick="convertToWinners()"
+          style="display:none;background:#b45309;box-shadow:0 2px 6px rgba(180,83,9,0.3)"
+          title="把「擬獲獎項」有填的作品，自動建立到「得獎者」名單">🏆 轉入得獎者</button>
   <span class="row-count" id="rowCount"></span>
 </div>
 <main>
@@ -400,46 +418,46 @@
 <div class="toast" id="toast"></div>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v23.3（修正橫向捲動時右下角露白條、底部加總列寬度不足）');
+console.log('roster.html · v26（徵件審查＋得獎配對＋獎項名額與獎金控管）');
 // ============================================================
-//  台北有影 3｜名單總管 roster.html  v23.2
-//  v23.2 變更（純前端，Apps Script 不用動）：
-//   ① 內部名單畫面隱藏「編號」欄（和 # 重複）。編號仍在資料裡當對位鍵
-//      （像身分證字號，多人儲存／刪除全靠它），只是不顯示；# 是排隊號碼。
-//   ② 「類別」欄加寬（78→100px），「影片後製」等四字選項完整顯示。
-//   ③ 「項目說明」改多行格：字多自動斷行、列高自動長，不再被截斷。
-//   ④ 「對應採購」串接升級：空白顯示「—」不吵；選了品項→金額空白
-//      自動帶採購「總額」、項目說明空白自動帶品項名稱（都可再修改），
-//      選單變主色粗體，一眼看出這筆有勾稽。
-//   ⑤ 有「日期」欄的內部名單（開銷／分發）依日期由早到晚自動排序顯示
-//      （同日再依編號）。只排畫面，資料與儲存機制不動，後補的舊日期
-//      自動歸位；日期空白的排最後。
-//  v23.1 變更（純前端，Apps Script 不用動）：
-//   ① 預算滑桿上限改 200 萬（1 萬一格，拖起來更精準）；若 Sheets 裡
-//      存的預算超過 200 萬，滑桿上限會自動撐大，不會蓋掉。
-//   ② 培訓學員「確認出席」由打勾框改為「電訪結果」下拉：
-//      會來（綠）／取消（紅）／未接／關機／再聯絡（橘）。
-//      寫回報名表的仍是純文字，同事直接看 Sheet 也一目了然。
-//   ③ 「只看未確認」改為「只看待電訪」：空白、未接、關機、再聯絡
-//      都算還要打；會來、取消算有結果。清單就是待辦名單。
-//  v23 變更（需搭配 Apps Script v25 重新部署）：
-//   ① 頂部「預算儀表板」：滑動桿調總預算（預設 100 萬），放開自動
-//      儲存到 Google Sheets「專案設定」分頁（全員共用）。進度條即時
-//      顯示 已花費／剩餘／使用率；80% 轉橘、超支轉紅。
-//      「已花費」＝開銷記錄全部金額加總（開銷記錄是唯一的錢帳）。
-//   ② 開銷記錄新增「對應採購」下拉：這筆錢如果是買採購造冊裡的
-//      東西，就選對應品項；純執行費用留空。從此「花了多少」只看
-//      開銷記錄一張表，不會漏也不會重複。
-//   ③ 採購造冊底部「錢帳勾稽」提醒列：已到貨但開銷記錄找不到的
-//      品項會列出來，提醒「這筆錢還沒入帳」。
-//   ④ 分發記錄新增「活動場次」欄：把原本埋在備註的「Day 1／市民
-//      大聲說／8月場次」變成正式欄位，結案報告直接篩選交代。
-//  v22 分發記錄領用流水帳：自動算已分發／剩餘，存檔後回寫採購造冊
-//  v21.1 電訪模式欄位改版：職業身份＋得知管道；關鍵字模糊比對欄名
-//  v21 培訓學員電訪模式＋姓名凍結欄＋未成年紅標
-//  v20：學校名單動態欄位＋自動撐開欄寬；開銷下拉對齊 Sheet
-//  v18：培訓學員梯次篩選＋只看未確認
-//  v17：培訓學員「確認出席」打勾框
+//  台北有影 3｜名單總管 roster.html  v26
+//  ------------------------------------------------------------
+//  v26 變更（需搭配 Apps Script v27.7 以上）：
+//   ★ 獎項名額與獎金控管：檔案上方 AWARDS 設定組別、獎項、名額、獎金。
+//     ・「擬獲獎項」下拉顯示「已配/上限·獎金」，選超額立刻紅字提醒
+//     ・底部配額看板：各組各獎已配幾名、獎金已配多少／預算多少
+//     ・轉入得獎者時自動帶入「組別」與「獎金」金額
+//     ・得獎者名單新增「組別」「獎金」兩欄，可直接據以匯款與結案核銷
+//  ------------------------------------------------------------
+//  v25 變更（需搭配 Apps Script v27.6 以上）：
+//   ★ 得獎配對：徵件作品新增「擬獲獎項」欄，評審定案後選好獎項，
+//     按「🏆 轉入得獎者」，系統自動把作品名、姓名、團隊、電話、Email
+//     搬進「得獎者」名單。用作品名稱比對，重複轉入只更新獎項不會產生
+//     重複列；得獎者名單裡已經人工填好的欄位（通訊地址、出席確認…）
+//     完全不會被覆蓋。
+//     ⚠️ 通訊地址徵件表沒有收，要另外聯絡取得（寄獎狀、匯獎金要用）。
+//  ------------------------------------------------------------
+//  v24 變更（需搭配 Apps Script v27.3 以上）：
+//   ① 新增「徵件作品」分頁：像培訓學員一樣讀報名表、直接審查、
+//      結果寫回 Google Sheets。可編輯欄：審查狀態、缺件項目、審查備註。
+//   ② Drive 文件變成可點的按鈕：影片、身分證、學生證明、同意書等
+//      連結欄位以前是唯讀純文字（一長串網址、點不開），
+//      現在自動變成「▶ 看影片」「📄 開啟」按鈕，另開分頁不離開表格。
+//      審查一定要點得開文件，這是這一版最關鍵的改動。
+//   ③ 自動缺件標示：「缺件項目」由系統依組別自動算出（學生證明只有
+//      學生組要），紅色標籤顯示，不用人工一欄一欄核對。
+//   ④ 審查模式：只顯示審查會用到的欄位（作品名、狀態、缺件、組別、
+//      文件連結、備註），關掉就看報名表全部資訊。
+//   ⑤ 列底色提醒：待審淡黃、缺件淡紅，一眼看出哪幾件還沒處理。
+//   ⑥ 儲存後重讀不再蓋掉畫面（背景更新，資料一直看得到）。
+//  ------------------------------------------------------------
+//  v23.3 修正橫向捲動時右下角露白條、底部加總列寬度不足
+//  v23.2 隱藏編號欄／類別欄加寬／項目說明多行／對應採購串接／日期排序
+//  v23.1 預算滑桿 200 萬／培訓電訪結果下拉／只看待電訪
+//  v23   預算儀表板／開銷對應採購／採購錢帳勾稽／分發活動場次
+//  v22   分發記錄領用流水帳
+//  v21   培訓學員電訪模式＋姓名凍結欄＋未成年紅標
+//  v20   學校名單動態欄位＋自動撐開欄寬
 // ============================================================
 const SHEETS = {
   '合作廠商': {
@@ -458,7 +476,9 @@ const SHEETS = {
   },
   '得獎者': {
     color: '#065f46',
-    headers: ['編號','獎項','作品名稱','得獎者姓名','團隊名稱','電話','Email','通訊地址','出席確認','獎金匯款狀態','備註'],
+    headers: ['編號','獎項','組別','作品名稱','得獎者姓名','團隊名稱','獎金','電話','Email','通訊地址','出席確認','獎金匯款狀態','備註'],
+    stickyCol: '作品名稱',
+    amountCol: '獎金',
     dropdowns: {
       '出席確認':    ['待確認','本人出席','代理出席','無法出席'],
       '獎金匯款狀態':['待匯款','資料齊備','已匯款','退匯']
@@ -487,25 +507,43 @@ const SHEETS = {
     headers: ['編號','組別','姓名','職務','電話','Email','到場時間','主要任務','設備領用','備註'],
     dropdowns: { '組別':['總務','場控','報到','攝錄影','公關','接待','機動','其他'] }
   },
+  // ★ v24 新增：影片徵件作品審查
+  //   跟培訓學員同一套機制——資料住在另一個雲端帳號的表單回覆表，
+  //   這裡只讀它、只寫「審查狀態／缺件項目／審查備註」三欄，
+  //   表單原始資料一個字都不會被動到。
+  '徵件作品': {
+    color: '#7c3aed',
+    sourceAction:   'readSubmission',
+    saveAction:     'writeSubmission',
+    dynamicHeaders: true,
+    sourceName:     '影片徵件報名表（Google 表單）',
+    editable:       ['審查狀態','擬獲獎項','缺件項目','審查備註'],
+    headers:        [],
+    stickyCol:      '作品名稱',
+    // 審查模式：只顯示審查會用到的欄位（關鍵字模糊比對，不怕表單標題微調）
+    compactFields:  ['作品名稱','審查狀態','擬獲獎項','缺件項目','參賽組別','參賽姓名',
+                     '參賽影片','身分證','學生證明','審查備註'],
+    dropdowns: {
+      '審查狀態': ['待審','資格通過','資料不全','已退件','已補件']
+      // 「擬獲獎項」的選項由 AWARDS 自動產生，見 renderCell
+    },
+    isSubmission: true
+  },
   '培訓學員': {
     color: '#0369a1',
     sourceAction:   'readTrainingForm',
     saveAction:     'writeTrainingRoster',
-    dynamicHeaders: true,                    // 欄位由 API 動態提供
+    dynamicHeaders: true,
     sourceName:     '人才培訓報名表（Google 表單）',
-    editable:       ['確認出席','出席紀錄','結業狀態','備註'],  // 與後端 TRAINING_EDITABLE_FIELDS 一致
-    headers: [],                             // 載入後從 API 填入
-    // ★ v21 完整模式：姓名凍結在最左，往右捲不迷路
+    editable:       ['確認出席','出席紀錄','結業狀態','備註'],
+    headers: [],
     stickyCol: '姓名',
-    // ★ v21.1 電訪模式：只顯示打電話會用到的欄位（依這個順序排）。
-    //   「職業」「得知本課程」用關鍵字比對（實際欄名是問卷長標題，
-    //   例如「您的職業或身份」「您是從何處得知本課程資訊?」，
-    //   這樣寫不怕標題微調或全形半形問號差異）。
     compactFields: ['姓名','確認出席','參加梯次','聯絡電話','出生年月日','職業','得知本課程','備註'],
     dropdowns: {
       '出席紀錄': ['全程出席','部分出席','缺席'],
       '結業狀態': ['在學中','已結業','未結業','中途退出']
-    }
+    },
+    isTraining: true
   },
   '採購造冊': {
     color: '#ca8a04',
@@ -517,26 +555,19 @@ const SHEETS = {
     }
   },
   '分發記錄': {
-    // ★ v22：採購物資「領用流水帳」。像銀行存摺：採購造冊是帳戶總額，
-    //   這裡每領一次記一筆，系統自動算已分發與剩餘。
-    // ★ v23：新增「活動場次」欄——這批東西用在哪一場（例：市民大聲說 Day 1、
-    //   8月台北場），結案報告直接篩選交代，不必再翻備註。
     color: '#ea580c',
     headers: ['編號','日期','對應採購單號','品項名稱','領用數量','用途','活動場次','領用人','經手人','備註'],
-    needsPurchase: true,            // 「對應採購單號」下拉取自採購造冊
-    distLog: true,                  // 底部顯示各品項「已領／總數／剩」統計列
-    readonlyCols: ['品項名稱'],     // 選了採購單號自動帶入，不必手打
+    needsPurchase: true,
+    distLog: true,
+    readonlyCols: ['品項名稱'],
     dropdowns: {}
   },
   '開銷記錄': {
-    // ★ v23：新增「對應採購」下拉——這筆錢若是買採購造冊裡的東西就選品項，
-    //   純執行費用（餐飲、講師費…）留空。開銷記錄從此是唯一的錢帳。
     color: '#b45309',
     headers: ['編號','日期','類別','項目說明','請款人','對應採購','金額','付款方式','付款狀態','負責人','備註'],
-    needsPurchase: true,            // 「對應採購」下拉取自採購造冊
+    needsPurchase: true,
     dropdowns: {
       '類別':    ['場地','設備','印刷設計','影片製作','餐飲','公關','人事','其他'],
-      // ★ 與後端／Sheet 資料驗證完全對齊（不一致會被 Sheet 打回票→儲存失敗）
       '付款方式':['虛擬儲值','匯款','現金','待定'],
       '付款狀態':['待申請','已申請','暫緩']
     },
@@ -548,8 +579,8 @@ const SHEETS = {
     saveAction:     'writeSchoolRoster',
     dynamicHeaders: true,
     sourceName:     '臺北市正式派報清單（Google Sheets）',
-    autoWidth:      true,                    // 欄寬由內容決定（不用固定停車格）
-    headers: [],                             // 載入後從 API 填入
+    autoWidth:      true,
+    headers: [],
     dropdowns: {
       '學制':    ['高中職','五專','大學','社區大學'],
       '確認狀態':['待寄送','已寄送','退信']
@@ -561,36 +592,114 @@ let currentSheet = SHEET_NAMES[0];
 let tableData    = {};
 let loadedSheets = new Set();
 let isDirty      = false;
-let purchaseOptions = [];   // 「對應採購單號／對應採購」的下拉選項（取自採購造冊編號）
+let purchaseOptions = [];
 // ── 培訓學員：梯次／未確認／電訪模式 篩選狀態 ──
 const TRAINING_BATCH_FIELD = '參加梯次';
-// ★ v23.1 電訪結果選項（存回 Sheet 的就是這些字）
 const TRAINING_CALL_OPTIONS = ['會來','取消','未接','關機','再聯絡'];
-// 還要再打嗎？空白＝還沒打；未接／關機／再聯絡＝打了沒結果 → 都算「待電訪」
-// 會來／取消＝有結果，不用再打
 const trainingNeedsCall = v => {
   const s = String(v ?? '').trim();
   return s === '' || (s !== '會來' && s !== '取消');
 };
-let trainingBatchFilter = '';         // '' = 全部；'__blank__' = 未填梯次
-let trainingUnconfirmedOnly = false;  // 只看「確認出席」還空白的（電話還沒打的）
-let trainingCompactView = true;       // ★ v21 電訪模式：預設開啟（只顯示打電話用的欄位）
+let trainingBatchFilter = '';
+let trainingUnconfirmedOnly = false;
+let trainingCompactView = true;
+// ── ★ v24 徵件作品：審查篩選狀態 ──
+const SUB_STATUS_OPTIONS = ['待審','資格通過','資料不全','已退件','已補件'];
+// ★★ 獎項與獎金設定（要跟 Apps Script 的 AWARDS 一致）★★
+const AWARDS = {
+  groups: ['劇情組','非劇情組','青春學生組','熱血學生組'],
+  levels: [
+    { name: '首獎', quota: 1, prize: 20000 },
+    { name: '優選', quota: 1, prize: 10000 },
+    { name: '佳作', quota: 3, prize: 5000 }
+  ],
+  // ⚠️ 待確認：四組 × 45,000 ＝ 180,000，湊到 20 萬 → 社大獎 2 名。
+  //    若實際是「四組各選 1 名」＝ 4 名，改成 quota: 4（總額 22 萬）。
+  special: [
+    { name: '社大獎', quota: 2, prize: 10000 }
+  ]
+};
+const SUB_AWARD_OPTIONS = AWARDS.levels.map(l => l.name)
+  .concat(AWARDS.special.map(l => l.name))
+  .concat(['未獲獎']);
+const awardInfo = name => {
+  const n = String(name ?? '').trim();
+  return AWARDS.levels.concat(AWARDS.special).find(l => l.name === n) || null;
+};
+const isSpecialAward = name => AWARDS.special.some(l => l.name === String(name ?? '').trim());
+const awardBudgetTotal = () =>
+  AWARDS.levels.reduce((s, l) => s + l.quota * l.prize * AWARDS.groups.length, 0) +
+  AWARDS.special.reduce((s, l) => s + l.quota * l.prize, 0);
+// 各組各獎已配幾名、獎金加總、超額清單
+function awardQuota(rows) {
+  const count = {};
+  let usedPrize = 0;
+  (rows || []).forEach(r => {
+    const a = String(r['擬獲獎項'] ?? '').trim();
+    if (!a || a === '未獲獎') return;
+    const g = pickVal(r, ['參賽組別','組別']) || '（未填組別）';
+    const key = isSpecialAward(a) ? ('*||' + a) : (g + '||' + a);
+    count[key] = (count[key] || 0) + 1;
+    const info = awardInfo(a);
+    if (info) usedPrize += info.prize;
+  });
+  const out = [], specials = [], overList = [], unknown = [];
+  AWARDS.groups.forEach(g => {
+    AWARDS.levels.forEach(l => {
+      const used = count[g + '||' + l.name] || 0;
+      const over = Math.max(0, used - l.quota);
+      out.push({ group: g, level: l.name, used, quota: l.quota, prize: l.prize, over });
+      if (over) overList.push(`${g} ${l.name} 超額 ${over}`);
+    });
+  });
+  AWARDS.special.forEach(l => {
+    const used = count['*||' + l.name] || 0;
+    const over = Math.max(0, used - l.quota);
+    specials.push({ level: l.name, used, quota: l.quota, prize: l.prize, over });
+    if (over) overList.push(`${l.name} 超額 ${over}`);
+  });
+  Object.keys(count).forEach(k => {
+    const [g, lv] = k.split('||');
+    if (g !== '*' && !AWARDS.groups.includes(g)) unknown.push(`${g} ${lv}（${count[k]} 件）`);
+  });
+  return { rows: out, specials, overList, unknown, usedPrize, totalPrize: awardBudgetTotal() };
+}
+const subIsAwarded = v => {
+  const a = String(v ?? '').trim();
+  return a !== '' && a !== '未獲獎';
+};
+// 徵件表的欄名很長（例：「聯絡者電子信箱」），用關鍵字模糊比對抓值
+function pickVal(row, keywords) {
+  for (const k of keywords) {
+    if (row[k] !== undefined && String(row[k]).trim() !== '') return String(row[k]).trim();
+  }
+  for (const k of keywords) {
+    for (const h of Object.keys(row)) {
+      if (h.includes(k) && String(row[h] ?? '').trim() !== '') return String(row[h]).trim();
+    }
+  }
+  return '';
+}
+// 哪些狀態算「還沒審完」（與 Apps Script 的 SUBMISSION_PENDING_STATUS 一致）
+const SUB_PENDING = ['','待審','資料不全','已補件'];
+const subIsPending = v => SUB_PENDING.includes(String(v ?? '').trim());
+let subStatusFilter  = '';      // '' = 全部
+let subPendingOnly   = false;   // 只看待審
+let subMissingOnly   = false;   // 只看缺件
+let subCompactView   = true;    // 審查模式（預設開啟）
 // ── 多人協作：每個分頁各自記錄「改過的列」與「刪除的列」 ──
-let dirtyKeys    = {};   // { 分頁名稱: Set(列的鍵) }
-let deletedKeys  = {};   // { 分頁名稱: Set(被刪除列的編號) }
+let dirtyKeys    = {};
+let deletedKeys  = {};
 function rowKeyOf(sheetName, row) {
   const cfg = SHEETS[sheetName];
-  if (cfg.dynamicHeaders) return String(row._key || row['編號'] || row._rowIndex || '');  // 培訓：時間戳記；學校：編號
-  return String(row['編號'] || '').trim();                                  // 內部名單：編號
+  if (cfg.dynamicHeaders) return String(row._key || row['編號'] || row._rowIndex || '');
+  return String(row['編號'] || '').trim();
 }
 function markRowDirty(sheetName, key) {
   if (!key) return;
   (dirtyKeys[sheetName] = dirtyKeys[sheetName] || new Set()).add(String(key));
   isDirty = true;
 }
-// ★ v21.1：把 compactFields 的關鍵字對應到實際欄名。
-//   先找完全相同的欄名，找不到再找「包含這個關鍵字」的欄名
-//   （例如關鍵字「職業」→ 命中「您的職業或身份」）。
 function resolveCompactHeaders(compactFields, fullHeaders) {
   const out = [];
   compactFields.forEach(f => {
@@ -600,8 +709,35 @@ function resolveCompactHeaders(compactFields, fullHeaders) {
   });
   return out;
 }
+// ★ v24：這一格是不是 Drive／網頁連結（審查要點得開）
+function isUrlValue(v) {
+  return /^https?:\/\//i.test(String(v ?? '').trim());
+}
+// ★ v24：把連結欄畫成可點的按鈕。一格裡有多個連結（換行或逗號分隔）也拆得開。
+function renderDocLinks(header, value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return '<div class="ro-display"><span class="doc-none">（未上傳）</span></div>';
+  const urls = raw.split(/[\s,，、]+/).filter(u => /^https?:\/\//i.test(u));
+  if (!urls.length) return `<div class="ro-display">${escapeHtml(raw)}</div>`;
+  const isVideo = /影片|video|作品/.test(header);
+  const label   = isVideo ? '▶ 看影片' : '📄 開啟';
+  const cls     = isVideo ? 'doc-link video' : 'doc-link';
+  const links = urls.map((u, i) =>
+    `<a class="${cls}" href="${escapeHtml(u)}" target="_blank" rel="noopener" title="${escapeHtml(header)}">`
+    + `${label}${urls.length > 1 ? ' ' + (i + 1) : ''}</a>`).join('');
+  return `<div class="ro-display">${links}</div>`;
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+// ★ v24：缺件清單（後端算好放在 _missing）
+function missingOf(row) {
+  const m = row && row._missing;
+  if (Array.isArray(m)) return m;
+  if (typeof m === 'string' && m.trim()) return m.split(/[、,，]/).filter(Boolean);
+  return [];
+}
 // ── 「對應採購單號／對應採購」：選項即時取自採購造冊的編號 ──
-// ★ v22：多帶 item（品項名稱）與 qty（數量），給分發記錄自動帶品項、算剩餘用
 function buildPurchaseOptions() {
   const rows = tableData['採購造冊'] || [];
   purchaseOptions = rows
@@ -610,11 +746,10 @@ function buildPurchaseOptions() {
       const id   = String(r['編號']).trim();
       const item = String(r['品項名稱'] ?? '').trim();
       const qty  = String(r['數量'] ?? '').trim();
-      const amt  = parseFloat(String(r['總額'] ?? '').replace(/,/g, '')) || 0;   // ★ v23.2 給開銷自動帶金額用
+      const amt  = parseFloat(String(r['總額'] ?? '').replace(/,/g, '')) || 0;
       return { id, item, qty, amt, label: item ? `${id} · ${item}` : id };
     });
 }
-// 確保採購造冊已載入（開銷記錄／分發記錄要用它的編號當下拉）；沒載過就先抓一次
 function ensurePurchaseOptions() {
   if (loadedSheets.has('採購造冊')) { buildPurchaseOptions(); return Promise.resolve(); }
   return fetch(`${API_URL}?action=readRoster&sheet=${encodeURIComponent('採購造冊')}`, { redirect: 'follow' })
@@ -629,7 +764,6 @@ function ensurePurchaseOptions() {
     .catch(() => {})
     .then(() => buildPurchaseOptions());
 }
-// ★ v22：確保「分發記錄」已載入（看採購造冊時要靠它算已分發／剩餘）
 function ensureDistLog() {
   if (loadedSheets.has('分發記錄')) return Promise.resolve();
   return fetch(`${API_URL}?action=readRoster&sheet=${encodeURIComponent('分發記錄')}`, { redirect: 'follow' })
@@ -643,7 +777,6 @@ function ensureDistLog() {
     })
     .catch(() => {});
 }
-// ★ v23：確保「開銷記錄」已載入（預算儀表板的「已花費」與採購勾稽都要用）
 function ensureExpense() {
   if (loadedSheets.has('開銷記錄')) return Promise.resolve();
   return fetch(`${API_URL}?action=readRoster&sheet=${encodeURIComponent('開銷記錄')}`, { redirect: 'follow' })
@@ -658,12 +791,10 @@ function ensureExpense() {
     .catch(() => {});
 }
 // ============================================================
-//  ★ v23 預算儀表板
+//  預算儀表板
 //  比喻：預算是「油箱容量」，開銷記錄是「已用掉的油」。
-//  滑桿調的是油箱大小；進度條顯示油用到哪了。
-//  數字存在 Google Sheets「專案設定」分頁 → 同事打開看到同一個數字。
 // ============================================================
-let projectBudget = 1000000;   // 預設 100 萬；載入後以 Sheets 為準
+let projectBudget = 1000000;
 const fmtNT = n => 'NT$ ' + (Math.round(n) || 0).toLocaleString('zh-TW');
 function loadBudget() {
   fetch(`${API_URL}?action=readBudget`, { redirect: 'follow' })
@@ -672,19 +803,19 @@ function loadBudget() {
       if (res && res.ok && res.budget > 0) {
         projectBudget = res.budget;
         const s = document.getElementById('budgetSlider');
-        if (projectBudget > +s.max) s.max = String(projectBudget);   // 超過滑桿上限就把上限撐大
+        if (projectBudget > +s.max) s.max = String(projectBudget);
         s.value = String(projectBudget);
       }
       updateBudgetBar();
     })
     .catch(() => { updateBudgetBar(); });
 }
-function onBudgetSlide(v) {        // 拖動中：即時預覽，不打 API
+function onBudgetSlide(v) {
   projectBudget = +v;
   updateBudgetBar();
 }
 let budgetSaveTimer;
-function saveBudget(v) {           // 放開滑桿：存回 Sheets（0.4 秒防抖，連拖只存最後一次）
+function saveBudget(v) {
   projectBudget = +v;
   updateBudgetBar();
   clearTimeout(budgetSaveTimer);
@@ -702,7 +833,7 @@ function saveBudget(v) {           // 放開滑桿：存回 Sheets（0.4 秒防�
     .catch(err => showToast('預算儲存失敗：' + err.message, 'err'));
   }, 400);
 }
-function expenseSpent_() {         // 已花費 ＝ 開銷記錄全部金額加總（唯一的錢帳）
+function expenseSpent_() {
   const num = v => parseFloat(String(v ?? '0').replace(/,/g, '')) || 0;
   return (tableData['開銷記錄'] || []).reduce((s, r) => s + num(r['金額']), 0);
 }
@@ -723,7 +854,6 @@ function updateBudgetBar() {
       `<span class="budget-stat"><span class="k">使用率</span><span class="v" style="color:${pctCol}">${pct}%</span></span>`
     : `<span class="budget-stat"><span class="k">開銷資料載入中…</span></span>`;
 }
-// ★ v23 採購造冊「錢帳勾稽」：已到貨但開銷記錄查無「對應採購」的品項 → 提醒還沒入帳
 function purchaseLinkBarHtml(rows) {
   if (!loadedSheets.has('開銷記錄')) {
     return '<div class="sum-item"><span class="sum-label">💡 錢帳勾稽</span><span class="sum-val">開銷記錄載入中…</span></div>';
@@ -745,7 +875,6 @@ function purchaseLinkBarHtml(rows) {
   return '<div class="sum-item"><span class="sum-label">💡 還沒入帳（開銷記錄查無這些採購）</span>' +
          `<span class="sum-val" style="color:var(--warn)">${missing.join('、')}</span></div>`;
 }
-// ★ v22：各品項「已領用」加總（key = 採購造冊編號）
 function distSums() {
   const toNum = v => parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
   const used = {};
@@ -756,7 +885,6 @@ function distSums() {
   });
   return used;
 }
-// ★ v22：分發記錄底部統計列——每個品項「已領／總數／剩」
 function distBarInnerHtml() {
   const toNum = v => parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
   const used  = distSums();
@@ -778,8 +906,61 @@ function updateDistBar() {
   const bar = document.getElementById('distBar');
   if (bar) bar.innerHTML = distBarInnerHtml();
 }
-// ★ v22：存完分發記錄後，把各品項加總回寫採購造冊「已分發數」
-//   （只送「編號＋已分發數」兩欄，後端 mergeIntoSheet_ 只動這一欄，不碰其他資料）
+// ★ v24 徵件作品：底部審查進度統計列
+function subBarInnerHtml(rows) {
+  const total   = rows.length;
+  const pending = rows.filter(r => subIsPending(r['審查狀態'])).length;
+  const passed  = rows.filter(r => String(r['審查狀態'] ?? '').trim() === '資格通過').length;
+  const missing = rows.filter(r => missingOf(r).length).length;
+  const awarded = rows.filter(r => subIsAwarded(r['擬獲獎項'])).length;
+  const pct     = total ? Math.round((total - pending) / total * 100) : 0;
+  return `
+    <div class="sum-item"><span class="sum-label">收件</span><span class="sum-val total">${total} 件</span></div>
+    <div class="sum-item"><span class="sum-label">待審</span><span class="sum-val" style="color:${pending ? 'var(--warn)' : 'var(--success)'}">${pending} 件</span></div>
+    <div class="sum-item"><span class="sum-label">資格通過</span><span class="sum-val" style="color:var(--success)">${passed} 件</span></div>
+    <div class="sum-item"><span class="sum-label">文件不齊</span><span class="sum-val" style="color:${missing ? 'var(--danger)' : 'var(--success)'}">${missing} 件</span></div>
+    <div class="sum-item"><span class="sum-label">審查進度</span><span class="sum-val">${pct}%</span></div>
+    ${awarded ? `<div class="sum-item"><span class="sum-label">🏆 擬獲獎</span><span class="sum-val" style="color:#b45309">${awarded} 件</span></div>` : ''}`;
+}
+// ★ v26 獎項配額看板：每組每獎已配幾名、獎金加總
+function awardBarInnerHtml(rows) {
+  const q = awardQuota(rows);
+  const total = q.rows.reduce((n, r) => n + r.used, 0) + q.specials.reduce((n, r) => n + r.used, 0);
+  if (!total) {
+    return `<div class="sum-item"><span class="sum-label">🏆 獎項配額</span>` +
+           `<span class="sum-val" style="color:var(--text-muted)">評審定案後在「擬獲獎項」選獎，這裡會即時顯示名額與獎金</span></div>`;
+  }
+  const fmt = n => 'NT$ ' + n.toLocaleString('zh-TW');
+  const grpHtml = AWARDS.groups.map(g => {
+    const parts = q.rows.filter(r => r.group === g).map(r => {
+      const col = r.over ? 'var(--danger)' : (r.used === r.quota ? 'var(--success)' : 'var(--text-dim)');
+      return `<span style="color:${col}">${r.level} ${r.used}/${r.quota}${r.over ? ' ⚠️' : ''}</span>`;
+    }).join('　');
+    return `<div class="sum-item"><span class="sum-label">${g}</span><span class="sum-val">${parts}</span></div>`;
+  }).join('');
+  const spHtml = q.specials.map(sp => {
+    const col = sp.over ? 'var(--danger)' : (sp.used === sp.quota ? 'var(--success)' : 'var(--text-dim)');
+    return `<div class="sum-item"><span class="sum-label">${sp.level}</span>` +
+           `<span class="sum-val" style="color:${col}">${sp.used}/${sp.quota}${sp.over ? ' ⚠️' : ''}</span></div>`;
+  }).join('');
+  const overCol = q.usedPrize > q.totalPrize ? 'var(--danger)' : '#b45309';
+  const warn = q.overList.length
+    ? `<div class="sum-item"><span class="sum-label" style="color:var(--danger)">🔴 超額</span><span class="sum-val" style="color:var(--danger)">${q.overList.join('、')}</span></div>` : '';
+  const unk = q.unknown.length
+    ? `<div class="sum-item"><span class="sum-label" style="color:var(--warn)">⚠️ 組別對不上設定</span><span class="sum-val" style="color:var(--warn)">${q.unknown.join('、')}</span></div>` : '';
+  return grpHtml + spHtml +
+    `<div class="sum-item"><span class="sum-label">🏆 獎金已配</span>` +
+    `<span class="sum-val" style="color:${overCol}">${fmt(q.usedPrize)} / ${fmt(q.totalPrize)}</span></div>` +
+    warn + unk;
+}
+function updateAwardBar() {
+  const bar = document.getElementById('awardBar');
+  if (bar) bar.innerHTML = awardBarInnerHtml(tableData[currentSheet] || []);
+}
+function updateSubBar() {
+  const bar = document.getElementById('subBar');
+  if (bar) bar.innerHTML = subBarInnerHtml(tableData[currentSheet] || []);
+}
 function syncDistributedToPurchase() {
   ensurePurchaseOptions().then(() => {
     const used = distSums();
@@ -787,7 +968,7 @@ function syncDistributedToPurchase() {
     const updates = [];
     rows.forEach(r => {
       const id = String(r['編號'] ?? '').trim();
-      if (!id || used[id] === undefined) return;   // 沒有流水帳的品項不動（保留手填值）
+      if (!id || used[id] === undefined) return;
       if (String(r['已分發數'] ?? '').trim() !== String(used[id])) {
         r['已分發數'] = String(used[id]);
         updates.push({ '編號': id, '已分發數': String(used[id]) });
@@ -807,8 +988,8 @@ function syncDistributedToPurchase() {
 window.addEventListener('DOMContentLoaded', () => {
   buildTabs();
   switchTab(SHEET_NAMES[0]);
-  loadBudget();                                   // ★ v23 讀取共用預算
-  ensureExpense().then(() => updateBudgetBar());  // ★ v23 預載開銷 → 算「已花費」
+  loadBudget();
+  ensureExpense().then(() => updateBudgetBar());
 });
 function buildTabs() {
   const bar = document.getElementById('tabsBar');
@@ -832,15 +1013,25 @@ function switchTab(name) {
   document.getElementById('searchInput').value = '';
   trainingBatchFilter = '';
   trainingUnconfirmedOnly = false;
-  trainingCompactView = true;   // ★ v21 每次進來預設回到電訪模式（好記、好預期）
+  trainingCompactView = true;
+  subStatusFilter = '';
+  subPendingOnly  = false;
+  subMissingOnly  = false;
+  subCompactView  = true;
   const config = SHEETS[name];
-  // 外部 Sheet（學校名單、培訓學員）：禁用「新增」、不允許刪列
   const isExternalSheet = !!config.saveAction;
   document.getElementById('addRowBtn').style.display = isExternalSheet ? 'none' : '';
-  // 提示語：根據 sheet 種類顯示不同訊息
+  const wb = document.getElementById('toWinnerBtn');
+  if (wb) wb.style.display = config.isSubmission ? '' : 'none';
   const existingHint = document.getElementById('schoolHint');
   if (existingHint) existingHint.remove();
-  if (isExternalSheet) {
+  if (config.isSubmission) {
+    const hint = document.createElement('span');
+    hint.id = 'schoolHint';
+    hint.className = 'school-hint';
+    hint.innerHTML = '🎬 點文件按鈕看影片與證件 → 選「審查狀態」→ 按「✓ 儲存」｜評審定案後填「擬獲獎項」，再按「🏆 轉入得獎者」';
+    document.getElementById('toolbar').appendChild(hint);
+  } else if (isExternalSheet) {
     const hint = document.createElement('span');
     hint.id = 'schoolHint';
     hint.className = 'school-hint';
@@ -853,14 +1044,12 @@ function switchTab(name) {
     }
     document.getElementById('toolbar').appendChild(hint);
   } else if (config.distLog) {
-    // ★ v22：分發記錄的使用提示
     const hint = document.createElement('span');
     hint.id = 'schoolHint';
     hint.className = 'school-hint';
     hint.innerHTML = '📦 每領一次記一筆；選「對應採購單號」自動帶品項，存檔後自動回寫採購造冊的已分發數';
     document.getElementById('toolbar').appendChild(hint);
   } else if (name === '開銷記錄') {
-    // ★ v23：開銷記錄的使用提示（唯一錢帳原則）
     const hint = document.createElement('span');
     hint.id = 'schoolHint';
     hint.className = 'school-hint';
@@ -870,40 +1059,37 @@ function switchTab(name) {
   if (!loadedSheets.has(name)) {
     loadCurrentSheet();
   } else if (config.needsPurchase) {
-    ensurePurchaseOptions().then(() => renderTable());   // 確保採購編號下拉是最新的
+    ensurePurchaseOptions().then(() => renderTable());
   } else if (name === '採購造冊') {
-    // ★ v22 算已分發／剩餘要用流水帳；★ v23 錢帳勾稽要用開銷記錄
     Promise.all([ensureDistLog(), ensureExpense()]).then(() => renderTable());
   } else {
     renderTable();
   }
 }
-function loadCurrentSheet() {
+// silent = true 時不蓋掉畫面（儲存後的背景重讀用，資料一直看得到）
+function loadCurrentSheet(silent) {
   const name   = currentSheet;
   const config = SHEETS[name];
   const url    = config.sourceAction
     ? `${API_URL}?action=${config.sourceAction}`
     : `${API_URL}?action=readRoster&sheet=${encodeURIComponent(name)}`;
-  setTableLoading();
-  setSyncState('loading', '連線中…');
-  loadBudget();   // ★ v23 順手同步最新預算（同事可能改過）
+  if (!silent) setTableLoading();
+  setSyncState('loading', silent ? '背景更新中…' : '連線中…');
+  loadBudget();
   fetch(url, { redirect: 'follow' })
     .then(r => r.json())
     .then(res => {
       if (!res.ok) throw new Error(res.msg || '讀取失敗');
       tableData[name] = res.data || [];
-      // 動態欄位：從 API 回傳填入 headers 與 editable
       if (config.dynamicHeaders) {
         if (res.headers) {
           let hs = res.headers.slice();
           if (config.compactFields) {
-            // ★ v21.1 培訓學員：把「電訪重點欄」照順序搬到最前面（關鍵字模糊比對），
-            //   其餘照原順序跟在後面。完整模式往右捲時，前段就是最常用的欄位。
+            // 把重點欄照順序搬到最前面（關鍵字模糊比對），其餘照原順序跟在後面
             const pri  = resolveCompactHeaders(config.compactFields, hs);
             const rest = hs.filter(h => !pri.includes(h));
             hs = pri.concat(rest);
           } else {
-            // 其他動態名單（學校名單）：維持把「確認出席」搬到姓名後的舊邏輯
             const ci = hs.indexOf('確認出席');
             if (ci > -1) {
               hs.splice(ci, 1);
@@ -918,18 +1104,19 @@ function loadCurrentSheet() {
       loadedSheets.add(name);
       updateCount(name);
       setSyncState('ok', `最後同步：${fmtTime()}`);
-      // 開銷記錄／分發記錄要先備妥採購編號下拉，再畫表
       if (config.needsPurchase) {
         ensurePurchaseOptions().then(() => renderTable());
       } else if (name === '採購造冊') {
-        Promise.all([ensureDistLog(), ensureExpense()]).then(() => renderTable());   // ★ v22＋v23
+        Promise.all([ensureDistLog(), ensureExpense()]).then(() => renderTable());
       } else {
         renderTable();
       }
     })
     .catch(err => {
-      document.getElementById('tableArea').innerHTML =
-        `<div class="loading" style="color:var(--danger)">讀取失敗：${err.message}</div>`;
+      if (!silent) {
+        document.getElementById('tableArea').innerHTML =
+          `<div class="loading" style="color:var(--danger)">讀取失敗：${err.message}</div>`;
+      }
       setSyncState('err', '連線失敗：' + err.message);
       showToast('讀取失敗：' + err.message, 'err');
     });
@@ -940,26 +1127,32 @@ function saveCurrentSheet() {
   const all    = tableData[name] || [];
   const btn    = document.getElementById('saveBtn');
   btn.disabled = true; btn.textContent = '儲存中…';
-  // 只挑出「改過的列」與「刪除清單」，不整批覆蓋 → 不會洗掉同事其他列
   const dset      = dirtyKeys[name] || new Set();
   const dirtyRows = all.filter(r => dset.has(rowKeyOf(name, r)));
   const deletes   = Array.from(deletedKeys[name] || new Set());
+  if (!dirtyRows.length && !deletes.length) {
+    btn.disabled = false; btn.textContent = '✓ 儲存';
+    showToast('沒有變更需要儲存');
+    return;
+  }
   let body;
   if (config.saveAction) {
-    // 外部 Sheet（學校／培訓）：只送改過的列，後端依鍵就地更新（非破壞性）
     let payload = dirtyRows;
     if (config.dynamicHeaders && config.editable) {
-      // 培訓學員：只送可編輯欄位＋穩定鍵
+      // 只送可編輯欄位＋穩定鍵（表單原始資料一個字都不動）
       payload = dirtyRows.map(row => {
-        const out = { _rowIndex: row._rowIndex, _key: row._key };  // 帶上穩定鍵
+        const out = { _rowIndex: row._rowIndex, _key: row._key };
         config.editable.forEach(f => { out[f] = row[f] !== undefined ? row[f] : ''; });
+        // ★ v24 徵件：缺件由系統自動算，順便寫回 Sheet，讓直接看 Sheet 的人也一目了然
+        if (config.isSubmission) {
+          const miss = missingOf(row);
+          out['缺件項目'] = miss.length ? miss.join('、') : '齊全';
+        }
         return out;
       });
     }
-    // 學校名單（editable 未設定＝全欄可編輯）：整列送出，後端依「編號」對位、跳過編號本身
     body = JSON.stringify({ action: config.saveAction, data: payload });
   } else {
-    // 內部名單：逐列合併（只送改過的列 + 刪除清單）
     body = JSON.stringify({ action: 'writeRoster', sheet: name, data: { updates: dirtyRows, deletes } });
   }
   fetch(API_URL, {
@@ -975,11 +1168,10 @@ function saveCurrentSheet() {
     dirtyKeys[name]   = new Set();
     deletedKeys[name] = new Set();
     isDirty = false;
-    // ★ v22：存完分發記錄，順手把加總回寫採購造冊「已分發數」
     if (config.distLog) syncDistributedToPurchase();
-    // 重新讀取，顯示合併後（含同事更新）的最新內容
+    // 背景重讀（看得到同事的更新），但不蓋掉畫面
     loadedSheets.delete(name);
-    loadCurrentSheet();
+    loadCurrentSheet(true);
   })
   .catch(err => showToast('儲存失敗：' + err.message, 'err'))
   .finally(() => { btn.disabled = false; btn.textContent = '✓ 儲存'; });
@@ -990,28 +1182,23 @@ function renderTable() {
   const allData = tableData[name] || [];
   const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
   const isExternalSheet = !!config.saveAction;
-  buildPurchaseOptions();   // 每次重畫都用最新的採購編號（採購那邊改了，這裡同步）
-  // ★ v21 顯示欄位：
-  //   ・電訪模式（培訓學員）→ 只顯示 compactFields（打電話用的精簡欄）
-  //   ・其他情況 → 完整 headers
-  //   注意：搜尋一律搜「完整欄位」，電訪模式下被隱藏的欄也搜得到。
+  buildPurchaseOptions();
   const fullHeaders = config.headers || [];
-  const compactOn   = !!config.compactFields && trainingCompactView;
-  let headers       = compactOn
+  // 精簡模式：培訓＝電訪模式、徵件＝審查模式
+  const compactOn = !!config.compactFields &&
+                    (config.isSubmission ? subCompactView : trainingCompactView);
+  let headers = compactOn
     ? resolveCompactHeaders(config.compactFields, fullHeaders)
     : fullHeaders;
-  // ★ v23.2 內部名單：畫面隱藏「編號」欄（和 # 重複）。
-  //   編號仍在每筆資料裡當對位鍵（儲存／刪除靠它），只是不顯示。
   if (!config.dynamicHeaders) headers = headers.filter(h => h !== '編號');
-  // 凍結欄只在「完整模式」需要（電訪模式欄位少，不用捲、也就不用凍結）
   const stickyCol = (!compactOn && config.stickyCol && headers.includes(config.stickyCol)) ? config.stickyCol : null;
-  syncTrainingFilters();   // 培訓學員才會顯示「電訪模式／梯次／只看未確認」篩選器
+  syncFilters();
   let filtered = keyword
     ? allData.filter(row => fullHeaders.some(h => String(row[h] ?? '').toLowerCase().includes(keyword)))
     : allData;
-  // 培訓學員專屬：依梯次、只看未確認 再篩一次
   let extraFilter = false;
-  if (config.dynamicHeaders && fullHeaders.includes(TRAINING_BATCH_FIELD)) {
+  // ── 培訓學員：梯次、只看待電訪 ──
+  if (config.isTraining && fullHeaders.includes(TRAINING_BATCH_FIELD)) {
     if (trainingBatchFilter) {
       extraFilter = true;
       filtered = filtered.filter(r => {
@@ -1021,12 +1208,35 @@ function renderTable() {
     }
     if (trainingUnconfirmedOnly) {
       extraFilter = true;
-      // ★ v23.1 「待電訪」＝空白＋未接＋關機＋再聯絡（會來／取消算有結果）
       filtered = filtered.filter(r => trainingNeedsCall(r['確認出席']));
     }
   }
-  // ★ v23.2 自動排序：有「日期」欄的內部名單，依日期由早到晚顯示（同日再依編號）。
-  //   只排「畫面」，資料本身與儲存機制完全不動；日期空白的排最後。
+  // ── ★ v24 徵件作品：審查狀態、只看待審、只看缺件 ──
+  if (config.isSubmission) {
+    if (subStatusFilter) {
+      extraFilter = true;
+      filtered = filtered.filter(r => {
+        const v = String(r['審查狀態'] ?? '').trim();
+        return subStatusFilter === '__blank__' ? v === '' : v === subStatusFilter;
+      });
+    }
+    if (subPendingOnly) {
+      extraFilter = true;
+      filtered = filtered.filter(r => subIsPending(r['審查狀態']));
+    }
+    if (subMissingOnly) {
+      extraFilter = true;
+      filtered = filtered.filter(r => missingOf(r).length > 0);
+    }
+    // 待審的排前面（要處理的先看到），同狀態依收件時間由早到晚
+    filtered = filtered.slice().sort((a, b) => {
+      const pa = subIsPending(a['審查狀態']) ? 0 : 1;
+      const pb = subIsPending(b['審查狀態']) ? 0 : 1;
+      if (pa !== pb) return pa - pb;
+      return String(a._key || '').localeCompare(String(b._key || ''));
+    });
+  }
+  // 有「日期」欄的內部名單依日期排序（只排畫面，資料不動）
   if (!config.dynamicHeaders && fullHeaders.includes('日期')) {
     filtered = filtered.slice().sort((a, b) => {
       const da = toISODate(a['日期']) || '9999-12-31';
@@ -1039,42 +1249,49 @@ function renderTable() {
     ? `找到 ${filtered.length} / ${allData.length} 筆`
     : `共 ${allData.length} 筆`;
   if (allData.length === 0) {
-    const emptyMsg = config.dynamicHeaders
-      ? '尚無資料<br><span style="font-size:0.8rem;color:var(--text-muted)">來源 Sheet 有資料後會自動出現於此</span>'
-      : '此名單尚無資料<br><span style="font-size:0.8rem;color:var(--text-muted)">點「＋ 新增」開始填寫</span>';
+    const emptyMsg = config.isSubmission
+      ? '目前還沒有人投稿<br><span style="font-size:0.8rem;color:var(--text-muted)">報名表收到件之後會自動出現在這裡（測試資料會自動排除）</span>'
+      : config.dynamicHeaders
+        ? '尚無資料<br><span style="font-size:0.8rem;color:var(--text-muted)">來源 Sheet 有資料後會自動出現於此</span>'
+        : '此名單尚無資料<br><span style="font-size:0.8rem;color:var(--text-muted)">點「＋ 新增」開始填寫</span>';
     document.getElementById('tableArea').innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">📋</div>
+        <div class="empty-icon">${config.isSubmission ? '🎬' : '📋'}</div>
         <div style="font-size:0.9rem">${emptyMsg}</div>
       </div>`;
     return;
   }
   if (filtered.length === 0) {
+    const msg = keyword ? `找不到「${escapeHtml(keyword)}」相關資料` : '目前的篩選條件沒有符合的資料';
     document.getElementById('tableArea').innerHTML =
-      `<div class="empty-state"><div class="empty-icon">🔍</div><div>找不到「${keyword}」相關資料</div></div>`;
+      `<div class="empty-state"><div class="empty-icon">🔍</div><div>${msg}</div></div>`;
     return;
   }
-  // 欄寬語意對照表
   const COL_CLASS = {
     '編號':'col-id', '類別':'col-cat', '組別':'col-tag', '梯次':'col-tag',
     '採購類別':'col-tag', '得知管道':'col-tag',
     '性別':'col-tiny', '年齡':'col-tiny',
     '數量':'col-tiny', '已分發數':'col-status', '領用數量':'col-tiny',
     '姓名':'col-name-s', '得獎者姓名':'col-name-s', '記者姓名':'col-name-s',
+    '參賽姓名':'col-name-s', '聯絡者姓名':'col-name-s', '參賽團體名稱':'col-org',
     '聯絡窗口':'col-contact', '建議聯絡窗口':'col-contact', '負責人':'col-name-s',
     '領用人':'col-name-s', '經手人':'col-name-s',
     '廠商名稱':'col-org', '媒體名稱':'col-org', '任職單位':'col-org',
     '姓名／單位':'col-org', '團隊名稱':'col-org',
     '服務項目':'col-desc', '項目說明':'col-desc', '主要任務':'col-desc',
-    '作品名稱':'col-desc', '獎項':'col-desc', '報導連結':'col-desc',
+    '作品名稱':'col-org', '獎項':'col-desc', '報導連結':'col-desc',
+    '作品內容描述':'col-long', '參賽組別':'col-cat',
+    '審查狀態':'col-status', '擬獲獎項':'col-status', '缺件項目':'col-miss', '審查備註':'col-note',
+    '獎金':'col-amount', '組別':'col-cat',
     '品項名稱':'col-desc', '用途／對應名單':'col-desc', '用途':'col-desc',
     '您的職業或身份':'col-desc', '職業或身份':'col-desc',
     '廠商':'col-org', '請款人':'col-org', '對應採購單號':'col-org', '對應採購':'col-org',
     '活動場次':'col-desc',
     '職稱':'col-role', '職務':'col-role', '部門':'col-role',
     '專業領域':'col-desc',
-    '電話':'col-tel', '聯絡電話':'col-tel',
+    '電話':'col-tel', '聯絡電話':'col-tel', '聯絡者電話':'col-tel',
     'Email':'col-email', '聯絡信箱':'col-email', '官網':'col-email',
+    '聯絡者電子信箱':'col-email',
     '地址':'col-addr', '通訊地址':'col-addr',
     '合作狀態':'col-status', '邀請狀態':'col-status', '出席確認':'col-status',
     '邀請函寄送':'col-status', '新聞稿寄送':'col-status',
@@ -1100,20 +1317,18 @@ function renderTable() {
     '電子郵件':'col-email', '電子信箱':'col-email',
     '備註':'col-note'
   };
-  // 自動撐開模式：不畫固定「停車格」（colgroup），讓瀏覽器照內容分配欄寬
+  // ★ v24：文件連結欄（含這些關鍵字）套較窄的欄寬，因為只放一顆按鈕
+  const isDocHeader = h => /影片|身分證|學生證明|上傳|檔案|同意|授權|抄襲|證明/.test(h);
   const autoWidth = !!config.autoWidth;
   const colGroup = autoWidth ? '' : `<colgroup>
     <col class="col-num">
-    ${headers.map(h => `<col class="${COL_CLASS[h] || (h.includes('得知') ? 'col-org' : 'col-default')}">`).join('')}
+    ${headers.map(h => `<col class="${COL_CLASS[h] || (isDocHeader(h) ? 'col-doc' : h.includes('得知') ? 'col-org' : 'col-default')}">`).join('')}
     ${isExternalSheet ? '' : '<col class="col-action">'}
   </colgroup>`;
   const wrapClass = autoWidth
     ? 'table-wrap auto-width'
     : (stickyCol ? 'table-wrap full-view' : 'table-wrap');
-  // 金額相關欄位（套右對齊等寬字，數字看起來整齊）
   const MONEY_HEADERS = new Set(['報價','出席費','金額','單價','預估總額','實際支出']);
-  // ★ v23.3 tw-inner：把表格與底部各列包在一起，寬度一律隨表格（max-content）。
-  //   否則橫向捲動時，底部加總／勾稽列只有「可視寬度」，右邊會露出白條、底線斷掉。
   let html = `<div class="${wrapClass}"><div class="tw-inner"><table>${colGroup}<thead><tr>
     <th class="td-num">#</th>
     ${headers.map(h => `<th${h === stickyCol ? ' class="sticky-col"' : ''}>${h}</th>`).join('')}
@@ -1121,54 +1336,66 @@ function renderTable() {
   </tr></thead><tbody>`;
   filtered.forEach((row, fi) => {
     const ri = allData.indexOf(row);
-    html += `<tr data-index="${ri}">
+    // ★ v24 列底色：待審淡黃、缺件淡紅
+    let rowCls = '';
+    if (config.isSubmission) {
+      if (missingOf(row).length) rowCls = ' class="row-incomplete"';
+      else if (subIsPending(row['審查狀態'])) rowCls = ' class="row-pending"';
+    }
+    html += `<tr data-index="${ri}"${rowCls}>
       <td class="td-num">${fi + 1}</td>
       ${headers.map(h => {
-        const isAddr   = (h === '地址' || h === '通訊地址' || h === '備註' || h === '項目說明');   // ★ 多行格：字多自動換行、列高自動長（v23.2 加入項目說明）
+        const isAddr   = (h === '地址' || h === '通訊地址' || h === '備註' || h === '項目說明' || h === '審查備註');
         const isAmt    = (h === config.amountCol) || MONEY_HEADERS.has(h);
         const isSticky = h === stickyCol;
-        // 唯讀：① 有 editable 清單且此欄不在清單內（培訓學員）
-        //       ② 外部名單的「編號」（回填對位的鑰匙，鎖起來保護）
-        //       ③ ★ v22 config.readonlyCols 指定的欄（分發記錄的品項名稱）
         const isReadOnly = !!(config.editable && !config.editable.includes(h))
                         || (isExternalSheet && h === '編號')
-                        || !!(config.readonlyCols && config.readonlyCols.includes(h));
+                        || !!(config.readonlyCols && config.readonlyCols.includes(h))
+                        || (config.isSubmission && h === '缺件項目');   // 缺件由系統算，不給手改
         let cls = '';
         if (isAmt)      cls = 'amount-cell';
         if (isAddr)     cls = 'addr-cell';
         if (isReadOnly) cls = cls ? cls + ' readonly-cell' : 'readonly-cell';
         if (isSticky)   cls = cls ? cls + ' sticky-col' : 'sticky-col';
-        return `<td${cls ? ` class="${cls}"` : ''}>${renderCell(h, row[h] ?? '', ri, config, isReadOnly)}</td>`;
+        return `<td${cls ? ` class="${cls}"` : ''}>${renderCell(h, row[h] ?? '', ri, config, isReadOnly, row)}</td>`;
       }).join('')}
       ${isExternalSheet ? '' : `<td class="td-action"><button class="del-btn" onclick="deleteRow(${ri})" title="刪除">✕</button></td>`}
     </tr>`;
   });
   html += `</tbody></table>`;
-  // 金額分頁：底部加總列（給固定 id="sumBar"，之後可單獨即時更新，不必整表重畫）
   if (config.amountCol && allData.length > 0) {
     html += `<div class="sum-bar" id="sumBar">${sumBarInnerHtml(allData, config)}</div>`;
   }
-  // ★ v22 分發記錄：底部「各品項 已領／總數／剩」統計列
   if (config.distLog && allData.length > 0) {
     html += `<div class="sum-bar" id="distBar">${distBarInnerHtml()}</div>`;
   }
-  // ★ v23 採購造冊：底部「錢帳勾稽」提醒列
   if (name === '採購造冊' && allData.length > 0) {
     html += `<div class="sum-bar" id="purchaseLinkBar">${purchaseLinkBarHtml(allData)}</div>`;
+  }
+  // ★ v24 徵件作品：底部審查進度統計
+  if (config.isSubmission && allData.length > 0) {
+    html += `<div class="sum-bar" id="subBar">${subBarInnerHtml(allData)}</div>`;
+    html += `<div class="sum-bar" id="awardBar">${awardBarInnerHtml(allData)}</div>`;
   }
   if (isExternalSheet) {
     const sourceName = config.sourceName || '外部 Sheet';
     html += `<div class="source-bar">📊 資料來源：${sourceName} · 編輯後按「✓ 儲存」同步回 Sheets</div>`;
   }
-  html += `</div></div>`;   // ★ v23.3 先關 tw-inner，再關 table-wrap
+  html += `</div></div>`;
   document.getElementById('tableArea').innerHTML = html;
 }
-// 培訓學員：依目前資料即時產生「電訪模式 + 梯次下拉 + 只看未確認」篩選器（其他名單自動隱藏）
-function syncTrainingFilters() {
+// ── 篩選器：培訓學員＝電訪模式；徵件作品＝審查模式；其他分頁自動隱藏 ──
+function syncFilters() {
   const box = document.getElementById('trainingFilters');
   if (!box) return;
   const cfg = SHEETS[currentSheet];
-  const hasBatch = cfg && cfg.dynamicHeaders && (cfg.headers || []).includes(TRAINING_BATCH_FIELD);
+  if (cfg && cfg.isSubmission) { renderSubmissionFilters(box, cfg); return; }
+  if (cfg && cfg.isTraining)   { renderTrainingFilters(box, cfg);   return; }
+  box.style.display = 'none';
+  box.innerHTML = '';
+}
+function renderTrainingFilters(box, cfg) {
+  const hasBatch = (cfg.headers || []).includes(TRAINING_BATCH_FIELD);
   if (!hasBatch) { box.style.display = 'none'; box.innerHTML = ''; return; }
   const all = tableData[currentSheet] || [];
   const counts = {};
@@ -1182,7 +1409,7 @@ function syncTrainingFilters() {
     if (pa) return -1; if (pb) return 1;
     return a.localeCompare(b);
   });
-  const unconfirmed = all.filter(r => trainingNeedsCall(r['確認出席'])).length;   // ★ v23.1 待電訪人數
+  const unconfirmed = all.filter(r => trainingNeedsCall(r['確認出席'])).length;
   const optHtml = `<option value="">全部梯次（${all.length}）</option>` +
     keys.map(k => {
       const val = (k === '（未填）') ? '__blank__' : k;
@@ -1200,7 +1427,40 @@ function syncTrainingFilters() {
       `<input type="checkbox" ${trainingUnconfirmedOnly ? 'checked' : ''} onchange="trainingUnconfirmedOnly=this.checked;renderTable()">` +
       `只看待電訪（${unconfirmed}）</label>`;
 }
-// 從「7月18日 / 7/18」抓出月、日，用來把梯次由早到晚排序
+// ★ v24 徵件作品的審查篩選器
+function renderSubmissionFilters(box, cfg) {
+  const all = tableData[currentSheet] || [];
+  const counts = {};
+  all.forEach(r => {
+    const k = String(r['審查狀態'] ?? '').trim() || '（未審）';
+    counts[k] = (counts[k] || 0) + 1;
+  });
+  const keys = Object.keys(counts).sort((a, b) => {
+    const ia = SUB_STATUS_OPTIONS.indexOf(a), ib = SUB_STATUS_OPTIONS.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+  const pending  = all.filter(r => subIsPending(r['審查狀態'])).length;
+  const missing  = all.filter(r => missingOf(r).length).length;
+  const optHtml = `<option value="">全部狀態（${all.length}）</option>` +
+    keys.map(k => {
+      const val = (k === '（未審）') ? '__blank__' : k;
+      const sel = (subStatusFilter === val) ? ' selected' : '';
+      return `<option value="${String(val).replace(/"/g, '&quot;')}"${sel}>${k}（${counts[k]}）</option>`;
+    }).join('');
+  box.style.display = 'flex';
+  box.innerHTML =
+    `<label class="tf-toggle${subCompactView ? ' on' : ''}" title="只顯示審查會用到的欄位；關掉可看報名表全部資訊">` +
+      `<input type="checkbox" ${subCompactView ? 'checked' : ''} onchange="subCompactView=this.checked;renderTable()">` +
+      `📋 審查模式</label>` +
+    `<span class="tf-label">狀態</span>` +
+    `<select onchange="subStatusFilter=this.value;renderTable()">${optHtml}</select>` +
+    `<label class="tf-toggle${subPendingOnly ? ' on' : ''}" title="空白、待審、資料不全、已補件都算還沒審完">` +
+      `<input type="checkbox" ${subPendingOnly ? 'checked' : ''} onchange="subPendingOnly=this.checked;renderTable()">` +
+      `只看待審（${pending}）</label>` +
+    `<label class="tf-toggle${subMissingOnly ? ' on' : ''}" title="系統自動核對必要文件；學生證明只有學生組才算必要">` +
+      `<input type="checkbox" ${subMissingOnly ? 'checked' : ''} onchange="subMissingOnly=this.checked;renderTable()">` +
+      `⚠️ 只看缺件（${missing}）</label>`;
+}
 function parseMD(s) {
   const t = String(s || '').trim();
   let m = t.match(/(\d{1,2})\s*月\s*(\d{1,2})/);
@@ -1209,7 +1469,6 @@ function parseMD(s) {
   if (m) return { mo: +m[1], dy: +m[2] };
   return null;
 }
-// ── 加總計算與底部列：抽成獨立函式，給 renderTable 與 updateSumBar 共用 ──
 function computeSums(allData, config) {
   const num = v => parseFloat(String(v ?? '0').replace(/,/g, '')) || 0;
   const total   = allData.reduce((s, r) => s + num(r[config.amountCol]), 0);
@@ -1227,7 +1486,6 @@ function sumBarInnerHtml(allData, config) {
     <div class="sum-item"><span class="sum-label">待申請</span><span class="sum-val" style="color:var(--warn)">${fmt(pending)}</span></div>
     <div class="sum-item"><span class="sum-label">已申請</span><span class="sum-val" style="color:var(--success)">${fmt(applied)}</span></div>`;
 }
-// 只更新底部加總，不重畫整張表（保住輸入框焦點）
 function updateSumBar() {
   const config = SHEETS[currentSheet];
   if (!config.amountCol) return;
@@ -1235,85 +1493,139 @@ function updateSumBar() {
   if (!bar) return;
   bar.innerHTML = sumBarInnerHtml(tableData[currentSheet] || [], config);
 }
-// ── 日期欄：哪些欄位要套用日期選擇器 ──
 const DATE_COLS = new Set(['日期','簽約日期','報名日期','追蹤日期','預計到貨日','實際到貨日','出生年月日']);
-// ── 金額相關欄位（手機叫數字鍵盤用） ──
 const MONEY_FIELDS = new Set(['報價','出席費','金額','單價','預估總額','實際支出']);
-// 把各種寫法整理成西元「YYYY-MM-DD」（原生日期選擇器只認這個格式）
-// 規則：年份 < 1912 視為民國年（自動 +1911）；含時間的時間戳用「當地時間」還原日期，避開時區差一天
 function toISODate(raw) {
   const p2 = n => String(n).padStart(2, '0');
   const s = String(raw ?? '').trim();
   if (!s) return '';
-  // 含時間或帶 Z 的時間戳（例如 2026-06-16T16:00:00Z、0115-06-16T15:54:00）：用當地時間取出年月日
   if (/T/.test(s) || /Z$/i.test(s) || /\d{1,2}:\d{2}/.test(s)) {
     const dt = new Date(s);
     if (!isNaN(dt.getTime())) {
       let y = dt.getFullYear();
-      if (y < 1912) y += 1911;           // 民國年 → 西元年
+      if (y < 1912) y += 1911;
       return `${y}-${p2(dt.getMonth() + 1)}-${p2(dt.getDate())}`;
     }
   }
-  // 純日期字串（2026-06-17、2026/6/7、115/6/7、20260617、1150607）
   let y, mo, d;
   const m = s.match(/(\d{1,4})\D+(\d{1,2})\D+(\d{1,2})/);
   if (m) {
     y = +m[1]; mo = +m[2]; d = +m[3];
   } else {
     const dg = s.replace(/\D/g, '');
-    if (dg.length === 8)      { y = +dg.slice(0,4); mo = +dg.slice(4,6); d = +dg.slice(6,8); }  // 西元 YYYYMMDD
-    else if (dg.length === 7) { y = +dg.slice(0,3); mo = +dg.slice(3,5); d = +dg.slice(5,7); }  // 民國 YYYMMDD
+    if (dg.length === 8)      { y = +dg.slice(0,4); mo = +dg.slice(4,6); d = +dg.slice(6,8); }
+    else if (dg.length === 7) { y = +dg.slice(0,3); mo = +dg.slice(3,5); d = +dg.slice(5,7); }
     else return '';
   }
   if (!y || !mo || !d || mo > 12 || d > 31) return '';
-  if (y < 1912) y += 1911;               // 民國年 → 西元年
+  if (y < 1912) y += 1911;
   return `${y}-${p2(mo)}-${p2(d)}`;
 }
-// ★ v21：是否未成年（未滿 18）。解析不了生日回 null（不標記）。
 function isMinorLocal(birthRaw) {
   const iso = toISODate(birthRaw);
   if (!iso) return null;
   const b = new Date(iso + 'T00:00:00');
   if (isNaN(b.getTime())) return null;
   const today = new Date();
-  if (b.getTime() > today.getTime()) return false;   // 生日填成未來 → 明顯輸錯，不標
+  if (b.getTime() > today.getTime()) return false;
   let age = today.getFullYear() - b.getFullYear();
   const md = today.getMonth() - b.getMonth();
   if (md < 0 || (md === 0 && today.getDate() < b.getDate())) age--;
-  // 防呆：算出來未滿 6 歲，代表生日欄被帶錯值（例如系統帶入 2026 年），
-  // 不可能是真的來上課的學員 → 視為填錯，不掛「未成年」標籤
   if (age < 6) return false;
   return age < 18;
 }
-function renderCell(header, value, rowIndex, config, isReadOnly) {
-  const safe = String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  // ★ v22 採購造冊：品項只要在「分發記錄」有流水帳，「已分發數」改為自動計算（唯讀）。
-  //   沒有流水帳的品項維持原本可手填（完全相容既有資料）。
+function renderCell(header, value, rowIndex, config, isReadOnly, row) {
+  const safe = escapeHtml(value);
+  // 採購造冊：品項有流水帳時「已分發數」改為自動計算（唯讀）
   if (currentSheet === '採購造冊' && header === '已分發數') {
-    const row  = (tableData['採購造冊'] || [])[rowIndex] || {};
-    const id   = String(row['編號'] ?? '').trim();
+    const r    = (tableData['採購造冊'] || [])[rowIndex] || {};
+    const id   = String(r['編號'] ?? '').trim();
     const used = distSums();
     if (id && used[id] !== undefined) {
-      const total = parseFloat(String(row['數量'] ?? '').replace(/,/g, '')) || 0;
+      const total = parseFloat(String(r['數量'] ?? '').replace(/,/g, '')) || 0;
       const left  = total - used[id];
       const col   = left < 0 ? 'var(--danger)' : 'var(--text-muted)';
       return `<div class="ro-display" title="由「分發記錄」流水帳自動加總；要修改請至分發記錄分頁">`
         + `${used[id]}<span style="color:${col}"> ∕ 剩 ${left}${left < 0 ? ' ⚠️' : ''}</span></div>`;
     }
   }
-  // 唯讀欄位（培訓學員的表單原始資料、外部名單的編號、分發記錄的品項名稱）
+  // ★ v24 徵件作品：「缺件項目」由系統自動核對（依組別判斷學生證明是否必要）
+  if (config.isSubmission && header === '缺件項目') {
+    const miss = missingOf(row);
+    if (!miss.length) return `<div class="ro-display"><span class="miss-ok">✓ 齊全</span></div>`;
+    return `<div class="ro-display" title="系統自動核對；補齊後把審查狀態改成「已補件」">`
+      + miss.map(m => `<span class="miss-tag">${escapeHtml(m)}</span>`).join('') + `</div>`;
+  }
+  // ★ v24：唯讀欄位若是 Drive／網頁連結 → 變成可點的按鈕（審查一定要點得開）
+  if (isReadOnly && isUrlValue(value)) {
+    return renderDocLinks(header, value);
+  }
+  // 唯讀欄位
   if (isReadOnly) {
-    if (!safe) return `<div class="ro-display empty">（空白）</div>`;
-    // ★ v21 出生年月日：未成年掛紅標，電訪時順口提醒需家長／監護人授權書
+    if (!safe) {
+      // 文件類欄位空白 → 明確標示「未上傳」，比空白好判讀
+      const docish = /影片|身分證|學生證明|上傳|檔案|同意|授權|抄襲|證明/.test(header);
+      return `<div class="ro-display ${docish ? '' : 'empty'}">`
+        + (docish ? '<span class="doc-none">（未上傳）</span>' : '（空白）') + `</div>`;
+    }
     if (header === '出生年月日' && isMinorLocal(value) === true) {
       return `<div class="ro-display">${safe}<span class="minor-flag" title="未滿 18 歲，需家長／監護人授權書">未成年</span></div>`;
     }
     return `<div class="ro-display">${safe}</div>`;
   }
-  // 確認出席：
-  //  ・★ v23.1 培訓學員 → 「電訪結果」下拉（會來／取消／未接／關機／再聯絡），
-  //    選了直接變色，一覽表就能看出誰還要追。寫回 Sheet 的是純文字。
-  //  ・其他名單 → 維持原本的打勾框（勾＝會來、不勾＝尚未確認）
+  // ★ v24 徵件作品：審查狀態下拉（選了直接變色）
+  if (config.isSubmission && header === '審查狀態') {
+    const cur = String(value ?? '').trim();
+    const col = cur === '資格通過' ? 'var(--success)'
+              : cur === '已退件'   ? 'var(--danger)'
+              : cur === '資料不全' ? 'var(--warn)'
+              : cur === '已補件'   ? '#7c3aed'
+              : 'var(--text-muted)';
+    let optList = SUB_STATUS_OPTIONS.slice();
+    if (cur && !optList.includes(cur)) optList = [cur, ...optList];
+    const opts = optList.map(o => `<option value="${o}"${o === cur ? ' selected' : ''}>${o}</option>`).join('');
+    return `<select style="color:${col};font-weight:${cur ? '700' : '400'}" `
+      + `onchange="updateCell(${rowIndex},'${header}',this.value)">`
+      + `<option value=""${cur ? '' : ' selected'}>（未審）</option>${opts}</select>`;
+  }
+  // ★ v26 擬獲獎項下拉：選項顯示獎金與剩餘名額，超額變紅
+  if (config.isSubmission && header === '擬獲獎項') {
+    const cur = String(value ?? '').trim();
+    const q   = awardQuota(tableData['徵件作品'] || []);
+    const grp = pickVal(row || {}, ['參賽組別','組別']);
+    // 這一格目前的獎項有沒有超額
+    const myOver = (() => {
+      if (!cur || cur === '未獲獎') return false;
+      if (isSpecialAward(cur)) return (q.specials.find(x => x.level === cur) || {}).over > 0;
+      return (q.rows.find(x => x.group === grp && x.level === cur) || {}).over > 0;
+    })();
+    const col = myOver ? 'var(--danger)'
+              : cur === '首獎'   ? '#b45309'
+              : cur === '優選'   ? '#0369a1'
+              : cur === '佳作'   ? '#059669'
+              : cur === '社大獎' ? '#7c3aed'
+              : cur === '未獲獎' ? 'var(--text-muted)'
+              : 'var(--text-muted)';
+    let optList = SUB_AWARD_OPTIONS.slice();
+    if (cur && !optList.includes(cur)) optList = [cur, ...optList];
+    const opts = optList.map(o => {
+      const info = awardInfo(o);
+      let tag = '';
+      if (info) {
+        const st = isSpecialAward(o)
+          ? q.specials.find(x => x.level === o)
+          : q.rows.find(x => x.group === grp && x.level === o);
+        const used = st ? st.used : 0;
+        tag = ` (${used}/${info.quota}·${(info.prize / 1000)}K)`;
+      }
+      return `<option value="${o}"${o === cur ? ' selected' : ''}>${o}${tag}</option>`;
+    }).join('');
+    return `<select style="color:${col};font-weight:${subIsAwarded(cur) ? '700' : '400'}" `
+      + `title="括號是「已配名額/上限·獎金千元」" `
+      + `onchange="updateCell(${rowIndex},'${header}',this.value)">`
+      + `<option value=""${cur ? '' : ' selected'}>（未定）</option>${opts}</select>`;
+  }
+  // 培訓學員「確認出席」→ 電訪結果下拉；其他名單 → 打勾框
   if (header === '確認出席') {
     if (config.dynamicHeaders && config.editable) {
       const cur = String(value ?? '').trim();
@@ -1321,7 +1633,7 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
                 : cur === '取消' ? 'var(--danger)'
                 : cur ? 'var(--warn)' : 'var(--text-muted)';
       let optList = TRAINING_CALL_OPTIONS.slice();
-      if (cur && !optList.includes(cur)) optList = [cur, ...optList];   // 舊資料的其他寫法也保留
+      if (cur && !optList.includes(cur)) optList = [cur, ...optList];
       const opts = optList.map(o => `<option value="${o}"${o === cur ? ' selected' : ''}>${o}</option>`).join('');
       return `<select style="color:${col};font-weight:${cur ? '700' : '400'}" `
         + `onchange="updateCell(${rowIndex},'${header}',this.value)">`
@@ -1333,8 +1645,6 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
       + `onchange="updateCell(${rowIndex},'${header}',this.checked?'會來':'')">`
       + `<span>會來</span></label>`;
   }
-  // 已通知：打勾框。寄出／通知學校後勾起來；勾＝已通知、不勾＝尚未
-  //   Sheet 儲存格會存文字「已通知」（未勾＝空白）。
   if (header === '已通知') {
     const yes = String(value ?? '').trim() !== '';
     return `<label class="confirm-box">`
@@ -1342,45 +1652,39 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
       + `onchange="updateCell(${rowIndex},'${header}',this.checked?'已通知':'')">`
       + `<span>已通知</span></label>`;
   }
-  // 對應採購單號（分發記錄）／對應採購（開銷記錄）：動態下拉，
-  // 選項即時取自採購造冊的編號（顯示「編號 · 品項名稱」，存的是編號）
   if (header === '對應採購單號' || header === '對應採購') {
     const cur = String(value ?? '').trim();
-    // ★ v23.2 開銷記錄：空白顯示「—」（純執行費用），畫面不吵；
-    //   選了品項會變主色粗體，一眼看出這筆有勾稽採購
     let opts = (header === '對應採購')
       ? '<option value="">—</option>'
       : '<option value=""></option>';
     const known = purchaseOptions.some(o => o.id === cur);
     if (cur && !known) {
-      // 採購那筆被刪了仍保留舊值，不讓畫面變空白
       opts += `<option value="${cur.replace(/"/g,'&quot;')}" selected>${cur}（採購名冊已無此編號）</option>`;
     }
     opts += purchaseOptions.map(o => {
-      const lbl = String(o.label).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const lbl = escapeHtml(o.label);
       const idv = String(o.id).replace(/"/g,'&quot;');
       return `<option value="${idv}"${o.id===cur?' selected':''}>${lbl}</option>`;
     }).join('');
-    // ★ v23.2 有勾稽採購 → 主色粗體；空白 → 淡灰
     const selCol = cur ? 'var(--accent)' : 'var(--text-muted)';
     return `<select style="color:${selCol};font-weight:${cur ? '700' : '400'}" onchange="updateCell(${rowIndex},'${header}',this.value)">${opts}</select>`;
   }
   const dd = config.dropdowns?.[header];
   if (dd) {
-    // 若這格的舊資料是清單裡沒有的選項（例如以前存過「已核銷」），仍保留它，不讓畫面變空白
     const optList = (value && !dd.includes(value)) ? [value, ...dd] : dd;
     const opts = optList.map(o => `<option value="${o}"${o===value?' selected':''}>${o}</option>`).join('');
     return `<select onchange="updateCell(${rowIndex},'${header}',this.value)"><option value=""></option>${opts}</select>`;
   }
-  // 多行文字格（地址、備註、項目說明）：contenteditable，字多自動換行、整列跟著長高，不再被截斷
-  const isAddr = (header === '地址' || header === '通訊地址' || header === '備註' || header === '項目說明');
+  // 多行文字格（地址、備註、項目說明、審查備註）
+  const isAddr = (header === '地址' || header === '通訊地址' || header === '備註'
+               || header === '項目說明' || header === '審查備註');
   if (isAddr) {
-    return `<div class="addr-edit" contenteditable="true"
+    const ph = header === '審查備註' ? '例：已電話通知，8/25 前補件' : '';
+    return `<div class="addr-edit" contenteditable="true" data-ph="${ph}"
       onblur="updateCell(${rowIndex},'${header}',this.innerText.trim())"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur()}"
       >${safe}</div>`;
   }
-  // 日期欄：原生日期選擇器（點一下跳月曆），存成西元 YYYY-MM-DD，免手打、避免時區差一天
   if (DATE_COLS.has(header)) {
     const iso = toISODate(value);
     return `<input type="date" class="date-input" value="${iso}"
@@ -1388,8 +1692,6 @@ function renderCell(header, value, rowIndex, config, isReadOnly) {
       title="點一下選日期；留白代表尚未填寫">`;
   }
   const inputSafe = String(value ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
-  // 金額欄：手機叫出數字鍵盤；輸入時不再整表重畫，可連續輸入多位數
-  // ★ v22：領用數量也叫數字鍵盤
   const numAttr = (MONEY_FIELDS.has(header) || header === '領用數量') ? ' inputmode="decimal"' : '';
   return `<input type="text"${numAttr} value="${inputSafe}" oninput="updateCell(${rowIndex},'${header}',this.value)" placeholder="${header}">`;
 }
@@ -1399,13 +1701,38 @@ function updateCell(rowIndex, header, value) {
   row[header] = value;
   markRowDirty(currentSheet, rowKeyOf(currentSheet, row));
   updateCount(currentSheet);
-  // ★ v23.1 培訓學員：選了電訪結果 → 重畫（顏色即時變、「待電訪」計數即時更新）
-  if (SHEETS[currentSheet].dynamicHeaders && header === '確認出席') {
-    renderTable();   // select 的 change 已完成，重畫不會打斷輸入
+  const cfg = SHEETS[currentSheet];
+  // ★ v24 徵件作品：改了審查狀態 → 只更新底部統計與篩選器計數，不重畫整表
+  //   （重畫會讓表格跳動、也會打斷連續審查的節奏）
+  if (cfg.isSubmission && (header === '審查狀態' || header === '擬獲獎項')) {
+    updateSubBar();
+    if (header === '擬獲獎項') {
+      updateAwardBar();
+      // 超額立刻提醒（不阻止，因為可能是並列或臨時加碼）
+      const q = awardQuota(tableData[currentSheet] || []);
+      const a = String(value ?? '').trim();
+      if (a && a !== '未獲獎') {
+        const grp = pickVal(row, ['參賽組別','組別']);
+        const st = isSpecialAward(a)
+          ? q.specials.find(x => x.level === a)
+          : q.rows.find(x => x.group === grp && x.level === a);
+        if (st && st.over > 0) {
+          showToast(`⚠️ ${isSpecialAward(a) ? a : grp + ' ' + a} 已超額 ${st.over} 名（上限 ${st.quota}）`, 'err');
+        } else {
+          const info = awardInfo(a);
+          if (info && st) showToast(`${a}　${st.used}/${st.quota} 名　獎金 NT$ ${info.prize.toLocaleString('zh-TW')}`);
+        }
+      }
+      renderTable();   // 重畫讓其他列的「剩餘名額」跟著更新
+    } else {
+      syncFilters();
+    }
     return;
   }
-  // ★ v23.2 開銷記錄：選了「對應採購」→ 兩表真正串接：
-  //   金額空白 → 自動帶採購的「總額」；項目說明空白 → 自動帶品項名稱（都可再修改）
+  if (cfg.isTraining && header === '確認出席') {
+    renderTable();
+    return;
+  }
   if (currentSheet === '開銷記錄' && header === '對應採購') {
     const hit = purchaseOptions.find(o => o.id === String(value).trim());
     if (hit) {
@@ -1415,37 +1742,164 @@ function updateCell(rowIndex, header, value) {
       if (!String(row['項目說明'] ?? '').trim() && hit.item) row['項目說明'] = '採購｜' + hit.item;
       showToast('✓ 已串接採購「' + hit.item + '」' + (filledAmt ? '，帶入金額 ' + hit.amt.toLocaleString('zh-TW') + '（可修改）' : ''));
     }
-    renderTable();   // select 的 change 已完成，重畫不會打斷輸入
+    renderTable();
     updateSumBar();
     updateBudgetBar();
     return;
   }
-  // ★ v22 分發記錄：選了「對應採購單號」→ 自動帶入品項名稱（帳看得懂，不用背編號）
-  if (SHEETS[currentSheet].distLog && header === '對應採購單號') {
+  if (cfg.distLog && header === '對應採購單號') {
     const hit = purchaseOptions.find(o => o.id === String(value).trim());
     row['品項名稱'] = hit ? hit.item : '';
-    renderTable();   // select 的 change 已完成，重畫不會打斷輸入
+    renderTable();
     return;
   }
-  // ★ v22 分發記錄：改了領用數量 → 即時刷新底部「已領／剩」統計列
-  if (SHEETS[currentSheet].distLog && header === '領用數量') updateDistBar();
-  // 金額或付款狀態改變時，只刷新底部加總與預算儀表板（不重畫整表，避免輸入框失焦）
-  if (SHEETS[currentSheet].amountCol === header || header === '付款狀態') {
+  if (cfg.distLog && header === '領用數量') updateDistBar();
+  if (cfg.amountCol === header || header === '付款狀態') {
     updateSumBar();
-    updateBudgetBar();   // ★ v23 「已花費／剩餘」跟著跳
+    updateBudgetBar();
   }
 }
+// ============================================================
+//  ★ v25 得獎配對：徵件作品 → 得獎者名單
+//
+//  為什麼要做這個：
+//   得獎名單要寄獎狀、匯獎金，作品名、姓名、電話、Email 全都要正確。
+//   十幾筆手打，錯一個電話就聯絡不到人。這一支負責把資料原封搬過去。
+//
+//  規則：
+//   ・只搬「擬獲獎項」有填、而且不是「未獲獎」的作品
+//   ・用「作品名稱」比對，同一件重複轉入只會更新獎項，不會產生重複列
+//   ・得獎者名單裡已經人工填好的欄位（通訊地址、出席確認…）不會被覆蓋
+// ============================================================
+function ensureWinners() {
+  if (loadedSheets.has('得獎者')) return Promise.resolve();
+  return fetch(`${API_URL}?action=readRoster&sheet=${encodeURIComponent('得獎者')}`, { redirect: 'follow' })
+    .then(r => r.json())
+    .then(res => {
+      if (res && res.ok) {
+        tableData['得獎者'] = res.data || [];
+        loadedSheets.add('得獎者');
+        updateCount('得獎者');
+      }
+    })
+    .catch(() => {});
+}
+
+function convertToWinners() {
+  if (isDirty) {
+    showToast('請先按「✓ 儲存」，再執行轉入', 'err');
+    return;
+  }
+  const subs = tableData['徵件作品'] || [];
+  const awarded = subs.filter(r => subIsAwarded(r['擬獲獎項']));
+  if (!awarded.length) {
+    showToast('目前沒有作品填了「擬獲獎項」', 'err');
+    return;
+  }
+
+  const btn = document.getElementById('toWinnerBtn');
+  btn.disabled = true; btn.textContent = '轉入中…';
+
+  ensureWinners().then(() => {
+    const winners = tableData['得獎者'] || [];
+    const byTitle = {};
+    winners.forEach(w => {
+      const t = String(w['作品名稱'] ?? '').trim();
+      if (t) byTitle[t] = w;
+    });
+
+    let maxNo = winners.reduce((m, w) => Math.max(m, parseInt(w['編號']) || 0), 0);
+    const updates = [];
+    let added = 0, updated = 0, skipped = 0;
+
+    awarded.forEach(r => {
+      const title = String(r['作品名稱'] ?? '').trim() || '（未填作品名）';
+      const award = String(r['擬獲獎項'] ?? '').trim();
+      const exist = byTitle[title];
+
+      if (exist) {
+        // 已在得獎名單：只更新獎項與對應獎金，其他人工填好的欄位完全不動
+        if (String(exist['獎項'] ?? '').trim() === award) { skipped++; return; }
+        const inf = awardInfo(award);
+        exist['獎項'] = award;
+        if (inf) exist['獎金'] = String(inf.prize);
+        updates.push({
+          '編號': String(exist['編號'] ?? '').trim(),
+          '獎項': award,
+          '獎金': inf ? String(inf.prize) : ''
+        });
+        updated++;
+        return;
+      }
+
+      maxNo++;
+      const info = awardInfo(award);
+      const row = {
+        '編號':         String(maxNo),
+        '獎項':         award,
+        '組別':         pickVal(r, ['參賽組別','組別']),
+        '作品名稱':     title,
+        '得獎者姓名':   pickVal(r, ['參賽姓名','姓名']),
+        '團隊名稱':     pickVal(r, ['參賽團體名稱','團體','團隊']),
+        '獎金':         info ? String(info.prize) : '',
+        '電話':         pickVal(r, ['聯絡者電話','電話','手機']),
+        'Email':        pickVal(r, ['聯絡者電子信箱','電子信箱','Email','信箱']),
+        '通訊地址':     '',
+        '出席確認':     '待確認',
+        '獎金匯款狀態': '待匯款',
+        '備註':         '由徵件作品轉入'
+      };
+      winners.push(row);
+      byTitle[title] = row;
+      updates.push(row);
+      added++;
+    });
+
+    if (!updates.length) {
+      showToast(`得獎者名單已是最新（${skipped} 件已存在且獎項相同）`);
+      btn.disabled = false; btn.textContent = '🏆 轉入得獎者';
+      return;
+    }
+
+    const q = awardQuota(subs);
+    const fmtA = n => 'NT$ ' + n.toLocaleString('zh-TW');
+    let msg = `即將轉入得獎者名單：\n\n  新增 ${added} 件\n  更新獎項 ${updated} 件`;
+    if (skipped) msg += `\n  已存在不變 ${skipped} 件`;
+    msg += `\n\n獎金合計 ${fmtA(q.usedPrize)} ／ 預算 ${fmtA(q.totalPrize)}`;
+    if (q.overList.length) msg += `\n\n🔴 名額超額：${q.overList.join('、')}\n（仍可轉入，請確認是否為並列或加碼）`;
+    msg += `\n\n⚠️ 通訊地址徵件表沒有收，要另外聯絡取得（寄獎狀、匯獎金用）。\n\n確定執行？`;
+    if (!confirm(msg)) {
+      btn.disabled = false; btn.textContent = '🏆 轉入得獎者';
+      return;
+    }
+
+    fetch(API_URL, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'writeRoster', sheet: '得獎者', data: { updates: updates, deletes: [] } })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (!res.ok) throw new Error(res.msg || '轉入失敗');
+      showToast(`✓ 已轉入得獎者名單（新增 ${added} 件、更新 ${updated} 件）`);
+      loadedSheets.delete('得獎者');
+      updateCount('得獎者');
+      setTimeout(() => switchTab('得獎者'), 600);   // 切過去讓你確認結果
+    })
+    .catch(err => showToast('轉入失敗：' + err.message, 'err'))
+    .finally(() => { btn.disabled = false; btn.textContent = '🏆 轉入得獎者'; });
+  });
+}
+
 function addRow() {
   if (!tableData[currentSheet]) tableData[currentSheet] = [];
   const cfg = SHEETS[currentSheet];
   const newRow = {};
   (cfg.headers || []).forEach(h => { newRow[h] = ''; });
-  // 自動給「編號」當作對位鍵（多人合併寫回靠它，避免空鍵相撞）
   if ((cfg.headers || []).includes('編號')) {
     const maxNo = (tableData[currentSheet] || []).reduce((m, r) => Math.max(m, parseInt(r['編號']) || 0), 0);
     newRow['編號'] = String(maxNo + 1);
   }
-  // ★ v22 分發記錄：新增一筆時自動帶今天日期（多數領用都是「現在領」）
   if (cfg.distLog && newRow['日期'] !== undefined) {
     const n = new Date();
     newRow['日期'] = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
@@ -1481,8 +1935,16 @@ function updateCount(name) {
   const el = document.getElementById('cnt-' + name);
   if (el) el.textContent = (tableData[name] || []).length;
   const info = document.getElementById('rowInfo');
-  if (info && name === currentSheet) info.textContent = `${(tableData[name] || []).length} 筆`;
-  // ★ v23 開銷記錄筆數有動（新增／刪除／載入）→ 預算儀表板跟著更新
+  if (info && name === currentSheet) {
+    const cfg = SHEETS[name];
+    const rows = tableData[name] || [];
+    if (cfg && cfg.isSubmission) {
+      const pending = rows.filter(r => subIsPending(r['審查狀態'])).length;
+      info.textContent = `${rows.length} 件 · 待審 ${pending}`;
+    } else {
+      info.textContent = `${rows.length} 筆`;
+    }
+  }
   if (name === '開銷記錄') updateBudgetBar();
 }
 function setTableLoading() {
@@ -1509,6 +1971,9 @@ function fmtTime() {
   const n = new Date();
   return `${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;
 }
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveCurrentSheet(); }
+});
 window.addEventListener('beforeunload', e => { if (isDirty) { e.preventDefault(); e.returnValue = ''; } });
 </script>
 </body>
