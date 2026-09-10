@@ -265,6 +265,11 @@
   tbody tr.row-pending:hover { background: #fef9e7; }
   tbody tr.row-incomplete { background: #fff7f7; }
   tbody tr.row-incomplete:hover { background: #fdeaea; }
+  /* ★ v28 分發記錄：退倉列淡橘底、作廢列灰底，翻帳本時一眼看出哪幾筆是回流 */
+  tbody tr.row-return { background: #fff7ed; }
+  tbody tr.row-return:hover { background: #ffedd5; }
+  tbody tr.row-void { background: #f5f5f5; color: var(--text-muted); }
+  tbody tr.row-void:hover { background: #ebebeb; }
   .confirm-box { display:flex; align-items:center; justify-content:center; gap:0.3rem; height:100%; min-height:var(--row-h); cursor:pointer; user-select:none; }
   .confirm-box input { width:17px; height:17px; accent-color:var(--success); cursor:pointer; flex-shrink:0; }
   .confirm-box span { font-size:0.76rem; color:var(--text-muted); }
@@ -372,7 +377,7 @@
 <body>
 <header>
   <div class="header-left">
-    <div class="logo">PAC · 公用頻道 · v27</div>
+    <div class="logo">PAC · 公用頻道 · v28</div>
     <div class="project-title">台北有影 3<span class="sub">名單總管</span></div>
   </div>
   <div class="header-right">
@@ -419,9 +424,20 @@
 <div class="toast" id="toast"></div>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v27（審查介面簡化：文件只標示有無上傳，不開啟檔案）');
+console.log('roster.html · v28（分發記錄支援退倉：異動類型 領用／退倉／作廢）');
 // ============================================================
-//  台北有影 3｜名單總管 roster.html  v27
+//  台北有影 3｜名單總管 roster.html  v28
+//  ------------------------------------------------------------
+//  v28 變更（需搭配 Apps Script v27.8 以上，欄位順序兩邊必須一致）：
+//   ★ 分發記錄新增「異動類型」欄（放在日期之後）：
+//       領用 → 扣庫存（預設；舊資料沒填的一律當領用）
+//       退倉 → 民眾未領取、寄回倉庫，加回庫存
+//       作廢 → 遺失、損毀，不影響庫存，只留紀錄
+//     退倉那一列數量填正數即可，底部庫存列會自動算「領用 − 退倉」。
+//     原本哪一筆領走的，寫在備註（例：原 6/30 分發 25 張，3 位民眾未領回）。
+//   ★ 底部庫存列改顯示「已領 X · 退倉 Y ／ 總量 Z　剩 W」。
+//   ★ 退倉列淡橘底、作廢列灰底。
+//   ★ 存檔後回寫採購造冊的「已分發數」改用淨值。
 //  ------------------------------------------------------------
 //  v27 變更（純前端，Apps Script 不用動）：
 //   ★ 審查介面簡化：文件欄不再做「開啟」按鈕，只標示 ✓ 已上傳 ／ ✕ 未上傳。
@@ -467,6 +483,16 @@ console.log('roster.html · v27（審查介面簡化：文件只標示有無上�
 //  v21   培訓學員電訪模式＋姓名凍結欄＋未成年紅標
 //  v20   學校名單動態欄位＋自動撐開欄寬
 // ============================================================
+// ★ v28 分發記錄的異動類型（要跟 Apps Script 的 DIST_TYPE_OPTIONS 一致）
+const DIST_TYPE_FIELD   = '異動類型';
+const DIST_TYPE_OPTIONS = ['領用', '退倉', '作廢'];
+// 領用＝扣、退倉＝加回、作廢＝不動；沒填的舊資料一律當領用
+const distSign = t => {
+  const s = String(t ?? '').trim();
+  if (s === '退倉') return -1;
+  if (s === '作廢') return 0;
+  return 1;
+};
 const SHEETS = {
   '合作廠商': {
     color: '#c2410c',
@@ -528,7 +554,6 @@ const SHEETS = {
     editable:       ['審查狀態','擬獲獎項','缺件項目','審查備註'],
     headers:        [],
     stickyCol:      '作品名稱',
-    // 審查模式：只顯示審查會用到的欄位（關鍵字模糊比對，不怕表單標題微調）
     // 審查模式只留判斷會用到的欄位。文件齊不齊看「缺件項目」就夠，
     // 不必逐欄確認；要看實際檔案請到 Google Sheets。
     compactFields:  ['作品名稱','審查狀態','擬獲獎項','缺件項目','參賽組別','參賽姓名','審查備註'],
@@ -563,13 +588,14 @@ const SHEETS = {
       '採購狀態': ['規劃中','比價中','已下訂','已到貨','已分發完畢','取消']
     }
   },
+  // ★ v28：新增「異動類型」（放在日期之後），與 Apps Script v27.8 一致
   '分發記錄': {
     color: '#ea580c',
-    headers: ['編號','日期','對應採購單號','品項名稱','領用數量','用途','活動場次','領用人','經手人','備註'],
+    headers: ['編號','日期','異動類型','對應採購單號','品項名稱','領用數量','用途','活動場次','領用人','經手人','備註'],
     needsPurchase: true,
     distLog: true,
     readonlyCols: ['品項名稱'],
-    dropdowns: {}
+    dropdowns: { '異動類型': DIST_TYPE_OPTIONS }
   },
   '開銷記錄': {
     color: '#b45309',
@@ -880,30 +906,43 @@ function purchaseLinkBarHtml(rows) {
   return '<div class="sum-item"><span class="sum-label">💡 還沒入帳（開銷記錄查無這些採購）</span>' +
          `<span class="sum-val" style="color:var(--warn)">${missing.join('、')}</span></div>`;
 }
-function distSums() {
+// ★ v28：分別加總「領用」與「退倉」，作廢不計
+function distSumsDetail() {
   const toNum = v => parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
-  const used = {};
+  const used = {}, returned = {};
   (tableData['分發記錄'] || []).forEach(r => {
     const id = String(r['對應採購單號'] ?? '').trim();
     if (!id) return;
-    used[id] = (used[id] || 0) + toNum(r['領用數量']);
+    const sign = distSign(r[DIST_TYPE_FIELD]);
+    const q = toNum(r['領用數量']);
+    if (sign > 0) used[id] = (used[id] || 0) + q;
+    else if (sign < 0) returned[id] = (returned[id] || 0) + q;
   });
-  return used;
+  return { used, returned };
+}
+// 淨出庫（領用 − 退倉）：回寫採購造冊「已分發數」與算「剩」都用這個
+function distSums() {
+  const { used, returned } = distSumsDetail();
+  const net = {};
+  Object.keys(used).forEach(id => { net[id] = used[id]; });
+  Object.keys(returned).forEach(id => { net[id] = (net[id] || 0) - returned[id]; });
+  return net;
 }
 function distBarInnerHtml() {
   const toNum = v => parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
-  const used  = distSums();
+  const { used, returned } = distSumsDetail();
   if (!purchaseOptions.length) {
     return '<div class="sum-item"><span class="sum-label">採購造冊尚無品項</span></div>';
   }
   return purchaseOptions.map(o => {
     const total = toNum(o.qty);
     const u     = used[o.id] || 0;
-    const left  = total - u;
+    const rt    = returned[o.id] || 0;
+    const left  = total - (u - rt);
     const col   = left < 0 ? 'var(--danger)' : (total && left === 0) ? 'var(--text-muted)' : 'var(--success)';
     const name  = String(o.item || o.id).replace(/</g, '&lt;');
     return `<div class="sum-item"><span class="sum-label">${name}</span>` +
-           `<span class="sum-val">已領 ${u}${total ? '／' + total : ''}</span>` +
+           `<span class="sum-val">已領 ${u}${rt ? ` · <span style="color:var(--warn)">退倉 ${rt}</span>` : ''}${total ? '／' + total : ''}</span>` +
            `<span class="sum-val" style="color:${col}">剩 ${left}${left < 0 ? ' ⚠️' : ''}</span></div>`;
   }).join('');
 }
@@ -986,7 +1025,7 @@ function syncDistributedToPurchase() {
       body: JSON.stringify({ action: 'writeRoster', sheet: '採購造冊', data: { updates: updates, deletes: [] } })
     })
     .then(r => r.json())
-    .then(res => { if (res.ok) showToast(`✓ 已把 ${updates.length} 個品項的「已分發數」同步回採購造冊`); })
+    .then(res => { if (res.ok) showToast(`✓ 已把 ${updates.length} 個品項的「已分發數」（領用 − 退倉）同步回採購造冊`); })
     .catch(() => {});
   });
 }
@@ -1052,7 +1091,7 @@ function switchTab(name) {
     const hint = document.createElement('span');
     hint.id = 'schoolHint';
     hint.className = 'school-hint';
-    hint.innerHTML = '📦 每領一次記一筆；選「對應採購單號」自動帶品項，存檔後自動回寫採購造冊的已分發數';
+    hint.innerHTML = '📦 每進出一次記一筆；領用扣庫存、退倉加回（數量填正數）、作廢不計；原分發哪一筆寫在備註。存檔後自動回寫採購造冊';
     document.getElementById('toolbar').appendChild(hint);
   } else if (name === '開銷記錄') {
     const hint = document.createElement('span');
@@ -1275,6 +1314,7 @@ function renderTable() {
   const COL_CLASS = {
     '編號':'col-id', '類別':'col-cat', '組別':'col-tag', '梯次':'col-tag',
     '採購類別':'col-tag', '得知管道':'col-tag',
+    '異動類型':'col-tag',
     '性別':'col-tiny', '年齡':'col-tiny',
     '數量':'col-tiny', '已分發數':'col-status', '領用數量':'col-tiny',
     '姓名':'col-name-s', '得獎者姓名':'col-name-s', '記者姓名':'col-name-s',
@@ -1287,7 +1327,7 @@ function renderTable() {
     '作品名稱':'col-org', '獎項':'col-desc', '報導連結':'col-desc',
     '作品內容描述':'col-long', '參賽組別':'col-cat',
     '審查狀態':'col-status', '擬獲獎項':'col-status', '缺件項目':'col-miss', '審查備註':'col-note',
-    '獎金':'col-amount', '組別':'col-cat',
+    '獎金':'col-amount',
     '品項名稱':'col-desc', '用途／對應名單':'col-desc', '用途':'col-desc',
     '您的職業或身份':'col-desc', '職業或身份':'col-desc',
     '廠商':'col-org', '請款人':'col-org', '對應採購單號':'col-org', '對應採購':'col-org',
@@ -1341,11 +1381,15 @@ function renderTable() {
   </tr></thead><tbody>`;
   filtered.forEach((row, fi) => {
     const ri = allData.indexOf(row);
-    // ★ v24 列底色：待審淡黃、缺件淡紅
+    // ★ v24 列底色：待審淡黃、缺件淡紅；★ v28 分發：退倉淡橘、作廢灰
     let rowCls = '';
     if (config.isSubmission) {
       if (missingOf(row).length) rowCls = ' class="row-incomplete"';
       else if (subIsPending(row['審查狀態'])) rowCls = ' class="row-pending"';
+    } else if (config.distLog) {
+      const sg = distSign(row[DIST_TYPE_FIELD]);
+      if (sg < 0) rowCls = ' class="row-return"';
+      else if (sg === 0) rowCls = ' class="row-void"';
     }
     html += `<tr data-index="${ri}"${rowCls}>
       <td class="td-num">${fi + 1}</td>
@@ -1550,7 +1594,7 @@ function renderCell(header, value, rowIndex, config, isReadOnly, row) {
       const total = parseFloat(String(r['數量'] ?? '').replace(/,/g, '')) || 0;
       const left  = total - used[id];
       const col   = left < 0 ? 'var(--danger)' : 'var(--text-muted)';
-      return `<div class="ro-display" title="由「分發記錄」流水帳自動加總；要修改請至分發記錄分頁">`
+      return `<div class="ro-display" title="由「分發記錄」流水帳自動加總（領用 − 退倉）；要修改請至分發記錄分頁">`
         + `${used[id]}<span style="color:${col}"> ∕ 剩 ${left}${left < 0 ? ' ⚠️' : ''}</span></div>`;
     }
   }
@@ -1576,6 +1620,20 @@ function renderCell(header, value, rowIndex, config, isReadOnly, row) {
       return `<div class="ro-display">${safe}<span class="minor-flag" title="未滿 18 歲，需家長／監護人授權書">未成年</span></div>`;
     }
     return `<div class="ro-display">${safe}</div>`;
+  }
+  // ★ v28 分發記錄：異動類型下拉（領用綠、退倉橘、作廢灰；空白視同領用）
+  if (config.distLog && header === DIST_TYPE_FIELD) {
+    const cur = String(value ?? '').trim();
+    const col = cur === '退倉' ? 'var(--warn)'
+              : cur === '作廢' ? 'var(--text-muted)'
+              : 'var(--success)';
+    let optList = DIST_TYPE_OPTIONS.slice();
+    if (cur && !optList.includes(cur)) optList = [cur, ...optList];
+    const opts = optList.map(o => `<option value="${o}"${o === cur ? ' selected' : ''}>${o}</option>`).join('');
+    return `<select style="color:${col};font-weight:700" `
+      + `title="領用＝扣庫存；退倉＝民眾未領取寄回倉庫，加回庫存；作廢＝遺失或損毀，不影響庫存" `
+      + `onchange="updateCell(${rowIndex},'${header}',this.value)">`
+      + `<option value=""${cur ? '' : ' selected'}>（領用）</option>${opts}</select>`;
   }
   // ★ v24 徵件作品：審查狀態下拉（選了直接變色）
   if (config.isSubmission && header === '審查狀態') {
@@ -1683,7 +1741,8 @@ function renderCell(header, value, rowIndex, config, isReadOnly, row) {
   const isAddr = (header === '地址' || header === '通訊地址' || header === '備註'
                || header === '項目說明' || header === '審查備註');
   if (isAddr) {
-    const ph = header === '審查備註' ? '例：已電話通知，8/25 前補件' : '';
+    const ph = header === '審查備註' ? '例：已電話通知，8/25 前補件'
+             : (config.distLog && header === '備註') ? '例：原 6/30 分發 25 張，3 位民眾未領回' : '';
     return `<div class="addr-edit" contenteditable="true" data-ph="${ph}"
       onblur="updateCell(${rowIndex},'${header}',this.innerText.trim())"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur()}"
@@ -1754,6 +1813,14 @@ function updateCell(rowIndex, header, value) {
   if (cfg.distLog && header === '對應採購單號') {
     const hit = purchaseOptions.find(o => o.id === String(value).trim());
     row['品項名稱'] = hit ? hit.item : '';
+    renderTable();
+    return;
+  }
+  // ★ v28：改了異動類型 → 列底色與庫存列都要跟著變，所以重畫
+  if (cfg.distLog && header === DIST_TYPE_FIELD) {
+    const t = String(value ?? '').trim();
+    if (t === '退倉') showToast('退倉：這一列的數量會加回庫存，記得在備註寫原本是哪一筆分發');
+    else if (t === '作廢') showToast('作廢：不影響庫存，只留紀錄');
     renderTable();
     return;
   }
@@ -1908,6 +1975,8 @@ function addRow() {
     const n = new Date();
     newRow['日期'] = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
   }
+  // ★ v28：新增分發列預設「領用」，退倉時再改
+  if (cfg.distLog && newRow[DIST_TYPE_FIELD] !== undefined) newRow[DIST_TYPE_FIELD] = '領用';
   tableData[currentSheet].push(newRow);
   markRowDirty(currentSheet, rowKeyOf(currentSheet, newRow));
   updateCount(currentSheet);
@@ -1945,6 +2014,9 @@ function updateCount(name) {
     if (cfg && cfg.isSubmission) {
       const pending = rows.filter(r => subIsPending(r['審查狀態'])).length;
       info.textContent = `${rows.length} 件 · 待審 ${pending}`;
+    } else if (cfg && cfg.distLog) {
+      const rt = rows.filter(r => distSign(r[DIST_TYPE_FIELD]) < 0).length;
+      info.textContent = `${rows.length} 筆${rt ? ` · 退倉 ${rt}` : ''}`;
     } else {
       info.textContent = `${rows.length} 筆`;
     }
