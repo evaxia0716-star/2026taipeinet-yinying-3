@@ -270,6 +270,11 @@
   tbody tr.row-return:hover { background: #ffedd5; }
   tbody tr.row-void { background: #f5f5f5; color: var(--text-muted); }
   tbody tr.row-void:hover { background: #ebebeb; }
+  /* ★ v29 得獎者：代理出席但代領人資料沒填 → 紅框提醒；不適用的格子顯示「—」 */
+  td input.need-fill { border-color: #fca5a5; background: #fff7f7; }
+  td input.need-fill::placeholder { color: var(--danger); }
+  td input.over-limit { color: var(--danger); font-weight: 700; border-color: #fca5a5; }
+  .na-cell { color: #b6c9c5; text-align: center; }
   .confirm-box { display:flex; align-items:center; justify-content:center; gap:0.3rem; height:100%; min-height:var(--row-h); cursor:pointer; user-select:none; }
   .confirm-box input { width:17px; height:17px; accent-color:var(--success); cursor:pointer; flex-shrink:0; }
   .confirm-box span { font-size:0.76rem; color:var(--text-muted); }
@@ -377,7 +382,7 @@
 <body>
 <header>
   <div class="header-left">
-    <div class="logo">PAC · 公用頻道 · v28</div>
+    <div class="logo">PAC · 公用頻道 · v29</div>
     <div class="project-title">台北有影 3<span class="sub">名單總管</span></div>
   </div>
   <div class="header-right">
@@ -424,9 +429,23 @@
 <div class="toast" id="toast"></div>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyRPxff6kKN3XIazFbgxhotXuUjZYyAhRJ3_t6G-tMTsswdRZ2lD5WKel_WEyM8BrS2/exec';
-console.log('roster.html · v28（分發記錄支援退倉：異動類型 領用／退倉／作廢）');
+console.log('roster.html · v29（得獎者：代領人＋同行人數＋典禮報到）');
 // ============================================================
-//  台北有影 3｜名單總管 roster.html  v28
+//  台北有影 3｜名單總管 roster.html  v29
+//  ------------------------------------------------------------
+//  v29 變更（需搭配 Apps Script v27.12 以上）：
+//   ★ 得獎者名單新增五欄：代領人姓名／代領人關係／代領人電話／同行人數／報到
+//     比喻：像領掛號信，家人可以代簽收，但收件人還是本人。
+//     代領只影響誰上台拿獎座，獎金照樣匯給得獎者本人。
+//     ・出席確認選「代理出席」，代領人三格才會打開；沒填姓名、電話會紅框提醒
+//     ・同行人數只記幾位，超過上限（COMPANION_LIMIT，預設 2）紅字提醒
+//     ・「無法出席」的列灰底，同行人數不計
+//   ★ 篩選：出席狀態下拉、「⚠️ 只看要追的」（待確認／代領資料不齊／同行超額）
+//   ★ 「🎤 典禮模式」：只留報到桌會用到的欄位，典禮當天直接勾報到
+//   ★ 底部統計：本人／代領／無法出席／待確認、同行合計、預估到場、報到進度
+//   ★ 底部金額列改成依「獎金匯款狀態」加總（以前誤用開銷記錄的付款狀態，永遠是 0）
+//   ⚠️ 畫面欄位順序跟 Sheet 不同是正常的：新欄在 Sheet 上接在最右邊，
+//      這樣舊欄位的下拉選單不會跑位；存檔時程式照「欄名」對位，不看第幾欄。
 //  ------------------------------------------------------------
 //  v28 變更（需搭配 Apps Script v27.8 以上，欄位順序兩邊必須一致）：
 //   ★ 分發記錄新增「異動類型」欄（放在日期之後）：
@@ -508,15 +527,22 @@ const SHEETS = {
     headers: ['編號','姓名','專業領域','任職單位','職稱','電話','Email','邀請狀態','出席費','備註'],
     dropdowns: { '邀請狀態':['待邀請','已邀請','已確認','婉拒','待回覆'] }
   },
+  // ★ v29：代領人三欄、同行人數、報到 排在「出席確認」旁邊（Sheet 上是接在最右邊）
   '得獎者': {
     color: '#065f46',
-    headers: ['編號','獎項','組別','作品名稱','得獎者姓名','團隊名稱','獎金','電話','Email','通訊地址','出席確認','獎金匯款狀態','備註'],
+    headers: ['編號','獎項','組別','作品名稱','得獎者姓名','團隊名稱','獎金','電話','Email','通訊地址',
+              '出席確認','代領人姓名','代領人關係','代領人電話','同行人數','報到','獎金匯款狀態','備註'],
     stickyCol: '作品名稱',
     amountCol: '獎金',
+    // 典禮模式：報到桌只看這幾欄
+    compactFields: ['作品名稱','獎項','組別','得獎者姓名','出席確認','代領人姓名','代領人關係','代領人電話','同行人數','報到','備註'],
     dropdowns: {
       '出席確認':    ['待確認','本人出席','代理出席','無法出席'],
+      '代領人關係':  ['家人','同學','老師','同事','朋友','團隊成員','其他'],
+      '報到':        ['未報到','已報到'],
       '獎金匯款狀態':['待匯款','資料齊備','已匯款','退匯']
-    }
+    },
+    isAwardee: true
   },
   '貴賓邀請': {
     color: '#1e40af',
@@ -722,6 +748,61 @@ let subStatusFilter  = '';      // '' = 全部
 let subPendingOnly   = false;   // 只看待審
 let subMissingOnly   = false;   // 只看缺件
 let subCompactView   = true;    // 審查模式（預設開啟）
+// ── ★ v29 得獎者：頒獎典禮出席管理 ──
+//   上限要跟 Apps Script 的 AWARDEE_COMPANION_LIMIT 一致（0 ＝ 不設限）
+const COMPANION_LIMIT = 2;
+const PROXY_FIELDS    = ['代領人姓名','代領人關係','代領人電話'];
+const ATTEND_OPTIONS  = ['待確認','本人出席','代理出席','無法出席'];
+let awardeeAttendFilter = '';     // '' = 全部
+let awardeeFollowOnly   = false;  // 只看要追的
+let awardeeCompactView  = false;  // 典禮模式（預設關閉，平常看完整資料）
+const attendOf = row => {
+  const a = String(row['出席確認'] ?? '').trim();
+  return ATTEND_OPTIONS.includes(a) ? a : '待確認';   // 空白或其他字都算待確認
+};
+// 「2」「2位」「２人」都認得；空白或看不懂就當 0
+const companionCount = v => {
+  const s = String(v ?? '').replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
+  const m = s.match(/\d+/);
+  return m ? parseInt(m[0], 10) : 0;
+};
+// 代理出席卻缺哪些代領資料
+function proxyMissing(row) {
+  if (attendOf(row) !== '代理出席') return [];
+  const miss = [];
+  if (!String(row['代領人姓名'] ?? '').trim()) miss.push('姓名');
+  if (!String(row['代領人電話'] ?? '').trim()) miss.push('電話');
+  return miss;
+}
+const companionOver = row =>
+  COMPANION_LIMIT > 0 && attendOf(row) !== '無法出席' && companionCount(row['同行人數']) > COMPANION_LIMIT;
+// 這一位還有事要追嗎（待確認／代領資料不齊／同行超額）
+const awardeeNeedsFollow = row =>
+  attendOf(row) === '待確認' || proxyMissing(row).length > 0 || companionOver(row);
+function awardeeRowClass(row) {
+  const a = attendOf(row);
+  if (a === '無法出席') return 'row-void';
+  if (proxyMissing(row).length || companionOver(row)) return 'row-incomplete';
+  if (a === '待確認') return 'row-pending';
+  return '';
+}
+function awardeeAttendance(rows) {
+  const st = { total: 0, self: 0, proxy: 0, absent: 0, pending: 0, companions: 0, checkedIn: 0, missing: 0, over: 0 };
+  (rows || []).forEach(r => {
+    st.total++;
+    const a = attendOf(r);
+    if (a === '無法出席') { st.absent++; return; }
+    if (a === '待確認')   { st.pending++; return; }
+    if (a === '本人出席') st.self++; else st.proxy++;
+    if (proxyMissing(r).length) st.missing++;
+    if (companionOver(r)) st.over++;
+    st.companions += companionCount(r['同行人數']);
+    if (String(r['報到'] ?? '').trim() === '已報到') st.checkedIn++;
+  });
+  st.attending = st.self + st.proxy;
+  st.expected  = st.attending + st.companions;
+  return st;
+}
 // ── 多人協作：每個分頁各自記錄「改過的列」與「刪除的列」 ──
 let dirtyKeys    = {};
 let deletedKeys  = {};
@@ -997,6 +1078,30 @@ function awardBarInnerHtml(rows) {
     `<span class="sum-val" style="color:${overCol}">${fmt(q.usedPrize)} / ${fmt(q.totalPrize)}</span></div>` +
     warn + unk;
 }
+// ★ v29 得獎者：典禮出席統計列
+function awardeeBarInnerHtml(rows) {
+  const st = awardeeAttendance(rows);
+  const item = (k, v, col) =>
+    `<div class="sum-item"><span class="sum-label">${k}</span><span class="sum-val"${col ? ` style="color:${col}"` : ''}>${v}</span></div>`;
+  const maxMore = (st.pending && COMPANION_LIMIT > 0)
+    ? `（另有 ${st.pending} 位待確認，全來最多再加 ${st.pending * (1 + COMPANION_LIMIT)} 位）`
+    : st.pending ? `（另有 ${st.pending} 位待確認）` : '';
+  return item('本人出席', st.self + ' 位', 'var(--success)')
+    + item('代領', st.proxy + ' 位', '#0369a1')
+    + item('無法出席', st.absent + ' 位', 'var(--text-muted)')
+    + item('待確認', st.pending + ' 位', st.pending ? 'var(--warn)' : 'var(--success)')
+    + item('同行', st.companions + ' 位' + (COMPANION_LIMIT > 0 ? `（每位上限 ${COMPANION_LIMIT}）` : ''))
+    + `<div class="sum-item"><span class="sum-label">🪑 預估到場</span><span class="sum-val total">${st.expected} 位</span>`
+    + `<span class="sum-label" style="font-weight:400">${maxMore}</span></div>`
+    + (st.checkedIn ? item('✅ 已報到', `${st.checkedIn} / ${st.attending} 位`,
+                           st.checkedIn >= st.attending ? 'var(--success)' : 'var(--warn)') : '')
+    + (st.missing ? item('⚠️ 代領資料不齊', st.missing + ' 位', 'var(--danger)') : '')
+    + (st.over ? item('⚠️ 同行超額', st.over + ' 位', 'var(--danger)') : '');
+}
+function updateAwardeeBar() {
+  const bar = document.getElementById('awardeeBar');
+  if (bar) bar.innerHTML = awardeeBarInnerHtml(tableData[currentSheet] || []);
+}
 function updateAwardBar() {
   const bar = document.getElementById('awardBar');
   if (bar) bar.innerHTML = awardBarInnerHtml(tableData[currentSheet] || []);
@@ -1062,6 +1167,9 @@ function switchTab(name) {
   subPendingOnly  = false;
   subMissingOnly  = false;
   subCompactView  = true;
+  awardeeAttendFilter = '';
+  awardeeFollowOnly   = false;
+  awardeeCompactView  = false;
   const config = SHEETS[name];
   const isExternalSheet = !!config.saveAction;
   document.getElementById('addRowBtn').style.display = isExternalSheet ? 'none' : '';
@@ -1092,6 +1200,12 @@ function switchTab(name) {
     hint.id = 'schoolHint';
     hint.className = 'school-hint';
     hint.innerHTML = '📦 每進出一次記一筆；領用扣庫存、退倉加回（數量填正數）、作廢不計；原分發哪一筆寫在備註。存檔後自動回寫採購造冊';
+    document.getElementById('toolbar').appendChild(hint);
+  } else if (config.isAwardee) {
+    const hint = document.createElement('span');
+    hint.id = 'schoolHint';
+    hint.className = 'school-hint';
+    hint.innerHTML = `🏆 選「代理出席」才要填代領人；同行只記人數（每位上限 ${COMPANION_LIMIT}）；獎金照樣匯給得獎者本人`;
     document.getElementById('toolbar').appendChild(hint);
   } else if (name === '開銷記錄') {
     const hint = document.createElement('span');
@@ -1230,7 +1344,9 @@ function renderTable() {
   const fullHeaders = config.headers || [];
   // 精簡模式：培訓＝電訪模式、徵件＝審查模式
   const compactOn = !!config.compactFields &&
-                    (config.isSubmission ? subCompactView : trainingCompactView);
+                    (config.isSubmission ? subCompactView
+                     : config.isAwardee ? awardeeCompactView
+                     : trainingCompactView);
   let headers = compactOn
     ? resolveCompactHeaders(config.compactFields, fullHeaders)
     : fullHeaders;
@@ -1280,6 +1396,17 @@ function renderTable() {
       return String(a._key || '').localeCompare(String(b._key || ''));
     });
   }
+  // ── ★ v29 得獎者：出席狀態、只看要追的 ──
+  if (config.isAwardee) {
+    if (awardeeAttendFilter) {
+      extraFilter = true;
+      filtered = filtered.filter(r => attendOf(r) === awardeeAttendFilter);
+    }
+    if (awardeeFollowOnly) {
+      extraFilter = true;
+      filtered = filtered.filter(awardeeNeedsFollow);
+    }
+  }
   // 有「日期」欄的內部名單依日期排序（只排畫面，資料不動）
   if (!config.dynamicHeaders && fullHeaders.includes('日期')) {
     filtered = filtered.slice().sort((a, b) => {
@@ -1328,6 +1455,8 @@ function renderTable() {
     '作品內容描述':'col-long', '參賽組別':'col-cat',
     '審查狀態':'col-status', '擬獲獎項':'col-status', '缺件項目':'col-miss', '審查備註':'col-note',
     '獎金':'col-amount',
+    '代領人姓名':'col-name-s', '代領人關係':'col-tag', '代領人電話':'col-tel',
+    '同行人數':'col-tiny', '報到':'col-status',
     '品項名稱':'col-desc', '用途／對應名單':'col-desc', '用途':'col-desc',
     '您的職業或身份':'col-desc', '職業或身份':'col-desc',
     '廠商':'col-org', '請款人':'col-org', '對應採購單號':'col-org', '對應採購':'col-org',
@@ -1390,6 +1519,10 @@ function renderTable() {
       const sg = distSign(row[DIST_TYPE_FIELD]);
       if (sg < 0) rowCls = ' class="row-return"';
       else if (sg === 0) rowCls = ' class="row-void"';
+    } else if (config.isAwardee) {
+      // ★ v29 無法出席灰底、代領資料不齊或同行超額淡紅、待確認淡黃
+      const c = awardeeRowClass(row);
+      if (c) rowCls = ` class="${c}"`;
     }
     html += `<tr data-index="${ri}"${rowCls}>
       <td class="td-num">${fi + 1}</td>
@@ -1418,6 +1551,10 @@ function renderTable() {
   if (config.distLog && allData.length > 0) {
     html += `<div class="sum-bar" id="distBar">${distBarInnerHtml()}</div>`;
   }
+  // ★ v29 得獎者：典禮出席統計（看全部資料，不受篩選影響）
+  if (config.isAwardee && allData.length > 0) {
+    html += `<div class="sum-bar" id="awardeeBar">${awardeeBarInnerHtml(allData)}</div>`;
+  }
   if (name === '採購造冊' && allData.length > 0) {
     html += `<div class="sum-bar" id="purchaseLinkBar">${purchaseLinkBarHtml(allData)}</div>`;
   }
@@ -1440,8 +1577,30 @@ function syncFilters() {
   const cfg = SHEETS[currentSheet];
   if (cfg && cfg.isSubmission) { renderSubmissionFilters(box, cfg); return; }
   if (cfg && cfg.isTraining)   { renderTrainingFilters(box, cfg);   return; }
+  if (cfg && cfg.isAwardee)    { renderAwardeeFilters(box, cfg);    return; }
   box.style.display = 'none';
   box.innerHTML = '';
+}
+// ★ v29 得獎者：典禮模式、出席狀態、只看要追的
+function renderAwardeeFilters(box, cfg) {
+  const all = tableData[currentSheet] || [];
+  const counts = {};
+  all.forEach(r => { const a = attendOf(r); counts[a] = (counts[a] || 0) + 1; });
+  const follow = all.filter(awardeeNeedsFollow).length;
+  const optHtml = `<option value="">全部（${all.length}）</option>` +
+    ATTEND_OPTIONS.filter(a => counts[a]).map(a =>
+      `<option value="${a}"${awardeeAttendFilter === a ? ' selected' : ''}>${a}（${counts[a]}）</option>`
+    ).join('');
+  box.style.display = 'flex';
+  box.innerHTML =
+    `<label class="tf-toggle${awardeeCompactView ? ' on' : ''}" title="只留報到桌會用到的欄位；典禮當天用">` +
+      `<input type="checkbox" ${awardeeCompactView ? 'checked' : ''} onchange="awardeeCompactView=this.checked;renderTable()">` +
+      `🎤 典禮模式</label>` +
+    `<span class="tf-label">出席</span>` +
+    `<select onchange="awardeeAttendFilter=this.value;renderTable()">${optHtml}</select>` +
+    `<label class="tf-toggle${awardeeFollowOnly ? ' on' : ''}" title="待確認、代理出席但代領人姓名或電話沒填、同行超過上限">` +
+      `<input type="checkbox" ${awardeeFollowOnly ? 'checked' : ''} onchange="awardeeFollowOnly=this.checked;renderTable()">` +
+      `⚠️ 只看要追的（${follow}）</label>`;
 }
 function renderTrainingFilters(box, cfg) {
   const hasBatch = (cfg.headers || []).includes(TRAINING_BATCH_FIELD);
@@ -1528,8 +1687,22 @@ function computeSums(allData, config) {
   return { total, pending, applied };
 }
 function sumBarInnerHtml(allData, config) {
-  const { total, pending, applied } = computeSums(allData, config);
   const fmt = n => 'NT$ ' + n.toLocaleString('zh-TW');
+  // ★ v29 得獎者：依「獎金匯款狀態」加總（以前誤用開銷記錄的付款狀態，待申請／已申請永遠是 0）
+  if (config.isAwardee) {
+    const num = v => parseFloat(String(v ?? '0').replace(/,/g, '')) || 0;
+    const by = st => allData.filter(r => String(r['獎金匯款狀態'] ?? '').trim() === st)
+                            .reduce((s, r) => s + num(r[config.amountCol]), 0);
+    const total = allData.reduce((s, r) => s + num(r[config.amountCol]), 0);
+    const back  = by('退匯');
+    return `
+    <div class="sum-item"><span class="sum-label">獎金總額</span><span class="sum-val total">${fmt(total)}</span></div>
+    <div class="sum-item"><span class="sum-label">待匯款</span><span class="sum-val" style="color:var(--warn)">${fmt(total - by('資料齊備') - by('已匯款') - back)}</span></div>
+    <div class="sum-item"><span class="sum-label">資料齊備</span><span class="sum-val" style="color:#0369a1">${fmt(by('資料齊備'))}</span></div>
+    <div class="sum-item"><span class="sum-label">已匯款</span><span class="sum-val" style="color:var(--success)">${fmt(by('已匯款'))}</span></div>
+    ${back ? `<div class="sum-item"><span class="sum-label">退匯</span><span class="sum-val" style="color:var(--danger)">${fmt(back)}</span></div>` : ''}`;
+  }
+  const { total, pending, applied } = computeSums(allData, config);
   return `
     <div class="sum-item"><span class="sum-label">總金額</span><span class="sum-val total">${fmt(total)}</span></div>
     <div class="sum-item"><span class="sum-label">待申請</span><span class="sum-val" style="color:var(--warn)">${fmt(pending)}</span></div>
@@ -1687,6 +1860,50 @@ function renderCell(header, value, rowIndex, config, isReadOnly, row) {
       + `onchange="updateCell(${rowIndex},'${header}',this.value)">`
       + `<option value=""${cur ? '' : ' selected'}>（未定）</option>${opts}</select>`;
   }
+  // ★ v29 得獎者：出席確認／代領人／同行人數／報到
+  if (config.isAwardee) {
+    const attend = attendOf(row || {});
+    const cur    = String(value ?? '').trim();
+    const na = (tip) => `<div class="ro-display na-cell" title="${tip}">${cur ? safe : '—'}</div>`;
+    if (header === '出席確認') {
+      const col = attend === '本人出席' ? 'var(--success)'
+                : attend === '代理出席' ? '#0369a1'
+                : attend === '無法出席' ? 'var(--text-muted)'
+                : 'var(--warn)';
+      let optList = ATTEND_OPTIONS.slice();
+      if (cur && !optList.includes(cur)) optList = [cur, ...optList];
+      const opts = optList.map(o => `<option value="${o}"${o === (cur || '待確認') ? ' selected' : ''}>${o}</option>`).join('');
+      return `<select style="color:${col};font-weight:700" title="選「代理出席」後，旁邊的代領人欄位才會打開" `
+        + `onchange="updateCell(${rowIndex},'${header}',this.value)">${opts}</select>`;
+    }
+    if (PROXY_FIELDS.includes(header)) {
+      if (attend !== '代理出席') return na('出席確認選「代理出席」才需要填');
+      if (header === '代領人姓名' || header === '代領人電話') {
+        const v = String(value ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+        const need = cur ? '' : ' class="need-fill"';
+        const num  = header === '代領人電話' ? ' inputmode="tel"' : '';
+        return `<input type="text"${need}${num} value="${v}" placeholder="必填" `
+          + `oninput="updateCell(${rowIndex},'${header}',this.value);this.classList.toggle('need-fill',!this.value.trim())">`;
+      }
+      // 代領人關係 → 往下走一般下拉
+    }
+    if (header === '同行人數') {
+      if (attend === '無法出席') return na('無法出席，不計同行');
+      const v = String(value ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+      const over = companionOver(row || {}) ? ' class="over-limit"' : '';
+      return `<input type="text" inputmode="numeric"${over} value="${v}" placeholder="0" `
+        + `title="只記人數，不用寫名字${COMPANION_LIMIT > 0 ? `；每位上限 ${COMPANION_LIMIT} 位` : ''}" `
+        + `oninput="updateCell(${rowIndex},'${header}',this.value);markCompanion(this)">`;
+    }
+    if (header === '報到') {
+      if (attend === '無法出席') return na('無法出席，不用報到');
+      const done = cur === '已報到';
+      return `<select style="color:${done ? 'var(--success)' : 'var(--text-muted)'};font-weight:${done ? '700' : '400'}" `
+        + `onchange="updateCell(${rowIndex},'${header}',this.value)">`
+        + `<option value=""${done ? '' : ' selected'}>未報到</option>`
+        + `<option value="已報到"${done ? ' selected' : ''}>✓ 已報到</option></select>`;
+    }
+  }
   // 培訓學員「確認出席」→ 電訪結果下拉；其他名單 → 打勾框
   if (header === '確認出席') {
     if (config.dynamicHeaders && config.editable) {
@@ -1758,6 +1975,10 @@ function renderCell(header, value, rowIndex, config, isReadOnly, row) {
   const numAttr = (MONEY_FIELDS.has(header) || header === '領用數量') ? ' inputmode="decimal"' : '';
   return `<input type="text"${numAttr} value="${inputSafe}" oninput="updateCell(${rowIndex},'${header}',this.value)" placeholder="${header}">`;
 }
+// ★ v29 同行人數超過上限就變紅字（打字當下就看得到）
+function markCompanion(el) {
+  el.classList.toggle('over-limit', COMPANION_LIMIT > 0 && companionCount(el.value) > COMPANION_LIMIT);
+}
 function updateCell(rowIndex, header, value) {
   if (!tableData[currentSheet]) return;
   const row = tableData[currentSheet][rowIndex];
@@ -1765,6 +1986,27 @@ function updateCell(rowIndex, header, value) {
   markRowDirty(currentSheet, rowKeyOf(currentSheet, row));
   updateCount(currentSheet);
   const cfg = SHEETS[currentSheet];
+  // ★ v29 得獎者：出席確認一改，代領人欄位要開／關，所以重畫；
+  //   打字的欄位（代領人、同行人數）只更新列底色與統計，不重畫，游標才不會跳掉
+  if (cfg.isAwardee) {
+    if (header === '出席確認') {
+      if (value === '代理出席') showToast('代理出席：請填代領人姓名、電話（獎金照樣匯給得獎者本人）');
+      renderTable();
+      return;
+    }
+    if (header === '報到') { renderTable(); return; }
+    if (header === '同行人數' || PROXY_FIELDS.includes(header)) {
+      const tr = document.querySelector(`#tableArea tr[data-index="${rowIndex}"]`);
+      if (tr) tr.className = awardeeRowClass(row);
+      updateAwardeeBar();
+      syncFilters();
+      if (header === '同行人數' && companionOver(row)) {
+        showToast(`⚠️ 同行 ${companionCount(value)} 位，超過上限 ${COMPANION_LIMIT} 位`, 'err');
+      }
+      return;
+    }
+    if (header === '獎金匯款狀態') { updateSumBar(); return; }
+  }
   // ★ v24 徵件作品：改了審查狀態 → 只更新底部統計與篩選器計數，不重畫整表
   //   （重畫會讓表格跳動、也會打斷連續審查的節奏）
   if (cfg.isSubmission && (header === '審查狀態' || header === '擬獲獎項')) {
@@ -2017,6 +2259,9 @@ function updateCount(name) {
     } else if (cfg && cfg.distLog) {
       const rt = rows.filter(r => distSign(r[DIST_TYPE_FIELD]) < 0).length;
       info.textContent = `${rows.length} 筆${rt ? ` · 退倉 ${rt}` : ''}`;
+    } else if (cfg && cfg.isAwardee) {
+      const st = awardeeAttendance(rows);
+      info.textContent = `${rows.length} 位 · 預估到場 ${st.expected}${st.pending ? ` · 待確認 ${st.pending}` : ''}`;
     } else {
       info.textContent = `${rows.length} 筆`;
     }
