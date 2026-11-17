@@ -438,7 +438,7 @@ console.log('roster.html · v29（得獎者：代領人＋同行人數＋典禮�
 //     比喻：像領掛號信，家人可以代簽收，但收件人還是本人。
 //     代領只影響誰上台拿獎座，獎金照樣匯給得獎者本人。
 //     ・出席確認選「代理出席」，代領人三格才會打開；沒填姓名、電話會紅框提醒
-//     ・同行人數只記幾位，超過上限（COMPANION_LIMIT，預設 2）紅字提醒
+//     ・同行人數只記幾位，不設上限（COMPANION_LIMIT ＝ 0）；之後要限，填數字就會紅字提醒
 //     ・「無法出席」的列灰底，同行人數不計
 //   ★ 篩選：出席狀態下拉、「⚠️ 只看要追的」（待確認／代領資料不齊／同行超額）
 //   ★ 「🎤 典禮模式」：只留報到桌會用到的欄位，典禮當天直接勾報到
@@ -750,7 +750,7 @@ let subMissingOnly   = false;   // 只看缺件
 let subCompactView   = true;    // 審查模式（預設開啟）
 // ── ★ v29 得獎者：頒獎典禮出席管理 ──
 //   上限要跟 Apps Script 的 AWARDEE_COMPANION_LIMIT 一致（0 ＝ 不設限）
-const COMPANION_LIMIT = 2;
+const COMPANION_LIMIT = 0;   // 0 ＝ 不設限（目前不限）；填數字就會開始超額提醒
 const PROXY_FIELDS    = ['代領人姓名','代領人關係','代領人電話'];
 const ATTEND_OPTIONS  = ['待確認','本人出席','代理出席','無法出席'];
 let awardeeAttendFilter = '';     // '' = 全部
@@ -1205,7 +1205,7 @@ function switchTab(name) {
     const hint = document.createElement('span');
     hint.id = 'schoolHint';
     hint.className = 'school-hint';
-    hint.innerHTML = `🏆 選「代理出席」才要填代領人；同行只記人數（每位上限 ${COMPANION_LIMIT}）；獎金照樣匯給得獎者本人`;
+    hint.innerHTML = `🏆 選「代理出席」才要填代領人；同行只記人數${COMPANION_LIMIT > 0 ? `（每位上限 ${COMPANION_LIMIT}）` : '，不限幾位'}；獎金照樣匯給得獎者本人`;
     document.getElementById('toolbar').appendChild(hint);
   } else if (name === '開銷記錄') {
     const hint = document.createElement('span');
@@ -1598,7 +1598,7 @@ function renderAwardeeFilters(box, cfg) {
       `🎤 典禮模式</label>` +
     `<span class="tf-label">出席</span>` +
     `<select onchange="awardeeAttendFilter=this.value;renderTable()">${optHtml}</select>` +
-    `<label class="tf-toggle${awardeeFollowOnly ? ' on' : ''}" title="待確認、代理出席但代領人姓名或電話沒填、同行超過上限">` +
+    `<label class="tf-toggle${awardeeFollowOnly ? ' on' : ''}" title="待確認、代理出席但代領人姓名或電話沒填${COMPANION_LIMIT > 0 ? '、同行超過上限' : ''}">` +
       `<input type="checkbox" ${awardeeFollowOnly ? 'checked' : ''} onchange="awardeeFollowOnly=this.checked;renderTable()">` +
       `⚠️ 只看要追的（${follow}）</label>`;
 }
